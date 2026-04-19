@@ -127,6 +127,13 @@ body.layout-tablet-nav-open {
   }
 }
 
+/* ── Tablet (iPad Mini / Air / Pro): Hero 태블릿 padding과 일관되게 보강 ── */
+@media (min-width: 768px) and (max-width: 1079px) {
+  .layout-page {
+    --iropke-page-top: clamp(132px, 14vw, 168px);
+  }
+}
+
 @media (min-width: 1280px) {
   .layout-main {
     padding-bottom: 60px;

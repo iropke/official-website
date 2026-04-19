@@ -117,8 +117,8 @@
   /* Nav */
   --nav-height: 72px;
 
-  /* Page section top padding (layout-main already offsets for header) */
-  --iropke-page-top: 48px;
+  /* Page section top padding — Hero 섹션 padding과 일관되게 헤더(fixed) 클리어런스 확보 */
+  --iropke-page-top: clamp(80px, 9vw, 140px);
   --iropke-grid-gap: 24px;
 }
 

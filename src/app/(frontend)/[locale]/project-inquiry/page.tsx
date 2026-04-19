@@ -106,7 +106,7 @@ export default function ProjectInquiryPage() {
   const validateField = useCallback(
     (name: string, forceSubmit = false): boolean => {
       if (name === 'rfpFile') return true; // File field — skip string validation
-      const value = name === 'notRobot' ? '' : (formData as Record<string, string>)[name] ?? '';
+      const value = name === 'notRobot' ? '' : (formData as unknown as Record<string, string>)[name] ?? '';
       const isChecked = name === 'notRobot' ? formData.notRobot : false;
       const isEmpty = name === 'notRobot' ? !isChecked : value.trim() === '';
       const isValid = validators[name] ? validators[name](value, isChecked) : true;
@@ -207,7 +207,7 @@ export default function ProjectInquiryPage() {
         /* Focus first invalid field */
         const firstInvalid = fieldConfigs.find(({ name }) => {
           if (name === 'rfpFile') return false; // File field is always valid
-          const value = name === 'notRobot' ? '' : (formData as Record<string, string>)[name] ?? '';
+          const value = name === 'notRobot' ? '' : (formData as unknown as Record<string, string>)[name] ?? '';
           const isChecked = name === 'notRobot' ? formData.notRobot : false;
           return !(validators[name] ? validators[name](value, isChecked) : true);
         });

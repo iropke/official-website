@@ -69,6 +69,10 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    tags: Tag;
+    posts: Post;
+    pages: Page;
+    inquiries: Inquiry;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +82,10 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -86,10 +94,23 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')
+    | ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[];
+  globals: {
+    navigation: Navigation;
+    'site-settings': SiteSetting;
+    homepage: Homepage;
+  };
+  globalsSelect: {
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    homepage: HomepageSelect<false> | HomepageSelect<true>;
+  };
+  locale: 'ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -163,6 +184,207 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: number;
+  name: string;
+  /**
+   * 영문 소문자, 숫자, 하이픈만 사용 (예: ai-strategy)
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * 목록 페이지 카드에 표시되는 짧은 설명 (2~3문장)
+   */
+  excerpt?: string | null;
+  /**
+   * 목록 카드 썸네일 이미지 (540×398 권장)
+   */
+  thumbnail?: (number | null) | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * 게시물에 연결할 태그 선택 (복수 선택 가능)
+   */
+  tags?: (number | Tag)[] | null;
+  publishedDate?: string | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * 이 게시물을 공개할 언어를 선택하세요. 미선택 언어는 목록에서 숨겨집니다.
+   */
+  publishedLocales?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[] | null;
+  /**
+   * AI가 초안을 생성한 경우 체크
+   */
+  aiGenerated?: boolean | null;
+  /**
+   * 각 언어별 번역 완료 상태 (자동 관리)
+   */
+  translationStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  meta?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    ogImage?: (number | null) | Media;
+  };
+  /**
+   * 영문 소문자, 숫자, 하이픈만 사용 (예: ai-search-strategy)
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * 예: about, solution/corpis, privacy-policy
+   */
+  slug: string;
+  layout?:
+    | (
+        | {
+            headline: string;
+            subCopy?: string | null;
+            ctaLabel?: string | null;
+            ctaUrl?: string | null;
+            backgroundImage?: (number | null) | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            content?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            title?: string | null;
+            cards?:
+              | {
+                  icon?: string | null;
+                  title: string;
+                  description?: string | null;
+                  link?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cardGrid';
+          }
+        | {
+            message: string;
+            ctaLabel?: string | null;
+            ctaUrl?: string | null;
+            backgroundGradient?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaBanner';
+          }
+      )[]
+    | null;
+  status?: ('draft' | 'published') | null;
+  publishedLocales?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[] | null;
+  meta?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    ogImage?: (number | null) | Media;
+    noIndex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * 프로젝트 문의 접수 내역 (읽기 전용)
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  company: string;
+  contactName: string;
+  jobTitle?: string | null;
+  phone: string;
+  email: string;
+  projectOverview: string;
+  websiteUrl?: string | null;
+  launchDate?: string | null;
+  /**
+   * PPT/Word/PDF/ZIP, 최대 20MB
+   */
+  rfpFile?: (number | null) | Media;
+  status?: ('new' | 'reviewing' | 'replied' | 'on_hold' | 'closed') | null;
+  /**
+   * 담당자 내부 처리 메모 — 외부에 노출되지 않음
+   */
+  adminNote?: string | null;
+  /**
+   * 0.0 ~ 1.0 (0.5 미만 시 스팸 의심)
+   */
+  recaptchaScore?: number | null;
+  /**
+   * 폼 제출 시 사용자 언어
+   */
+  submittedLocale?: string | null;
+  ipAddress?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -192,6 +414,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: number | Tag;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -277,6 +515,134 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  thumbnail?: T;
+  content?: T;
+  tags?: T;
+  publishedDate?: T;
+  status?: T;
+  publishedLocales?: T;
+  aiGenerated?: T;
+  translationStatus?: T;
+  meta?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+      };
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              headline?: T;
+              subCopy?: T;
+              ctaLabel?: T;
+              ctaUrl?: T;
+              backgroundImage?: T;
+              id?: T;
+              blockName?: T;
+            };
+        content?:
+          | T
+          | {
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cardGrid?:
+          | T
+          | {
+              title?: T;
+              cards?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    description?: T;
+                    link?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        ctaBanner?:
+          | T
+          | {
+              message?: T;
+              ctaLabel?: T;
+              ctaUrl?: T;
+              backgroundGradient?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  status?: T;
+  publishedLocales?: T;
+  meta?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  company?: T;
+  contactName?: T;
+  jobTitle?: T;
+  phone?: T;
+  email?: T;
+  projectOverview?: T;
+  websiteUrl?: T;
+  launchDate?: T;
+  rfpFile?: T;
+  status?: T;
+  adminNote?: T;
+  recaptchaScore?: T;
+  submittedLocale?: T;
+  ipAddress?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -314,6 +680,288 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * 헤더 메가메뉴 구조를 관리합니다 (2-depth)
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  /**
+   * 드래그로 순서를 변경할 수 있습니다
+   */
+  items?:
+    | {
+        label: string;
+        /**
+         * 소메뉴 없이 직접 링크하는 경우에만 입력
+         */
+        link?: string | null;
+        isVisible?: boolean | null;
+        children?:
+          | {
+              label: string;
+              /**
+               * 메가메뉴 카드에 표시되는 짧은 설명
+               */
+              description?: string | null;
+              link: string;
+              linkType?: ('internal' | 'external') | null;
+              /**
+               * CSS gradient 값 (예: linear-gradient(135deg, #5EB6B2, #22908B))
+               */
+              gradient?: string | null;
+              /**
+               * 그라데이션 대신 이미지 사용 시 업로드
+               */
+              media?: (number | null) | Media;
+              /**
+               * 카드 우측 상단에 표시 (예: NEW, TM)
+               */
+              badge?: string | null;
+              isVisible?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * 사이트 이름, 로고, 소셜 링크, 언어 설정 등 전역 값을 관리합니다
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName: string;
+  siteDescription?: string | null;
+  logo?: (number | null) | Media;
+  logoDark?: (number | null) | Media;
+  favicon?: (number | null) | Media;
+  footerCopyright?: string | null;
+  footerPolicyLink?: string | null;
+  socialLinks?:
+    | {
+        platform: 'linkedin' | 'instagram' | 'youtube' | 'twitter' | 'facebook';
+        url: string;
+        isVisible?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  defaultLocale?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar') | null;
+  enabledLocales?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[] | null;
+  /**
+   * 아랍어 등 우→좌 방향 언어. HTML dir="rtl" 자동 적용
+   */
+  rtlLocales?: 'ar'[] | null;
+  /**
+   * 콘텐츠 생성 및 다국어 번역에 사용할 AI 서비스
+   */
+  aiApiProvider?: ('claude' | 'openai') | null;
+  /**
+   * 프로젝트 문의 알림 수신 주소
+   */
+  contactEmail?: string | null;
+  noReplyEmail?: string | null;
+  /**
+   * 프론트엔드에 노출되는 공개 키 (환경변수 권장)
+   */
+  recaptchaSiteKey?: string | null;
+  /**
+   * 페이지별 OG 이미지가 없을 때 사용하는 기본값
+   */
+  ogImage?: (number | null) | Media;
+  /**
+   * 예: G-XXXXXXXXXX
+   */
+  googleAnalyticsId?: string | null;
+  googleSearchConsoleVerification?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * 메인 페이지 각 섹션의 콘텐츠를 관리합니다
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage".
+ */
+export interface Homepage {
+  id: number;
+  heroHeadline: string;
+  heroSubCopy?: string | null;
+  heroCta?:
+    | {
+        label: string;
+        url: string;
+        variant?: ('primary' | 'secondary') | null;
+        id?: string | null;
+      }[]
+    | null;
+  carouselSlides?:
+    | {
+        title: string;
+        description?: string | null;
+        ctaLabel?: string | null;
+        ctaUrl?: string | null;
+        backgroundType?: ('gradient' | 'image') | null;
+        gradient?: string | null;
+        backgroundImage?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  gridSectionTitle?: string | null;
+  gridCards?:
+    | {
+        name: string;
+        tagline: string;
+        description?: string | null;
+        link?: string | null;
+        gradient?: string | null;
+        icon?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  coreMessage: string;
+  coreMessageSubtext?: string | null;
+  insightsSectionTitle?: string | null;
+  /**
+   * 최신 게시물 중 표시할 개수 (2~8)
+   */
+  insightsCount?: number | null;
+  insightsCtaLabel?: string | null;
+  insightsCtaUrl?: string | null;
+  ctaBannerMessage: string;
+  ctaBannerCtaLabel?: string | null;
+  ctaBannerCtaUrl?: string | null;
+  /**
+   * 예: linear-gradient(135deg, #5EB6B2 0%, #15716D 100%)
+   */
+  ctaBannerGradient?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        isVisible?: T;
+        children?:
+          | T
+          | {
+              label?: T;
+              description?: T;
+              link?: T;
+              linkType?: T;
+              gradient?: T;
+              media?: T;
+              badge?: T;
+              isVisible?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  siteDescription?: T;
+  logo?: T;
+  logoDark?: T;
+  favicon?: T;
+  footerCopyright?: T;
+  footerPolicyLink?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        isVisible?: T;
+        id?: T;
+      };
+  defaultLocale?: T;
+  enabledLocales?: T;
+  rtlLocales?: T;
+  aiApiProvider?: T;
+  contactEmail?: T;
+  noReplyEmail?: T;
+  recaptchaSiteKey?: T;
+  ogImage?: T;
+  googleAnalyticsId?: T;
+  googleSearchConsoleVerification?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage_select".
+ */
+export interface HomepageSelect<T extends boolean = true> {
+  heroHeadline?: T;
+  heroSubCopy?: T;
+  heroCta?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        variant?: T;
+        id?: T;
+      };
+  carouselSlides?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        ctaLabel?: T;
+        ctaUrl?: T;
+        backgroundType?: T;
+        gradient?: T;
+        backgroundImage?: T;
+        id?: T;
+      };
+  gridSectionTitle?: T;
+  gridCards?:
+    | T
+    | {
+        name?: T;
+        tagline?: T;
+        description?: T;
+        link?: T;
+        gradient?: T;
+        icon?: T;
+        id?: T;
+      };
+  coreMessage?: T;
+  coreMessageSubtext?: T;
+  insightsSectionTitle?: T;
+  insightsCount?: T;
+  insightsCtaLabel?: T;
+  insightsCtaUrl?: T;
+  ctaBannerMessage?: T;
+  ctaBannerCtaLabel?: T;
+  ctaBannerCtaUrl?: T;
+  ctaBannerGradient?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

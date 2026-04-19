@@ -1,0 +1,104 @@
+/* ── SearchToggle ── */
+.search {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(35, 35, 41, 0.08);
+  background: rgba(255, 255, 255, 0.54);
+  transition:
+    width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
+  will-change: width;
+  flex: 0 0 auto;
+}
+
+.search:hover,
+.search:focus-within {
+  border-color: rgba(94, 182, 178, 0.18);
+}
+
+.searchOpen {
+  width: 275px;
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(94, 182, 178, 0.22);
+  box-shadow: 0 12px 26px rgba(35, 35, 41, 0.08);
+}
+
+.iconButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--layout-text);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.24s ease, background-color 0.24s ease;
+}
+
+.iconButton:hover,
+.iconButton:focus-visible {
+  background: rgba(94, 182, 178, 0.12);
+  color: var(--layout-accent);
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.searchForm {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  width: calc(100% - 44px);
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0 10px 0 14px;
+  transform: translateX(-10px);
+  transition:
+    opacity 0.28s ease,
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.searchOpen .searchForm {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.searchInput {
+  width: 100%;
+  min-width: 0;
+  color: var(--layout-text);
+  font-size: 0.92rem;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  border: none;
+}
+
+.searchInput::placeholder {
+  color: #9ca3ad;
+}
+
+.searchInput:focus,
+.searchInput:focus-visible {
+  outline: none;
+  box-shadow: none;
+}

@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════════
+   Footer Component
+   Source: layout_en.css — .layout-site-footer
+   ═══════════════════════════════════════════════════════════════ */
+
+.footer {
+  position: relative;
+  z-index: 1;
+  padding-top: 24px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  margin-top: auto;
+  display: block;
+  height: auto;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--page-shell-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-shell-gutter);
+  padding-right: var(--page-shell-gutter);
+  box-sizing: border-box;
+}
+
+.inner {
+  display: grid;
+  gap: 20px;
+  padding: 8px 0 0;
+}
+
+/* ── Rows ── */
+.rowTop,
+.rowBottom {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+}
+
+.rowBottom {
+  justify-content: flex-start;
+}
+
+/* ── Left block ── */
+.left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-left: 0;
+}
+
+.copy,
+.policy {
+  color: var(--layout-text-muted);
+  font-size: 0.86rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.policy {
+  text-decoration: underline;
+  transition: color 0.24s ease;
+}
+
+.policy:hover,
+.policy:focus-visible {
+  color: var(--layout-accent);
+}
+
+/* ── Social Links ── */
+.social {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.socialLink {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.24s ease;
+}
+
+.socialLink:hover,
+.socialLink:focus-visible {
+  color: inherit;
+  background: transparent;
+  border-color: transparent;
+}
+
+.socialLink svg {
+  width: 30px;
+  height: 30px;
+  display: block;
+  object-fit: contain;
+}
+
+.socialLink:hover svg,
+.socialLink:focus-visible svg {
+  filter: brightness(0) saturate(100%) invert(49%) sepia(22%) saturate(957%) hue-rotate(133deg) brightness(92%) contrast(89%);
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  .inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

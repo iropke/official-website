@@ -1,0 +1,225 @@
+/* ═══════════════════════════════════════════════════════════════
+   Iropke Design Tokens & Global Reset
+   Source: basic_en.css + FIGMA_DESIGN_GUIDE.md
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Fonts ── */
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/fonts/Roboto-Regular.woff2') format('woff2'),
+       url('/assets/fonts/Roboto-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/fonts/Roboto-Bold.woff2') format('woff2'),
+       url('/assets/fonts/Roboto-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Design Tokens ── */
+:root {
+  /* Breakpoints (reference only) */
+  --breakpoint-sm: 560px;
+  --breakpoint-md: 720px;
+  --breakpoint-lg: 960px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1600px;
+  --breakpoint-3xl: 1920px;
+
+  /* Font Families */
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  --font-ui: 'Roboto', Arial, Helvetica, sans-serif;
+  --font-display: 'Roboto', Arial, Helvetica, sans-serif;
+  --font-body: 'Roboto', Arial, Helvetica, sans-serif;
+  --font-accent-serif: Georgia, 'Times New Roman', serif;
+
+  /* Primary Colors */
+  --primary: #5eb6b2;
+  --primary-hover: #22908b;
+  --primary-pressed: #15716d;
+  --secondary: #f5eee7;
+
+  /* Grayscale */
+  --grayscale-gs-primary: #232329;
+  --primary-2: #43434e;
+  --grayscale-gs-secondary-1: #68687b;
+  --grayscale-gs-secondary-2: #a1a1af;
+  --grayscale-gs-tertiary-1: #b0b0bc;
+  --grayscale-gs-tertiary-2: #d0d0d7;
+  --grayscale-gs-quarterly-1: #dfdfe4;
+  --grayscale-gs-background-darker: #f3f4f7;
+  --grayscale-gs-background: #fafafa;
+  --grayscale-gs-quarterly-2: #fdfdfd;
+  --grayscale-gs-white: #ffffff;
+  --grayscale-gs-black: #000000;
+
+  /* Background */
+  --main-bg-color-dark: #202124;
+  --main-color-dark: #e8eaed;
+  --main-bg-color-light: #f5f5f5;
+  --main-color-light: #202124;
+
+  /* Typography Scale */
+  --h1: clamp(34px, 2vw + 22px, 62px);
+  --h2: clamp(28px, 0.65vw + 26px, 38px);
+  --h3: clamp(24px, 0.3vw + 22.5px, 28px);
+  --h4: clamp(20px, 0.3vw + 18.5px, 24px);
+  --h5: clamp(16px, 0.13vw + 15.5px, 18px);
+  --h6: clamp(14px, 0.15vw + 13px, 16px);
+  --body-1: clamp(20px, 0.3vw + 18.5px, 24px);
+  --body-2: clamp(16px, 0.15vw + 15px, 18px);
+  --body-3: clamp(15px, 0.08vw + 14.5px, 16px);
+  --body-4: clamp(14px, 0.08vw + 13.5px, 15px);
+  --body-5: clamp(13px, 0.08vw + 12.5px, 14px);
+  --body-6: clamp(12px, 0.08vw + 11.5px, 13px);
+
+  /* Spacing */
+  --spacing-xs: 5px;
+  --spacing-s: 10px;
+  --spacing-m: 20px;
+  --spacing-l: 30px;
+  --spacing-xl: 40px;
+  --spacing-xxl: 50px;
+  --spacing-xxxl: 60px;
+  --spacing-xxxxl: 80px;
+  --spacing-col-margin: 16px;
+  --spacing-gutter: 16px;
+
+  /* Border & Radius */
+  --border-radius: 8px;
+  --button-radius: 5px;
+
+  /* Layout Shell */
+  --page-shell-max: 1440px;
+  --page-shell-gutter: 20px;
+
+  /* Layout Surfaces */
+  --layout-bg: var(--main-bg-color-light);
+  --layout-surface: rgba(255, 255, 255, 0.78);
+  --layout-surface-strong: rgba(255, 255, 255, 0.92);
+  --layout-surface-soft: rgba(255, 255, 255, 0.52);
+  --layout-border: rgba(35, 35, 41, 0.08);
+  --layout-border-strong: rgba(94, 182, 178, 0.18);
+  --layout-text: var(--grayscale-gs-primary);
+  --layout-text-muted: var(--grayscale-gs-secondary-1);
+  --layout-text-soft: var(--grayscale-gs-secondary-2);
+  --layout-accent: var(--primary);
+  --layout-accent-strong: var(--primary-hover);
+  --layout-shadow: 0 18px 54px rgba(35, 35, 41, 0.08);
+
+  /* Nav */
+  --nav-height: 72px;
+
+  /* Page section top padding (layout-main already offsets for header) */
+  --iropke-page-top: 48px;
+  --iropke-grid-gap: 24px;
+}
+
+@media (min-width: 561px) {
+  :root {
+    --spacing-col-margin: 40px;
+    --spacing-gutter: 20px;
+  }
+}
+
+@media (min-width: 961px) {
+  :root {
+    --spacing-xs: 10px;
+    --spacing-s: 15px;
+    --spacing-m: 25px;
+    --spacing-l: 40px;
+    --spacing-xl: 60px;
+    --spacing-xxl: 80px;
+    --spacing-xxxl: 120px;
+    --spacing-xxxxl: 160px;
+    --spacing-gutter: 30px;
+  }
+}
+
+@media (min-width: 1201px) {
+  :root {
+    --border-radius: 15px;
+  }
+}
+
+/* ── Reset ── */
+*,
+::after,
+::before,
+::backdrop {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid;
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--main-bg-color-light);
+  color: var(--primary-2);
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+ol, ul, menu {
+  list-style: none;
+}
+
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  vertical-align: middle;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+button, input, select, optgroup, textarea {
+  font: inherit;
+  color: inherit;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+::selection {
+  background-color: var(--primary);
+  color: var(--grayscale-gs-white);
+}
+
+/* ── Screen reader only ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

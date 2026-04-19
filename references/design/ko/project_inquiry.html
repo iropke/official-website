@@ -1,0 +1,513 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>프로젝트 문의 | 이롭게</title>
+  <meta name="description" content="웹사이트 구축, UX, 개발 및 디지털 프로젝트 문의를 위한 프로젝트 문의 페이지입니다." />
+  <link rel="stylesheet" href="assets/css/basic_ko.css" />
+</head>
+<body>
+  <div class="page">
+    <main class="project-inquiry">
+      <div class="project-inquiry__grid">
+        <div class="project-inquiry__main">
+          <section class="project-form" aria-labelledby="project-inquiry-title">
+            <span class="eyebrow">문의하실 내용 입력</span>
+            <h1 class="project-form__title" id="project-inquiry-title">프로젝트 문의</h1>
+            <p class="project-form__intro">
+              의뢰하실 내용을 남겨주시면, 입력하신 이메일 주소로 답변 드리겠습니다.
+            </p>
+
+            <form id="projectInquiryForm" class="project-form__fields" novalidate>
+              <div class="inquiry-type" role="radiogroup" aria-label="문의 유형">
+                <div class="inquiry-type__option">
+                  <input class="inquiry-type__input" id="inquiryTypeProject" name="inquiryType" type="radio" value="프로젝트 문의" checked />
+                  <label class="inquiry-type__label" for="inquiryTypeProject">프로젝트 문의</label>
+                </div>
+                <div class="inquiry-type__option">
+                  <input class="inquiry-type__input" id="inquiryTypeLecture" name="inquiryType" type="radio" value="강연 문의" />
+                  <label class="inquiry-type__label" for="inquiryTypeLecture">강연 문의</label>
+                </div>
+                <div class="inquiry-type__option">
+                  <input class="inquiry-type__input" id="inquiryTypeOther" name="inquiryType" type="radio" value="기타" />
+                  <label class="inquiry-type__label" for="inquiryTypeOther">기타</label>
+                </div>
+              </div>
+              <div class="field" data-field="companyName">
+                <label class="field__label" for="companyName">
+                  <span>회사 이름</span>
+                  <span class="field__meta field__meta--required">필수</span>
+                </label>
+                <div class="field__control">
+                  <input class="field__input" id="companyName" name="companyName" type="text" placeholder="예: 이롭게" required />
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">필수입력항목이 누락되었습니다.</p>
+              </div>
+
+              <div class="field field--half">
+                <div class="field__group field" data-field="contactName">
+                  <label class="field__label" for="contactName">
+                    <span>이름</span>
+                    <span class="field__meta field__meta--required">필수</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="contactName" name="contactName" type="text" placeholder="e.g. 김수로" required />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">필수입력항목이 누락되었습니다.</p>
+                </div>
+
+                <div class="field__group field" data-field="jobTitle">
+                  <label class="field__label" for="jobTitle">
+                    <span>직급</span>
+                    <span class="field__meta">선택</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="jobTitle" name="jobTitle" type="text" placeholder="예: 대표 / 마케팅 리드" />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">올바른 값을 입력해주세요.</p>
+                </div>
+              </div>
+
+              <div class="field field--half">
+                <div class="field__group field" data-field="phone">
+                  <label class="field__label" for="phone">
+                    <span>연락처</span>
+                    <span class="field__meta field__meta--required">필수</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="phone" name="phone" type="tel" inputmode="tel" placeholder="예: +82 10 1234 5678" required />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">올바른 연락처 형식을 입력해주세요.</p>
+                </div>
+
+                <div class="field__group field" data-field="email">
+                  <label class="field__label" for="email">
+                    <span>이메일 주소</span>
+                    <span class="field__meta field__meta--required">필수</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="email" name="email" type="email" inputmode="email" placeholder="예: hello@company.com" required />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">올바른 이메일 주소를 입력해주세요.</p>
+                </div>
+              </div>
+
+              <div class="field field--textarea" data-field="projectOverview">
+                <label class="field__label" for="projectOverview">
+                  <span class="js-overview-label">프로젝트 개요</span>
+                  <span class="field__meta field__meta--required">필수</span>
+                </label>
+                <div class="field__control">
+                  <textarea class="field__textarea" id="projectOverview" name="projectOverview" placeholder="의뢰하시고자 하는 내용을 입력해주시면 됩니다." required></textarea>
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">필수입력항목이 누락되었습니다.</p>
+              </div>
+
+              <div class="field field--upload js-project-only" data-field="rfpFile">
+                <div class="upload upload__wrapper">
+                  <div class="upload__label">
+                    <span>RFP 파일 업로드</span>
+                    <span class="field__meta">선택</span>
+                  </div>
+                  <div class="upload__control">
+                    <div class="upload__dropzone" tabindex="0">
+                    <p class="upload__title">이곳에 파일을 드래그 앤 드롭하거나 <strong>파일 선택</strong> 버튼을 클릭해주세요.</p>
+                    <p class="upload__accepted">첨부 가능 파일 형식: PowerPoint, Word, PDF, ZIP (최대 20MB)</p>
+                    <label class="upload__button" for="rfpFile">파일 선택</label>
+                    <input class="upload__input" id="rfpFile" name="rfpFile" type="file" accept=".ppt,.pptx,.doc,.docx,.pdf,.zip" />
+                    <p class="upload__filename" id="rfpFileName"></p>
+                    </div>
+                  </div>
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <!--<p class="field__hint">이 영역은 개발자가 파일 업로드 기능을 연결할 수 있도록 레이아웃만 구성되어 있습니다.</p>-->
+              </div>
+
+              <div class="field js-project-only" data-field="website">
+                <label class="field__label" for="website">
+                  <span>현재 웹사이트 주소</span>
+                  <span class="field__meta field__meta--required">필수</span>
+                </label>
+                <div class="field__control">
+                  <input class="field__input" id="website" name="website" type="url" inputmode="url" placeholder="예: https://www.company.com" required />
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">올바른 웹사이트 주소를 입력해주세요.</p>
+              </div>
+
+              <div class="field js-project-only" data-field="launchDate">
+                <label class="field__label" for="launchDate">
+                  <span>프로젝트 런칭 희망 일정</span>
+                  <span class="field__meta">선택</span>
+                </label>
+                <div class="field__control">
+                  <input class="field__date" id="launchDate" name="launchDate" type="text" placeholder="예: 2026-12-31" />
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">올바른 날짜 형식을 입력해주세요.</p>
+              </div>
+
+              <div class="field field--consent" data-field="notRobot">
+                <label class="consent__label" for="notRobot">
+                  <span>스팸 검증</span>
+                  <span class="field__meta field__meta--required">필수</span>
+                </label>
+                <div class="consent__control">
+                  <div class="consent-box">
+                  <div class="consent-box__main">
+                    <label>
+                      <span class="sr-only">스팸 방지 확인 체크박스</span>
+                      <input class="consent-box__input" id="notRobot" name="notRobot" type="checkbox" required />
+                      <span class="consent-box__check" aria-hidden="true"></span>
+                    </label>
+                    <span class="consent-box__text">나는 로봇이 아닙니다.</span>
+                  </div>
+                  <span class="consent-box__badge">Cap</span>
+                  </div>
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">필수입력항목이 누락되었습니다.</p>
+              </div>
+
+              <div class="project-form__actions">
+                <button class="submit-button" type="submit">프로젝트 문의하기</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="project-process" aria-labelledby="project-process-title">
+            <span class="eyebrow">문의 절차</span>
+            <h2 class="project-process__title" id="project-process-title">문의 후 진행 절차</h2>
+            <p class="project-process__desc">
+              문의 등록 전에 간단히 확인해주세요. 진행 절차를 미리 안내해 드립니다.
+            </p>
+
+            <div class="project-process__list">
+              <div class="process-item">
+                <span class="process-item__num">1</span>
+                <p><strong>필수 입력 항목을 모두 작성</strong>해주셔야 문의 내용을 빠르고 정확하게 검토할 수 있습니다.</p>
+              </div>
+              <div class="process-item">
+                <span class="process-item__num">2</span>
+                <p>문의가 등록되면 <strong>영업일 기준 3시간 이내에 회신</strong>을 받으실 수 있습니다.</p>
+              </div>
+              <div class="process-item">
+                <span class="process-item__num">3</span>
+                <p>이메일로 바로 문의하고 싶으시다면 <strong>hello@iropke.com</strong> 으로 프로젝트 개요를 보내주세요.</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="success-modal" id="successModal" aria-hidden="true" role="dialog" aria-labelledby="successModalTitle" aria-modal="true">
+    <div class="success-modal__dialog">
+      <div class="success-modal__icon" aria-hidden="true">✓</div>
+      <h2 class="success-modal__title" id="successModalTitle">문의가 성공적으로 등록되었습니다.</h2>
+      <p class="success-modal__text">
+        문의 내용이 정상적으로 접수되었으며, 빠르게 내용을 검토하고 입력하신 이메일로 회신 드리겠습니다.
+      </p>
+      <button class="success-modal__button" type="button" id="successModalClose">닫기</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById('projectInquiryForm');
+      const successModal = document.getElementById('successModal');
+      const successModalClose = document.getElementById('successModalClose');
+      const inquiryTypeInputs = Array.from(form.querySelectorAll('input[name="inquiryType"]'));
+      const overviewLabel = form.querySelector('.js-overview-label');
+      const projectOnlyFields = Array.from(form.querySelectorAll('.js-project-only'));
+      let lastFocusedElement = null;
+
+      const validators = {
+        companyName: (value) => value.trim().length > 0,
+        contactName: (value) => value.trim().length > 0,
+        jobTitle: (value) => value.trim().length === 0 || value.trim().length >= 2,
+        phone: (value) => {
+          const trimmed = value.trim();
+          const digitsOnly = trimmed.replace(/\D/g, '');
+          const allowed = /^[+\d\s().-]+$/;
+          return trimmed.length > 0 && allowed.test(trimmed) && digitsOnly.length >= 7 && digitsOnly.length <= 15;
+        },
+        email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
+        projectOverview: (value) => value.trim().length > 0,
+        website: (value) => {
+          if (!isProjectType()) return true;
+          const trimmed = value.trim();
+          if (!trimmed) return false;
+          const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+          try {
+            const url = new URL(normalized);
+            return !!url.hostname && url.hostname.includes('.');
+          } catch (error) {
+            return false;
+          }
+        },
+        launchDate: (value) => {
+          if (!isProjectType()) return true;
+          const trimmed = value.trim();
+          if (!trimmed) return true;
+          return /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
+        },
+        notRobot: (value, input) => input.checked === true,
+        rfpFile: () => true
+      };
+
+      const fieldConfigs = [
+        { name: 'companyName', required: true },
+        { name: 'contactName', required: true },
+        { name: 'jobTitle', required: false },
+        { name: 'phone', required: true },
+        { name: 'email', required: true },
+        { name: 'projectOverview', required: true },
+        { name: 'rfpFile', required: false },
+        { name: 'website', required: true },
+        { name: 'launchDate', required: false },
+        { name: 'notRobot', required: true }
+      ];
+
+      function getSelectedInquiryType() {
+        const checked = inquiryTypeInputs.find((input) => input.checked);
+        return checked ? checked.value : '프로젝트 문의';
+      }
+
+      function isProjectType() {
+        return getSelectedInquiryType() === '프로젝트 문의';
+      }
+
+      function getFieldElement(name) {
+        return form.querySelector(`[data-field="${name}"]`);
+      }
+
+      function getInputElement(name) {
+        return form.elements[name];
+      }
+
+      function setFieldState(fieldEl, state) {
+        if (!fieldEl) return;
+        fieldEl.classList.remove('is-valid', 'is-invalid');
+        if (state) fieldEl.classList.add(state);
+      }
+
+      function clearFieldState(name) {
+        const fieldEl = getFieldElement(name);
+        if (!fieldEl) return;
+        delete fieldEl.dataset.touched;
+        setFieldState(fieldEl, '');
+      }
+
+      function validateField(name, forceState) {
+        const fieldEl = getFieldElement(name);
+        const input = getInputElement(name);
+        if (!fieldEl || !input) return true;
+
+        if (!isProjectType() && ['rfpFile', 'website', 'launchDate'].includes(name)) {
+          clearFieldState(name);
+          return true;
+        }
+
+        const value = input.type === 'checkbox' ? input.checked : input.value;
+        const isEmpty = input.type === 'checkbox' ? !input.checked : input.value.trim() === '';
+        const isValid = validators[name] ? validators[name](value, input) : true;
+
+        if (forceState === 'neutral') {
+          setFieldState(fieldEl, '');
+          return isValid;
+        }
+
+        if (isEmpty && !fieldEl.dataset.touched && forceState !== 'submit') {
+          setFieldState(fieldEl, '');
+          return isValid;
+        }
+
+        if (isValid) {
+          setFieldState(fieldEl, 'is-valid');
+        } else {
+          setFieldState(fieldEl, 'is-invalid');
+        }
+
+        return isValid;
+      }
+
+      function markTouched(name) {
+        const fieldEl = getFieldElement(name);
+        if (fieldEl) fieldEl.dataset.touched = 'true';
+      }
+
+      fieldConfigs.forEach(({ name }) => {
+        const input = getInputElement(name);
+        if (!input) return;
+
+        const eventName = input.type === 'checkbox' || input.type === 'file' ? 'change' : 'input';
+        input.addEventListener(eventName, () => {
+          markTouched(name);
+          validateField(name);
+        });
+
+        input.addEventListener('blur', () => {
+          markTouched(name);
+          validateField(name);
+        });
+      });
+
+      const fileInput = document.getElementById('rfpFile');
+      const fileName = document.getElementById('rfpFileName');
+      const uploadWrapper = fileInput.closest('.upload');
+      const dropzone = uploadWrapper.querySelector('.upload__dropzone');
+
+      function updateFileState(file) {
+        if (file) {
+          uploadWrapper.classList.add('has-file');
+          fileName.textContent = `선택된 파일: ${file.name}`;
+          getFieldElement('rfpFile').classList.add('is-valid');
+        } else {
+          uploadWrapper.classList.remove('has-file');
+          fileName.textContent = '';
+          getFieldElement('rfpFile').classList.remove('is-valid');
+        }
+      }
+
+      fileInput.addEventListener('change', () => {
+        updateFileState(fileInput.files[0]);
+      });
+
+      ['dragenter', 'dragover'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.style.borderColor = '#5EB6B2';
+          dropzone.style.background = '#f3fbfa';
+        });
+      });
+
+      ['dragleave', 'drop'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.style.borderColor = '';
+          dropzone.style.background = '';
+        });
+      });
+
+      dropzone.addEventListener('drop', (event) => {
+        const files = event.dataTransfer.files;
+        if (files && files[0]) {
+          try {
+            fileInput.files = files;
+          } catch (error) {
+          }
+          updateFileState(files[0]);
+        }
+      });
+
+      function syncInquiryTypeUI() {
+        const projectType = isProjectType();
+
+        if (overviewLabel) {
+          overviewLabel.textContent = projectType ? '프로젝트 개요' : '문의 내용';
+        }
+
+        projectOnlyFields.forEach((fieldEl) => {
+          const input = fieldEl.querySelector('input, textarea, select');
+          fieldEl.classList.toggle('is-hidden-by-type', !projectType);
+
+          if (!projectType && input) {
+            input.value = '';
+          }
+
+          if (!projectType) {
+            delete fieldEl.dataset.touched;
+            setFieldState(fieldEl, '');
+          }
+        });
+
+        if (!projectType) {
+          updateFileState(null);
+        }
+      }
+
+      inquiryTypeInputs.forEach((input) => {
+        input.addEventListener('change', syncInquiryTypeUI);
+      });
+
+      function openSuccessModal() {
+        lastFocusedElement = document.activeElement;
+        successModal.classList.add('is-open');
+        successModal.setAttribute('aria-hidden', 'false');
+        successModalClose.focus();
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSuccessModal() {
+        successModal.classList.remove('is-open');
+        successModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (lastFocusedElement) lastFocusedElement.focus();
+      }
+
+      successModalClose.addEventListener('click', closeSuccessModal);
+      successModal.addEventListener('click', (event) => {
+        if (event.target === successModal) closeSuccessModal();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && successModal.classList.contains('is-open')) {
+          closeSuccessModal();
+        }
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        let allValid = true;
+        let firstInvalidInput = null;
+
+        fieldConfigs.forEach(({ name }) => {
+          const fieldEl = getFieldElement(name);
+          if (fieldEl) fieldEl.dataset.touched = 'true';
+          const currentValid = validateField(name, 'submit');
+          if (!currentValid) {
+            allValid = false;
+            if (!firstInvalidInput) {
+              firstInvalidInput = getInputElement(name);
+            }
+          }
+        });
+
+        if (!allValid) {
+          if (firstInvalidInput) {
+            firstInvalidInput.focus();
+            firstInvalidInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        openSuccessModal();
+        form.reset();
+        updateFileState(null);
+
+        fieldConfigs.forEach(({ name }) => {
+          clearFieldState(name);
+        });
+
+        const defaultType = form.querySelector('#inquiryTypeProject');
+        if (defaultType) defaultType.checked = true;
+        syncInquiryTypeUI();
+      });
+
+      syncInquiryTypeUI();
+    })();
+  </script>
+</body>
+</html>
+
+

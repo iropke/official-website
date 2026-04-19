@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="arrow-diagonal" viewBox="0 0 24 24">
+    <path d="M6 18L18 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+    <path d="M10 6H18V14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+  </symbol>
+  <symbol id="chevron-left" viewBox="0 0 24 24">
+    <path d="M15 6L9 12L15 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9"/>
+  </symbol>
+  <symbol id="chevron-right" viewBox="0 0 24 24">
+    <path d="M9 6L15 12L9 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9"/>
+  </symbol>
+</svg>

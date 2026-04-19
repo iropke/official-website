@@ -1,0 +1,536 @@
+/* ═══════════════════════════════════════════════════════════════
+   PostList — Post listing page styles
+   Source: basic_en.css (postList section)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Section ── */
+.section {
+  padding: var(--iropke-page-top) 0 96px;
+}
+
+/* ── Layout shell (12-col grid) ── */
+.layout {
+  width: 100%;
+  max-width: var(--page-shell-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-shell-gutter);
+  padding-right: var(--page-shell-gutter);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--iropke-grid-gap);
+}
+
+.spanFull {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* ── Post list grid ── */
+.postList {
+  display: grid;
+  gap: 0;
+}
+
+/* ── Post card ── */
+.card {
+  display: grid;
+  grid-template-columns: minmax(176px, 340px) minmax(0, 1fr);
+  gap: 34px;
+  align-items: center;
+  padding: 24px 0;
+  border: 0;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid rgba(51, 51, 51, 0.12);
+  background: transparent;
+  box-shadow: none;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.card:first-child {
+  border-top-color: rgba(51, 51, 51, 0.12);
+}
+
+.card:hover,
+.card:focus-visible {
+  background: #f3f3f3;
+  border-top-color: rgba(51, 51, 51, 0.16);
+  border-bottom-color: rgba(51, 51, 51, 0.16);
+  outline: none;
+}
+
+.card:hover:not(:first-child),
+.card:focus-visible:not(:first-child) {
+  margin-top: -1px;
+}
+
+/* ── Media / thumbnail ── */
+.media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  background:
+    linear-gradient(135deg, rgba(94, 182, 178, 0.08), rgba(35, 35, 41, 0.03)),
+    #eef2f3;
+  aspect-ratio: 540 / 398;
+  max-width: 340px;
+  margin: 0;
+  transition: border-radius 0.4s ease;
+}
+
+.card:hover .media,
+.card:focus-visible .media {
+  border-radius: 12px;
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 540 / 398;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .media img,
+.card:focus-visible .media img {
+  transform: scale(1.06);
+}
+
+/* ── Body ── */
+.body {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  color: #666666;
+  padding-right: 6px;
+}
+
+/* ── Title row ── */
+.titleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  color: #333333;
+  font-size: clamp(1.25rem, 1.65vw, 1.56rem);
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  display: inline;
+  min-width: 0;
+}
+
+.titleText {
+  position: relative;
+  display: inline;
+  transition: color 0.24s ease;
+}
+
+.titleText::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.08em;
+  width: 100%;
+  height: 1px;
+  background: #5eb6b2;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.24s ease;
+}
+
+.card:hover .titleText,
+.card:focus-visible .titleText {
+  color: #5eb6b2;
+}
+
+.card:hover .titleText::after,
+.card:focus-visible .titleText::after {
+  transform: scaleX(1);
+}
+
+/* ── Title arrow ── */
+.titleArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #666666;
+  line-height: 1;
+  transform: rotate(45deg);
+  transform-origin: 50% 50%;
+  transition: transform 0.24s ease, color 0.24s ease;
+  vertical-align: middle;
+}
+
+.titleArrow svg {
+  width: 1.25em;
+  height: 1.25em;
+  display: block;
+}
+
+.card:hover .titleArrow,
+.card:focus-visible .titleArrow {
+  transform: rotate(0deg);
+  color: #5eb6b2;
+}
+
+/* ── Description ── */
+.desc {
+  margin: 0;
+  max-width: 64ch;
+  color: #999999;
+  font-weight: 400;
+  font-size: 0.98rem;
+  line-height: 1.82;
+  font-family: Arial, Helvetica, sans-serif;
+  transition: color 0.22s ease;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card:hover .desc,
+.card:focus-visible .desc {
+  color: #666666;
+}
+
+/* ── Footer / date ── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 18px;
+  margin-top: 2px;
+  color: #666666;
+}
+
+.date {
+  color: #999999;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.825rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* ── Pagination ── */
+.paginationWrap {
+  margin-top: 44px;
+  display: flex;
+  justify-content: center;
+  grid-column: 3 / span 8;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+  margin: 0;
+}
+
+.paginationItem {
+  margin: 0;
+}
+
+.paginationLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(102, 102, 102, 0.14);
+  background: transparent;
+  color: #666666;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    transform 0.2s ease,
+    color 0.22s ease,
+    background-color 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.paginationLink:hover,
+.paginationLink:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(51, 51, 51, 0.18);
+  background: #ffffff;
+  color: #333333;
+  outline: none;
+}
+
+.paginationLinkActive {
+  background: #666666;
+  border-color: #666666;
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.paginationNav {
+  min-width: 48px;
+  padding: 0 14px;
+}
+
+.paginationIcon {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
+/* ── Reveal animation ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.revealVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Tablet <=1079px: collapse 12-col to single col ── */
+@media (max-width: 1079px) {
+  .layout {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+
+  .spanFull,
+  .paginationWrap {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── <=1024px: stack card vertically ── */
+@media (max-width: 1024px) {
+  .section {
+    padding: 96px 0 80px;
+  }
+
+  .card {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 22px 0;
+  }
+
+  .media {
+    max-width: 100%;
+  }
+
+  .desc {
+    max-width: none;
+  }
+}
+
+/* ── <=768px: tighter spacing ── */
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 0 64px;
+  }
+
+  .card {
+    gap: 14px;
+    padding: 18px 0;
+  }
+
+  .title {
+    font-size: clamp(1.125rem, 5vw, 1.3125rem);
+  }
+
+  .titleRow {
+    gap: 5px;
+  }
+
+  .desc {
+    font-size: 0.95rem;
+    line-height: 1.72;
+    -webkit-line-clamp: 4;
+  }
+
+  .pagination {
+    gap: 8px;
+  }
+
+  .paginationLink {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 11px;
+  }
+}
+
+/* ── <=480px: full-bleed cards, hide desc/date/arrow ── */
+@media (max-width: 480px) {
+  .section {
+    padding: 80px 0 56px;
+  }
+
+  .postList {
+    gap: 0;
+  }
+
+  .card {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 0 40px;
+    border-top: 0;
+    border-bottom: 0;
+  }
+
+  .card:first-child {
+    border-top: 0;
+  }
+
+  .card:hover,
+  .card:focus-visible {
+    background: transparent;
+  }
+
+  .media {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    aspect-ratio: 540 / 398;
+  }
+
+  .media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .body {
+    width: auto;
+    max-width: none;
+    padding: 0 20px;
+    margin: 0;
+    gap: 0;
+    box-sizing: border-box;
+  }
+
+  .titleRow {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .title {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(1.68rem, 6.3vw, 1.96rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    word-break: normal;
+    overflow-wrap: anywhere;
+    hyphens: none;
+    text-wrap: balance;
+  }
+
+  .titleText {
+    display: inline;
+    max-width: 100%;
+  }
+
+  .desc,
+  .footer,
+  .date {
+    display: none;
+  }
+
+  .titleArrow {
+    display: none;
+  }
+
+  .card + .card {
+    margin-top: 0.95em;
+  }
+
+  .paginationWrap {
+    display: flex;
+    margin-top: 20px;
+    padding: 0 20px;
+    justify-content: center;
+  }
+
+  .pagination {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .paginationItem {
+    width: 100%;
+  }
+
+  .paginationLink {
+    min-width: 0;
+    width: 100%;
+    height: 34px;
+    padding: 0;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+  }
+
+  .paginationNav {
+    min-width: 0;
+  }
+
+  .paginationIcon {
+    width: 1em;
+    height: 1em;
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card .media img,
+  .titleArrow,
+  .titleText,
+  .titleText::after,
+  .paginationLink,
+  .reveal {
+    transition: none !important;
+  }
+
+  .card:hover,
+  .card:focus-visible,
+  .paginationLink:hover,
+  .paginationLink:focus-visible {
+    transform: none !important;
+  }
+}

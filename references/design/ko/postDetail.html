@@ -1,0 +1,362 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>포스트: 상세 페이지 | 이롭게</title>
+  <meta
+    name="description"
+    content="An editorial-style post detail page for Iropke, designed for developer handoff with a responsive article layout, sticky related posts, structured content components, and a restrained editorial UI."
+  />
+  <link rel="stylesheet" href="assets/css/basic_ko.css" />
+</head>
+<body>
+  <div class="page">
+    <main>
+      <section class="section post-detail-page">
+        <div class="container">
+          <div class="post-detail-shell">
+            <article class="post-detail-main">
+              <header class="post-hero reveal">
+                <figure class="post-hero__media">
+                  <div class="post-hero__media-frame">
+                    <img
+                      src="https://placehold.co/1200x675"
+                      alt="에디토리얼 히어로 이미지"
+                    />
+                  </div>
+                </figure>
+                <h1 class="post-hero__title">보이지 않는 구조가 이제 가장 중요한 요소가 되었다.</h1>
+                <p class="post-hero__intro">
+                  웹은 더 이상 브라우저 안에만 존재하지 않는다. 그것은 해석되고, 검색되고, 요약되며, 재구성된다. 출시 당시 얼마나 멋진 히어로 배너였는지는 중요하지 않다. 결국 남는 것은 구조다.
+                </p>
+              </header>
+
+              <div class="editorial-content">
+                <h1 class="reveal">H1. 에디토리얼 시스템은 이제 구조적 시스템이 된다</h1>
+                <p class="reveal">
+                  포스트 페이지는 단순히 읽기 위한 공간이었다. 이제는 인덱싱, 검색, 요약, 재사용이라는 더 큰 생태계 안의 구조적 객체가 되었다. 이 변화는 디자인의 역할을 바꾼다. The interface still needs calm, rhythm, and readability, but underneath that visible layer, the page has to behave like a disciplined container.
+                </p>
+                <p class="reveal">
+                  즉, 미적인 요소는 여전히 중요하지만, 그것이 전부는 아니다. The stage lights are lovely. The beams holding the building up have become more important.
+                </p>
+
+                <div class="editorial-delimiter reveal" aria-hidden="true">
+                  <span class="editorial-delimiter__mark">§</span>
+                </div>
+
+                <h2 class="reveal">H2. 페이지는 사용자와 시스템 모두에게 설명 가능해야 한다</h2>
+                <p class="reveal">
+                  이 지점에서 에디토리얼 디자인은 전략이 된다. Headings must form a clean hierarchy. Tables should remain usable on smaller screens. Quotes need distinction without turning theatrical. Raw HTML areas should feel clearly separated from ordinary copy. Code examples must be legible rather than dumped like spare parts on a workshop floor.
+                </p>
+
+                <h3 class="reveal">H3. 구조화된 사고에는 순서가 필요하다</h3>
+                <ol class="reveal">
+                  <li>표면을 다듬기 전에 페이지의 역할을 정의하라.</li>
+                  <li>문서가 명확하게 해석될 수 있도록 시맨틱 구조를 유지하라.</li>
+                  <li>먼저 스캔을 고려하고, 그 다음 경험, 마지막으로 장식을 설계하라.</li>
+                </ol>
+
+                <h4 class="reveal">H4. 순서가 중요하지 않을 때는 비순차 리스트가 적합하다</h4>
+                <ul class="reveal">
+                  <li>명확한 헤딩 구조</li>
+                  <li>읽기 쉬운 본문</li>
+                  <li>일관된 미디어 처리</li>
+                  <li>일관된 메타데이터</li>
+                </ul>
+
+                <div class="editorial-media reveal">
+                  <figure>
+                    <div class="editorial-media__frame">
+                      <img
+                        src="https://placehold.co/1200x675"
+                        alt="Editorial placeholder image showing a restrained workspace composition"
+                      />
+                    </div>
+                    <figcaption class="editorial-media__caption">
+                      이미지 예시. 에디토리얼 미디어는 장식이 아니라 차분하고 여백 있는, 정보를 전달하는 역할이어야 합니다.
+                    </figcaption>
+                  </figure>
+                </div>
+
+                <h5 class="reveal">H5. 화면이 작아져도 테이블은 유용해야 한다</h5>
+                <p class="reveal">
+                  모바일에서는 첫 번째 열을 고정하고 나머지는 가로 스크롤로 확인할 수 있어야 한다. That way the reader keeps one anchor point instead of being dropped into a spreadsheet blizzard.
+                </p>
+
+                <div class="editorial-table reveal">
+                  <div class="editorial-table__wrap" aria-label="반응형 비교 테이블">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th scope="col">구성 요소</th>
+                          <th scope="col">주요 역할</th>
+                          <th scope="col">부재 시 리스크</th>
+                          <th scope="col">에디토리얼 영향</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>헤딩 구조</td>
+                          <td>시맨틱 구조 형성</td>
+                          <td>구조의 모호함</td>
+                          <td>가독성 저하 및 검색 맥락 약화</td>
+                        </tr>
+                        <tr>
+                          <td>미디어 캡션</td>
+                          <td>맥락 제공</td>
+                          <td>의미 없는 이미지</td>
+                          <td>장식적 노이즈로 전락</td>
+                        </tr>
+                        <tr>
+                          <td>코드 표현</td>
+                          <td>본문과 코드 구분</td>
+                          <td>독자 혼란</td>
+                          <td>기술 신뢰도 저하</td>
+                        </tr>
+                        <tr>
+                          <td>Q&amp;A formatting</td>
+                          <td>대화 구조 명확화</td>
+                          <td>정보 밀집 블록</td>
+                          <td>답변s become harder to retrieve and skim</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="editorial-table__swipe-hint">좌우로 스와이프하여 더 보기 →</div>
+                </div>
+
+                <div class="vertical-pad" aria-hidden="true"></div>
+
+                <div class="editorial-delimiter reveal" aria-hidden="true">
+                  <span class="editorial-delimiter__mark">✦</span>
+                </div>
+
+                <h6 class="reveal">H6. 작은 헤딩, 절제된 표현, 명확한 목적</h6>
+                <p class="reveal">
+                  모든 섹션이 강하게 외칠 필요는 없다. 어떤 것은 조율만으로 충분하다.
+                </p>
+
+                <div class="editorial-media reveal">
+                  <figure>
+                    <div class="editorial-media__frame">
+                      <iframe
+                        src="https://youtu.be/cyCMuCFCkdk?si=3W855qVCabsSVjyP"
+                        title="에디토리얼 영상 예시"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                      ></iframe>
+                    </div>
+                    <figcaption class="editorial-media__caption">
+                      영상 예시. 유튜브 임베드는 이미지와 동일한 리듬으로 배치하고, 하단에 캡션을 둡니다.
+                    </figcaption>
+                  </figure>
+                </div>
+
+                <div class="editorial-quote reveal">
+                  <svg class="editorial-quote__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M19 14C13.4772 14 9 18.4772 9 24V34H21V24H15C15 21.7909 16.7909 20 19 20V14Z" fill="currentColor"/>
+                    <path d="M39 14C33.4772 14 29 18.4772 29 24V34H41V24H35C35 21.7909 36.7909 20 39 20V14Z" fill="currentColor"/>
+                  </svg>
+                  <blockquote>
+                    <p>
+                      훌륭한 편집 페이지는 단순히 콘텐츠를 보여주는 데 그치지 않습니다. 페이지의 내용이 발췌, 인용, 크기 조정 또는 재해석되더라도 일관성을 유지할 수 있도록 충분한 절제력을 가지고 의미를 구성해야 합니다.
+                    </p>
+                    <cite>에디토리얼 노트</cite>
+                  </blockquote>
+                </div>
+
+                <h2 class="reveal">Raw HTML은 시각적으로 구분되어야 한다</h2>
+                <p class="reveal">
+                  HTML 원본 자체는 별도의 꾸밈이 필요하지 않지만, 주변의 텍스트에 시각적으로 녹아들어서는 안 됩니다. 독자는 다른 종류의 블록이 등장하고 있음을 분명히 인지해야 합니다.
+                </p>
+
+                <div class="editorial-raw reveal">
+                  <div class="editorial-raw__label">Raw HTML 예시</div>
+                  <div>
+                    <div class="sample-embed">
+                      <strong>커스텀 HTML 출력</strong><br />
+                      <span>이 블록은 에디터에 입력된 HTML이 그대로 렌더링됩니다.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <h2 class="reveal">코드 예시는 명확한 구조 안에 있어야 한다</h2>
+
+                <div class="editorial-code reveal" aria-label="Code example viewer">
+                  <div class="editorial-code__head">
+                    <span>HTML 코드 예시</span>
+                    <span class="editorial-code__dots" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </span>
+                  </div>
+                  <pre><code>&lt;figure class="editorial-media"&gt;
+  &lt;img src="/path/image.jpg" alt="Descriptive alt text" /&gt;
+  &lt;figcaption&gt;A short explanatory caption.&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+                </div>
+
+                <h2 class="reveal">Q&amp;A content works best when question and answer have visual roles</h2>
+
+                <div class="editorial-qna reveal">
+                  <div class="editorial-qna__item">
+                    <div class="editorial-qna__icon" aria-hidden="true">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 18H12.01M9.09 9A3 3 0 1 1 14.83 10.17C14 11 13 11.5 12.5 12.5C12.27 12.96 12.15 13.46 12.09 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1117 3.04346 16.4527L2 22L7.54729 20.9565C8.8883 21.6244 10.4003 22 12 22Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="editorial-qna__label">자주 묻는 질문</div>
+                      <p class="editorial-qna__text">
+                        인공지능 시스템이 페이지를 읽는 시대에 편집의 완성도는 여전히 중요할까요?
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="editorial-qna__item">
+                    <div class="editorial-qna__icon editorial-qna__icon--a" aria-hidden="true">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="editorial-qna__label">답변</div>
+                      <p class="editorial-qna__text">
+                        맞습니다. 시각적 요소는 독자의 신뢰도, 속도감, 이해도를 좌우하고, 구조적 요소는 기계의 해석을 지원합니다. 최고의 페이지는 어느 한쪽 독자층만 고려하고 다른 쪽을 외면하지 않습니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <section class="post-tags reveal" aria-labelledby="post-tags-title">
+                  
+                  <ul class="post-tags__list">
+                    <li class="post-tags__item"><a href="#">Editorial Design</a></li>
+                    <li class="post-tags__item"><a href="#">Content Systems</a></li>
+                    <li class="post-tags__item"><a href="#">AI Visibility</a></li>
+                    <li class="post-tags__item"><a href="#">Information Architecture</a></li>
+                    <li class="post-tags__item"><a href="#">Web Strategy</a></li>
+                  </ul>
+                </section>
+              </div>
+            </article>
+
+            <aside class="post-detail-aside">
+              <div class="post-detail-aside-inner related-posts reveal">
+                
+
+                <ul class="related-posts__list">
+                  <li class="related-posts__item">
+                    <a class="related-posts__link" href="#">
+                      <span class="related-posts__thumb">
+                        <img src="https://placehold.co/540x398" alt="관련 포스트 썸네일">
+                      </span>
+                      <h3 class="related-posts__post-title">AI 시대에 구조화된 웹사이트가 중요한 이유</h3>
+                      <time class="related-posts__date" datetime="2026-04-06">Apr 06, 2026</time>
+                    </a>
+                  </li>
+                  <li class="related-posts__item">
+                    <a class="related-posts__link" href="#">
+                      <span class="related-posts__thumb">
+                        <img src="https://placehold.co/540x398" alt="관련 포스트 썸네일">
+                      </span>
+                      <h3 class="related-posts__post-title">수작업에 의존하지 않는 확장 가능한 콘텐츠 시스템 구축</h3>
+                      <time class="related-posts__date" datetime="2026-04-04">Apr 04, 2026</time>
+                    </a>
+                  </li>
+                  <li class="related-posts__item">
+                    <a class="related-posts__link" href="#">
+                      <span class="related-posts__thumb">
+                        <img src="https://placehold.co/540x398" alt="관련 포스트 썸네일">
+                      </span>
+                      <h3 class="related-posts__post-title">조용한 웹사이트가 더 강력할 수 있다</h3>
+                      <time class="related-posts__date" datetime="2026-03-31">Mar 31, 2026</time>
+                    </a>
+                  </li>
+                  <li class="related-posts__item">
+                    <a class="related-posts__link" href="#">
+                      <span class="related-posts__thumb">
+                        <img src="https://placehold.co/540x398" alt="관련 포스트 썸네일">
+                      </span>
+                      <h3 class="related-posts__post-title">SEO 개선이 AI 노출로 이어지지 않는 이유</h3>
+                      <time class="related-posts__date" datetime="2026-03-20">Mar 20, 2026</time>
+                    </a>
+                  </li>
+                  <li class="related-posts__item">
+                    <a class="related-posts__link" href="#">
+                      <span class="related-posts__thumb">
+                        <img src="https://placehold.co/540x398" alt="관련 포스트 썸네일">
+                      </span>
+                      <h3 class="related-posts__post-title">사람에게는 읽히고, 기계에는 검색되는 콘텐츠</h3>
+                      <time class="related-posts__date" datetime="2026-02-27">Feb 27, 2026</time>
+                    </a>
+                  </li>
+                </ul>
+
+                <div class="related-posts__more">
+                  <a href="/en/insights">더 보기 →</a>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const items = document.querySelectorAll('.page .reveal');
+      if (items.length) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (reduceMotion) {
+          items.forEach((item) => item.classList.add('is-visible'));
+        } else {
+          const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              obs.unobserve(entry.target);
+            });
+          }, {
+            threshold: 0.12,
+            rootMargin: '0px 0px -8% 0px'
+          });
+
+          items.forEach((item, index) => {
+            item.style.transitionDelay = `${Math.min(index * 35, 210)}ms`;
+            observer.observe(item);
+          });
+        }
+      }
+
+      const mqDesktop = window.matchMedia('(min-width: 1025px)');
+      const aside = document.querySelector('.page .post-detail-aside-inner');
+
+      function applyStickyAside() {
+        if (!aside) return;
+
+        if (mqDesktop.matches) {
+          aside.style.position = 'sticky';
+          aside.style.top = '120px';
+        } else {
+          aside.style.position = 'static';
+          aside.style.top = 'auto';
+        }
+      }
+
+      applyStickyAside();
+      if (typeof mqDesktop.addEventListener === 'function') {
+        mqDesktop.addEventListener('change', applyStickyAside);
+      } else if (typeof mqDesktop.addListener === 'function') {
+        mqDesktop.addListener(applyStickyAside);
+      }
+      window.addEventListener('resize', applyStickyAside);
+    })();
+  </script>
+</body>
+</html>
+
+

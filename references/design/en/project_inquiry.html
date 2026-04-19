@@ -1,0 +1,442 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Inquiry | Iropke</title>
+  <meta name="description" content="Project inquiry form for new website, UX, development, and digital project requests." />
+  <link rel="stylesheet" href="assets/css/basic_en.css?v=20260407-10" />
+</head>
+<body>
+  <div class="page">
+    <main class="project-inquiry">
+      <div class="project-inquiry__grid">
+        <div class="project-inquiry__main">
+          <section class="project-form" aria-labelledby="project-inquiry-title">
+            <span class="eyebrow">Start a conversation</span>
+            <h1 class="project-form__title" id="project-inquiry-title">Project Inquiry</h1>
+            <p class="project-form__intro">
+              Share the outline of your project and your current website context. We will review the inquiry and get back to you with the next step.
+            </p>
+
+            <form id="projectInquiryForm" class="project-form__fields" novalidate>
+              <div class="field" data-field="companyName">
+                <label class="field__label" for="companyName">
+                  <span>Company Name</span>
+                  <span class="field__meta field__meta--required">Required</span>
+                </label>
+                <div class="field__control">
+                  <input class="field__input" id="companyName" name="companyName" type="text" placeholder="e.g. Iropke" required />
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">Required field is missing.</p>
+              </div>
+
+              <div class="field field--half">
+                <div class="field__group field" data-field="contactName">
+                  <label class="field__label" for="contactName">
+                    <span>Name</span>
+                    <span class="field__meta field__meta--required">Required</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="contactName" name="contactName" type="text" placeholder="e.g. Clark Kent" required />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">Required field is missing.</p>
+                </div>
+
+                <div class="field__group field" data-field="jobTitle">
+                  <label class="field__label" for="jobTitle">
+                    <span>Job Title</span>
+                    <span class="field__meta">Optional</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="jobTitle" name="jobTitle" type="text" placeholder="e.g. CEO / Marketing Lead" />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">Please enter a valid value.</p>
+                </div>
+              </div>
+
+              <div class="field field--half">
+                <div class="field__group field" data-field="phone">
+                  <label class="field__label" for="phone">
+                    <span>Contact Number</span>
+                    <span class="field__meta field__meta--required">Required</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="phone" name="phone" type="tel" inputmode="tel" placeholder="e.g. +82 10 1234 5678" required />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">Please enter a valid phone number.</p>
+                </div>
+
+                <div class="field__group field" data-field="email">
+                  <label class="field__label" for="email">
+                    <span>Email Address</span>
+                    <span class="field__meta field__meta--required">Required</span>
+                  </label>
+                  <div class="field__control">
+                    <input class="field__input" id="email" name="email" type="email" inputmode="email" placeholder="e.g. hello@company.com" required />
+                  </div>
+                  <span class="field__status" aria-hidden="true">✓</span>
+                  <p class="field__error">Please enter a valid email address.</p>
+                </div>
+              </div>
+
+              <div class="field field--textarea" data-field="projectOverview">
+                <label class="field__label" for="projectOverview">
+                  <span>Project Overview</span>
+                  <span class="field__meta field__meta--required">Required</span>
+                </label>
+                <div class="field__control">
+                  <textarea class="field__textarea" id="projectOverview" name="projectOverview" placeholder="e.g. We are planning a global website renewal and need strategy, UX, design, development, and multilingual rollout support." required></textarea>
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">Required field is missing.</p>
+              </div>
+
+              <div class="field field--upload" data-field="rfpFile">
+                <div class="upload upload__wrapper">
+                  <div class="upload__label">
+                    <span>RFP File Upload</span>
+                    <span class="field__meta">Optional</span>
+                  </div>
+                  <div class="upload__control">
+                    <div class="upload__dropzone" tabindex="0">
+                    <p class="upload__title">Drag and drop your file here, or click the <strong>Choose File</strong> button.</p>
+                    <p class="upload__accepted">Accepted file types: PowerPoint, Word, PDF, ZIP (up to 20MB)</p>
+                    <label class="upload__button" for="rfpFile">Choose File</label>
+                    <input class="upload__input" id="rfpFile" name="rfpFile" type="file" accept=".ppt,.pptx,.doc,.docx,.pdf,.zip" />
+                    <p class="upload__filename" id="rfpFileName"></p>
+                    </div>
+                  </div>
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <!--<p class="field__hint">This layout is ready for developer-side file upload integration.</p>-->
+              </div>
+
+              <div class="field" data-field="website">
+                <label class="field__label" for="website">
+                  <span>Current Website URL</span>
+                  <span class="field__meta field__meta--required">Required</span>
+                </label>
+                <div class="field__control">
+                  <input class="field__input" id="website" name="website" type="url" inputmode="url" placeholder="e.g. https://www.company.com" required />
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">Please enter a valid website URL.</p>
+              </div>
+
+              <div class="field" data-field="launchDate">
+                <label class="field__label" for="launchDate">
+                  <span>Desired Launch Date</span>
+                  <span class="field__meta">Optional</span>
+                </label>
+                <div class="field__control">
+                  <input class="field__date" id="launchDate" name="launchDate" type="text" placeholder="e.g. 2026-12-31" />
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">Please enter a valid date.</p>
+              </div>
+
+              <div class="field field--consent" data-field="notRobot">
+                <label class="consent__label" for="notRobot">
+                  <span>Spam filter is active</span>
+                  <span class="field__meta field__meta--required">Required</span>
+                </label>
+                <div class="consent__control">
+                  <div class="consent-box">
+                  <div class="consent-box__main">
+                    <label>
+                      <span class="sr-only">Spam protection checkbox</span>
+                      <input class="consent-box__input" id="notRobot" name="notRobot" type="checkbox" required />
+                      <span class="consent-box__check" aria-hidden="true"></span>
+                    </label>
+                    <span class="consent-box__text">I'm not bot</span>
+                  </div>
+                  <span class="consent-box__badge">Cap</span>
+                  </div>
+                </div>
+                <span class="field__status" aria-hidden="true">✓</span>
+                <p class="field__error">Required field is missing.</p>
+              </div>
+
+              <div class="project-form__actions">
+                <button class="submit-button" type="submit">Submit Project Inquiry</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="project-process" aria-labelledby="project-process-title">
+            <span class="eyebrow">Inquiry process</span>
+            <h2 class="project-process__title" id="project-process-title">What happens next</h2>
+            <p class="project-process__desc">
+              A quick note before you submit. This panel is here so the process feels less like a black box and more like a well-lit hallway.
+            </p>
+
+            <div class="project-process__list">
+              <div class="process-item">
+                <span class="process-item__num">1</span>
+                <p>Please complete all required fields so we can review your inquiry properly.</p>
+              </div>
+              <div class="process-item">
+                <span class="process-item__num">2</span>
+                <p>Once your inquiry is submitted, you can expect a reply within 3 hours on business days, excluding public holidays.</p>
+              </div>
+              <div class="process-item">
+                <span class="process-item__num">3</span>
+                <p>Prefer email right away? Send your project brief directly to <strong>hello@iropke.com</strong></p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="success-modal" id="successModal" aria-hidden="true" role="dialog" aria-labelledby="successModalTitle" aria-modal="true">
+    <div class="success-modal__dialog">
+      <div class="success-modal__icon" aria-hidden="true">✓</div>
+      <h2 class="success-modal__title" id="successModalTitle">Inquiry submitted successfully</h2>
+      <p class="success-modal__text">
+        Thank you for reaching out. Your project inquiry has been received, and our team will review it shortly.
+      </p>
+      <button class="success-modal__button" type="button" id="successModalClose">Close</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById('projectInquiryForm');
+      const successModal = document.getElementById('successModal');
+      const successModalClose = document.getElementById('successModalClose');
+      const focusableSelector = 'input, textarea, button';
+      let lastFocusedElement = null;
+
+      const validators = {
+        companyName: (value) => value.trim().length > 0,
+        contactName: (value) => value.trim().length > 0,
+        jobTitle: (value) => value.trim().length === 0 || value.trim().length >= 2,
+        phone: (value) => {
+          const trimmed = value.trim();
+          const digitsOnly = trimmed.replace(/\D/g, '');
+          const allowed = /^[+\d\s().-]+$/;
+          return trimmed.length > 0 && allowed.test(trimmed) && digitsOnly.length >= 7 && digitsOnly.length <= 15;
+        },
+        email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
+        projectOverview: (value) => value.trim().length > 0,
+        website: (value) => {
+          const trimmed = value.trim();
+          if (!trimmed) return false;
+          const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+          try {
+            const url = new URL(normalized);
+            return !!url.hostname && url.hostname.includes('.');
+          } catch (error) {
+            return false;
+          }
+        },
+        launchDate: (value) => {
+          const trimmed = value.trim();
+          if (!trimmed) return true;
+          return /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
+        },
+        notRobot: (value, input) => input.checked === true,
+        rfpFile: () => true
+      };
+
+      const fieldConfigs = [
+        { name: 'companyName', required: true },
+        { name: 'contactName', required: true },
+        { name: 'jobTitle', required: false },
+        { name: 'phone', required: true },
+        { name: 'email', required: true },
+        { name: 'projectOverview', required: true },
+        { name: 'rfpFile', required: false },
+        { name: 'website', required: true },
+        { name: 'launchDate', required: false },
+        { name: 'notRobot', required: true }
+      ];
+
+      function getFieldElement(name) {
+        return form.querySelector(`[data-field="${name}"]`);
+      }
+
+      function getInputElement(name) {
+        return form.elements[name];
+      }
+
+      function setFieldState(fieldEl, state) {
+        if (!fieldEl) return;
+        fieldEl.classList.remove('is-valid', 'is-invalid');
+        if (state) fieldEl.classList.add(state);
+      }
+
+      function validateField(name, forceState) {
+        const fieldEl = getFieldElement(name);
+        const input = getInputElement(name);
+        if (!fieldEl || !input) return true;
+
+        const value = input.type === 'checkbox' ? input.checked : input.value;
+        const isEmpty = input.type === 'checkbox' ? !input.checked : input.value.trim() === '';
+        const isValid = validators[name] ? validators[name](value, input) : true;
+
+        if (forceState === 'neutral') {
+          setFieldState(fieldEl, '');
+          return isValid;
+        }
+
+        if (isEmpty && !fieldEl.dataset.touched && forceState !== 'submit') {
+          setFieldState(fieldEl, '');
+          return isValid;
+        }
+
+        if (isValid) {
+          setFieldState(fieldEl, 'is-valid');
+        } else {
+          setFieldState(fieldEl, 'is-invalid');
+        }
+
+        return isValid;
+      }
+
+      function markTouched(name) {
+        const fieldEl = getFieldElement(name);
+        if (fieldEl) fieldEl.dataset.touched = 'true';
+      }
+
+      fieldConfigs.forEach(({ name }) => {
+        const input = getInputElement(name);
+        if (!input) return;
+
+        const eventName = input.type === 'checkbox' || input.type === 'file' ? 'change' : 'input';
+        input.addEventListener(eventName, () => {
+          markTouched(name);
+          validateField(name);
+        });
+
+        input.addEventListener('blur', () => {
+          markTouched(name);
+          validateField(name);
+        });
+      });
+
+      const fileInput = document.getElementById('rfpFile');
+      const fileName = document.getElementById('rfpFileName');
+      const uploadWrapper = fileInput.closest('.upload');
+      const dropzone = uploadWrapper.querySelector('.upload__dropzone');
+
+      function updateFileState(file) {
+        if (file) {
+          uploadWrapper.classList.add('has-file');
+          fileName.textContent = `Selected file: ${file.name}`;
+          getFieldElement('rfpFile').classList.add('is-valid');
+        } else {
+          uploadWrapper.classList.remove('has-file');
+          fileName.textContent = '';
+          getFieldElement('rfpFile').classList.remove('is-valid');
+        }
+      }
+
+      fileInput.addEventListener('change', () => {
+        updateFileState(fileInput.files[0]);
+      });
+
+      ['dragenter', 'dragover'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.style.borderColor = '#5EB6B2';
+          dropzone.style.background = '#f3fbfa';
+        });
+      });
+
+      ['dragleave', 'drop'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropzone.style.borderColor = '';
+          dropzone.style.background = '';
+        });
+      });
+
+      dropzone.addEventListener('drop', (event) => {
+        const files = event.dataTransfer.files;
+        if (files && files[0]) {
+          try {
+            fileInput.files = files;
+          } catch (error) {
+            // Some browsers prevent assignment. This layout still previews the filename.
+          }
+          updateFileState(files[0]);
+        }
+      });
+
+      function openSuccessModal() {
+        lastFocusedElement = document.activeElement;
+        successModal.classList.add('is-open');
+        successModal.setAttribute('aria-hidden', 'false');
+        successModalClose.focus();
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSuccessModal() {
+        successModal.classList.remove('is-open');
+        successModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (lastFocusedElement) lastFocusedElement.focus();
+      }
+
+      successModalClose.addEventListener('click', closeSuccessModal);
+      successModal.addEventListener('click', (event) => {
+        if (event.target === successModal) closeSuccessModal();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && successModal.classList.contains('is-open')) {
+          closeSuccessModal();
+        }
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        let allValid = true;
+        let firstInvalidInput = null;
+
+        fieldConfigs.forEach(({ name }) => {
+          const fieldEl = getFieldElement(name);
+          if (fieldEl) fieldEl.dataset.touched = 'true';
+          const currentValid = validateField(name, 'submit');
+          if (!currentValid) {
+            allValid = false;
+            if (!firstInvalidInput) {
+              firstInvalidInput = getInputElement(name);
+            }
+          }
+        });
+
+        if (!allValid) {
+          if (firstInvalidInput) {
+            firstInvalidInput.focus();
+            firstInvalidInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        openSuccessModal();
+        form.reset();
+        updateFileState(null);
+
+        fieldConfigs.forEach(({ name }) => {
+          const fieldEl = getFieldElement(name);
+          if (!fieldEl) return;
+          delete fieldEl.dataset.touched;
+          setFieldState(fieldEl, '');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
+
+

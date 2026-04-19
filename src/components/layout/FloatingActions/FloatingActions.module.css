@@ -1,0 +1,105 @@
+/* ═══════════════════════════════════════════════════════════════
+   FloatingActions Component
+   Source: layout_en.css — .floating-actions
+   ═══════════════════════════════════════════════════════════════ */
+
+.actions {
+  position: fixed;
+  right: 20px;
+  bottom: 26px;
+  z-index: 120;
+  display: grid;
+  gap: 12px;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.button {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  background: var(--grayscale-gs-tertiary-1);
+  border: 1px solid transparent;
+  color: var(--grayscale-gs-background);
+  box-shadow: 0 20px 38px rgba(35, 35, 41, 0.1);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color 0.24s ease,
+    background-color 0.24s ease,
+    border-color 0.24s ease,
+    transform 0.24s ease,
+    opacity 0.24s ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--grayscale-gs-white);
+  border-color: transparent;
+  color: var(--layout-accent);
+}
+
+.chat {
+  background: var(--layout-accent);
+  color: var(--grayscale-gs-white);
+}
+
+.chat:hover,
+.chat:focus-visible {
+  background: var(--grayscale-gs-white);
+  color: var(--layout-accent);
+}
+
+.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+}
+
+.label {
+  position: absolute;
+  right: calc(100% + 12px);
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(35, 35, 41, 0.08);
+  color: var(--layout-text);
+  font-size: 0.8rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.button:hover .label,
+.button:focus-visible .label {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  .actions {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .button {
+    width: 54px;
+    height: 54px;
+  }
+
+  .label {
+    display: none;
+  }
+}

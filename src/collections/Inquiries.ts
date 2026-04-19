@@ -22,7 +22,7 @@ export const Inquiries: CollectionConfig = {
                                                                 { name: 'projectOverview', type: 'textarea', label: '프로젝트 개요', required: true },
                                                                     { name: 'websiteUrl', type: 'text', label: '현재 웹사이트 URL' },
                                                                         { name: 'launchDate', type: 'text', label: '희망 런칭일 (YYYY-MM-DD)' },
-                                                                            { name: 'rfpFile', type: 'upload', label: 'RFP 파일', relationTo: 'media' },
+                                                                            { name: 'rfpFile', type: 'upload' as const, label: 'RFP 파일', relationTo: 'media' },
                                                                                 {
                                                                                       name: 'status',
                                                                                             type: 'select',

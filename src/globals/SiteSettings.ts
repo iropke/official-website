@@ -19,9 +19,9 @@ export const SiteSettings: GlobalConfig = {
           fields: [
             { name: 'siteName', type: 'text', label: '사이트명', defaultValue: 'Iropke', required: true },
             { name: 'siteDescription', type: 'textarea', label: '사이트 기본 설명 (메타)', localized: true },
-            { name: 'logo', type: 'upload', label: '로고 이미지 (밝은 배경용)', relationTo: 'media' },
-            { name: 'logoDark', type: 'upload', label: '로고 이미지 (어두운 배경용)', relationTo: 'media' },
-            { name: 'favicon', type: 'upload', label: '파비콘', relationTo: 'media' },
+            { name: 'logo', type: 'upload' as const, label: '로고 이미지 (밝은 배경용)', relationTo: 'media' },
+            { name: 'logoDark', type: 'upload' as const, label: '로고 이미지 (어두운 배경용)', relationTo: 'media' },
+            { name: 'favicon', type: 'upload' as const, label: '파비콘', relationTo: 'media' },
           ],
         },
         {
@@ -59,7 +59,7 @@ export const SiteSettings: GlobalConfig = {
         {
           label: 'SEO',
           fields: [
-            { name: 'ogImage', type: 'upload', label: '기본 OG 이미지', relationTo: 'media', admin: { description: '페이지별 OG 이미지가 없을 때 사용하는 기본값' } },
+            { name: 'ogImage', type: 'upload' as const, label: '기본 OG 이미지', relationTo: 'media', admin: { description: '페이지별 OG 이미지가 없을 때 사용하는 기본값' } },
             { name: 'googleAnalyticsId', type: 'text', label: 'Google Analytics ID (GA4)', admin: { description: '예: G-XXXXXXXXXX' } },
             { name: 'googleSearchConsoleVerification', type: 'text', label: 'Google Search Console 인증 코드' },
           ],

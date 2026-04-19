@@ -75,7 +75,7 @@ function EditorialBlockRenderer({ block, index }: { block: EditorialBlock; index
 
   switch (block.type) {
     case 'heading': {
-      const Tag = `h${block.level}` as keyof JSX.IntrinsicElements;
+      const Tag = `h${block.level}` as keyof React.JSX.IntrinsicElements;
       return <Tag className={styles.reveal} style={{ transitionDelay: delay }}>{block.text}</Tag>;
     }
     case 'paragraph':

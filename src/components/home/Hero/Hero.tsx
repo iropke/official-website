@@ -9,24 +9,46 @@ export interface HeroCta {
   id?: string | null;
 }
 
+export interface HeroBackgroundImage {
+  url?: string | null;
+  alt?: string | null;
+}
+
 export interface HeroProps {
   headline: string;
   subCopy?: string | null;
   ctas?: HeroCta[] | null;
+  backgroundImage?: HeroBackgroundImage | number | null;
   locale: string;
 }
 
 /**
  * Hero — Fixed declaration hero.
  * "From Visibility to Control" — static, dominant, no carousel.
- * Background: abstract system / structure visual (SVG grid + orbs).
+ * Background: abstract system / structure visual (SVG grid + orbs), or optional uploaded image.
  */
-export default function Hero({ headline, subCopy, ctas, locale }: HeroProps) {
+export default function Hero({ headline, subCopy, ctas, backgroundImage, locale }: HeroProps) {
   const primaryCtas = (ctas ?? []).filter(Boolean);
+
+  const bgUrl =
+    typeof backgroundImage === 'object' && backgroundImage
+      ? backgroundImage.url ?? null
+      : null;
+  const bgAlt =
+    typeof backgroundImage === 'object' && backgroundImage
+      ? backgroundImage.alt ?? ''
+      : '';
 
   return (
     <section className={styles.hero} aria-label="Iropke hero" lang={locale}>
       <div className={styles.hero__canvas} aria-hidden="true">
+        {bgUrl && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={bgUrl} alt={bgAlt} className={styles.hero__bgImage} />
+            <div className={styles.hero__bgOverlay} />
+          </>
+        )}
         <div className={styles.hero__grid} />
         <div className={styles.hero__orbA} />
         <div className={styles.hero__orbB} />

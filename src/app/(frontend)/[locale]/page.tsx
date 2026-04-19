@@ -188,6 +188,9 @@ export default async function HomePage({ params }: HomePageProps) {
   const ctaBannerCtaUrl =
     homepage?.ctaBannerCtaUrl ?? '/project-inquiry';
   const ctaBannerGradient = homepage?.ctaBannerGradient ?? null;
+  const heroBackgroundImage = homepage?.heroBackgroundImage ?? null;
+  const insightsBackgroundImage = homepage?.insightsBackgroundImage ?? null;
+  const ctaBannerBackgroundImage = homepage?.ctaBannerBackgroundImage ?? null;
 
   return (
     <>
@@ -195,6 +198,7 @@ export default async function HomePage({ params }: HomePageProps) {
         headline={heroHeadline}
         subCopy={heroSubCopy}
         ctas={heroCta}
+        backgroundImage={heroBackgroundImage}
         locale={locale}
       />
 
@@ -216,6 +220,7 @@ export default async function HomePage({ params }: HomePageProps) {
         sectionTitle={insightsSectionTitle}
         ctaLabel={insightsCtaLabel}
         ctaUrl={insightsCtaUrl}
+        backgroundImage={insightsBackgroundImage}
         posts={latestPosts}
         locale={locale}
       />
@@ -225,6 +230,7 @@ export default async function HomePage({ params }: HomePageProps) {
         ctaLabel={ctaBannerCtaLabel}
         ctaUrl={ctaBannerCtaUrl}
         gradient={ctaBannerGradient}
+        backgroundImage={ctaBannerBackgroundImage}
         locale={locale}
       />
     </>

@@ -2,11 +2,17 @@ import React from 'react';
 import Link from 'next/link';
 import styles from './CtaBanner.module.css';
 
+export interface CtaBannerBackgroundImage {
+  url?: string | null;
+  alt?: string | null;
+}
+
 export interface CtaBannerProps {
   message: string;
   ctaLabel?: string | null;
   ctaUrl?: string | null;
   gradient?: string | null;
+  backgroundImage?: CtaBannerBackgroundImage | number | null;
   locale: string;
 }
 
@@ -23,6 +29,7 @@ export default function CtaBanner({
   ctaLabel = 'Start a Project',
   ctaUrl = '/project-inquiry',
   gradient,
+  backgroundImage,
   locale,
 }: CtaBannerProps) {
   const href = ctaUrl
@@ -33,10 +40,30 @@ export default function CtaBanner({
 
   const bg = gradient || DEFAULT_GRADIENT;
 
+  const bgImageUrl =
+    typeof backgroundImage === 'object' && backgroundImage
+      ? backgroundImage.url ?? null
+      : null;
+  const bgImageAlt =
+    typeof backgroundImage === 'object' && backgroundImage
+      ? backgroundImage.alt ?? ''
+      : '';
+
   return (
     <section className={styles.section} aria-label="Project inquiry call to action">
       <div className="page-shell">
         <div className={styles.banner} style={{ background: bg }}>
+          {bgImageUrl && (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={bgImageUrl}
+                alt={bgImageAlt}
+                className={styles.banner__bgImage}
+              />
+              <div className={styles.banner__bgOverlay} aria-hidden="true" />
+            </>
+          )}
           <div className={styles.banner__grid} aria-hidden="true" />
           <div className={styles.banner__orb} aria-hidden="true" />
 

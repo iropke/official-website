@@ -3,10 +3,16 @@ import Link from 'next/link';
 import type { Post, Media } from '@/payload-types';
 import styles from './Insights.module.css';
 
+export interface InsightsBackgroundImage {
+  url?: string | null;
+  alt?: string | null;
+}
+
 export interface InsightsProps {
   sectionTitle?: string | null;
   ctaLabel?: string | null;
   ctaUrl?: string | null;
+  backgroundImage?: InsightsBackgroundImage | number | null;
   posts: Post[];
   locale: string;
 }
@@ -34,6 +40,7 @@ export default function Insights({
   sectionTitle = 'Latest Insights',
   ctaLabel = 'View All Insights',
   ctaUrl = '/insights',
+  backgroundImage,
   posts,
   locale,
 }: InsightsProps) {
@@ -45,8 +52,24 @@ export default function Insights({
       : ctaUrl
     : null;
 
+  const bgUrl =
+    typeof backgroundImage === 'object' && backgroundImage
+      ? backgroundImage.url ?? null
+      : null;
+  const bgAlt =
+    typeof backgroundImage === 'object' && backgroundImage
+      ? backgroundImage.alt ?? ''
+      : '';
+
   return (
     <section className={styles.section} aria-label={sectionTitle ?? 'Insights'}>
+      {bgUrl && (
+        <div className={styles.section__bg} aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={bgUrl} alt={bgAlt} className={styles.section__bgImage} />
+          <div className={styles.section__bgOverlay} />
+        </div>
+      )}
       <div className={`page-shell ${styles.section__shell}`}>
         <header className={styles.section__header}>
           <div className={styles.section__headingGroup}>

@@ -15,6 +15,13 @@ export interface AIOSCard {
       }
     | number
     | null;
+  image?:
+    | {
+        url?: string | null;
+        alt?: string | null;
+      }
+    | number
+    | null;
   id?: string | null;
 }
 
@@ -67,6 +74,13 @@ export default function AIOSGrid({
             const iconAlt =
               typeof card.icon === 'object' && card.icon ? card.icon.alt ?? card.name : card.name;
 
+            const imageUrl =
+              typeof card.image === 'object' && card.image ? card.image.url : null;
+            const imageAlt =
+              typeof card.image === 'object' && card.image
+                ? card.image.alt ?? card.name
+                : card.name;
+
             const href = card.link
               ? card.link.startsWith('/')
                 ? `/${locale}${card.link}`.replace(/\/+$/, '') || '/'
@@ -78,17 +92,31 @@ export default function AIOSGrid({
             const cardBody = (
               <>
                 <div className={styles.card__media} style={{ background: gradient }} aria-hidden="true">
+                  {imageUrl && (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imageUrl}
+                        alt={imageAlt ?? ''}
+                        className={styles.card__image}
+                        loading="lazy"
+                      />
+                      <div className={styles.card__imageOverlay} />
+                    </>
+                  )}
                   <span className={styles.card__number}>{cardNumber}</span>
                   {iconUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={iconUrl} alt={iconAlt ?? ''} className={styles.card__icon} />
                   ) : (
-                    <span className={styles.card__moduleMark} aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                    </span>
+                    !imageUrl && (
+                      <span className={styles.card__moduleMark} aria-hidden="true">
+                        <span />
+                        <span />
+                        <span />
+                        <span />
+                      </span>
+                    )
                   )}
                   <div className={styles.card__mediaGrid} />
                 </div>

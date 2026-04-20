@@ -265,12 +265,14 @@ html {
   --font-heading-h1-3: var(--font-korean), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
   --font-heading-h4-6: var(--font-korean), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
   --font-body: var(--font-korean), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
-  --font-caption: var(--font-iropke-batang), var(--font-latin-serif), Georgia, 'Times New Roman', serif;
+  /* 2026-04-20: 한글 locale 전역 폰트 일관화 — 캡션/악센트 세리프 자리도 Pretendard 로 통일
+     (영문/기타 locale 블록은 기존 세리프 유지) */
+  --font-caption: var(--font-korean), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
 
   /* 레거시 alias — 기존 컴포넌트 호환 */
   --font-ui: var(--font-body);
   --font-display: var(--font-heading-h1-3);
-  --font-accent-serif: var(--font-caption);
+  --font-accent-serif: var(--font-body);
 }
 
 /* Latin + Cyrillic (en / es / de / fr / ru)

@@ -2,6 +2,14 @@ import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 /**
+ * serverURL 계산 — payload.config.ts 와 동일 로직. preview/livePreview 에서
+ * 절대 URL 을 반환해야 admin iframe 및 외부 링크가 정상 동작.
+ */
+const serverURL =
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
+/**
  * Task #1.6: meta.ogImage 자동 복사 hook.
  *
  * 새 게시물 작성/수정 시 meta.ogImage 가 비어 있으면 thumbnail 값을 자동 복사.
@@ -32,15 +40,16 @@ export const Posts: CollectionConfig = {
         'ko'
       const slug = (doc as { slug?: string })?.slug
       if (!slug) return null
-      return `/${locale}/insights/${slug}`
+      return `${serverURL}/${locale}/insights/${slug}`
     },
     // Task #1.5: Live Preview (편집 중 실시간 미리보기 iframe).
+    // root-level livePreview (payload.config.ts) 와 동일 결과를 내도록 절대 URL 반환.
     livePreview: {
       url: ({ data, locale }) => {
         const code =
           (typeof locale === 'string' ? locale : (locale as { code?: string })?.code) ?? 'ko'
         const slug = (data as { slug?: string })?.slug ?? ''
-        return `/${code}/insights/${slug}`
+        return `${serverURL}/${code}/insights/${slug}`
       },
       breakpoints: [
         { label: 'Mobile', name: 'mobile', width: 375, height: 667 },

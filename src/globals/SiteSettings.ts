@@ -14,7 +14,7 @@ export const SiteSettings: GlobalConfig = {
     update: ({ req: { user } }) => Boolean(user),
   },
   fields: [
-    // ─── 기본 정보 ──────────────────────────────────────────────
+    // ─── 기본 정보 ─────────────────────────────────────────────
     {
       type: 'tabs',
       tabs: [
@@ -222,11 +222,12 @@ export const SiteSettings: GlobalConfig = {
             // 의 <GoogleAnalytics /> 로 일원화 (src/app/(frontend)/layout.tsx).
             // 과거 이 필드에 입력된 값은 어떤 코드에서도 읽히지 않는 dead field
             // 였다. 필요 시 admin 에서 데이터 정리 권장.
-            {
-              name: 'googleSearchConsoleVerification',
-              type: 'text',
-              label: 'Google Search Console 인증 코드',
-            },
+            //
+            // googleSearchConsoleVerification 필드도 2026-04-20 제거됨.
+            // GSC 인증은 DNS TXT 레코드 방식으로 이미 완료되어 있고,
+            // 커스텀 도메인(iropke.com) 연결 시 재인증이 필요하면 그때도
+            // DNS 로 처리 예정. 코드에서 `<meta name="google-site-verification" />`
+            // 로 읽는 곳이 없어 dead field 였다.
           ],
         },
       ],

@@ -24,15 +24,21 @@ export const Posts: CollectionConfig = {
     defaultColumns: ['title', 'publishedDate', 'status', 'updatedAt'],
     group: '콘텐츠',
     // Task #1.5: admin 우측 상단 "Preview" 버튼 → 프론트엔드 상세 페이지.
-    preview: (doc, { req }) => {
-      const locale = req?.locale || 'ko'
-      const slug = (doc as { slug?: string })?.slug ?? ''
+    // Payload 3.x signature: (doc, { locale, req }) => string | null
+    preview: (doc, options) => {
+      const locale =
+        (options as { locale?: string })?.locale ||
+        (options as { req?: { locale?: string } })?.req?.locale ||
+        'ko'
+      const slug = (doc as { slug?: string })?.slug
+      if (!slug) return null
       return `/${locale}/insights/${slug}`
     },
     // Task #1.5: Live Preview (편집 중 실시간 미리보기 iframe).
     livePreview: {
       url: ({ data, locale }) => {
-        const code = locale?.code ?? 'ko'
+        const code =
+          (typeof locale === 'string' ? locale : (locale as { code?: string })?.code) ?? 'ko'
         const slug = (data as { slug?: string })?.slug ?? ''
         return `/${code}/insights/${slug}`
       },

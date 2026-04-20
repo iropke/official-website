@@ -9,6 +9,10 @@ export const Tags: CollectionConfig = {
   },
   access: {
     read: () => true,
+    // Payload 3.82.1: read 만 정의 시 나머지 규칙이 fallback 되지 않음.
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {

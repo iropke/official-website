@@ -45,7 +45,14 @@ export const Posts: CollectionConfig = {
     },
   },
   access: {
+    // 공개 읽기 허용 (프론트에서 published 필터는 쿼리 단에서 적용)
     read: () => true,
+    // Payload 3.82.1 은 access 블록에 read 만 정의하면 create/update/delete 가
+    // 인증 기본값으로 fallback 되지 않고 거부된다. 로그인 유저에게 명시적 허용.
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
+    readVersions: ({ req: { user } }) => Boolean(user),
   },
   versions: {
     drafts: true,

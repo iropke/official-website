@@ -9,6 +9,9 @@ export const Homepage: GlobalConfig = {
   },
   access: {
     read: () => true,
+    // Payload 3.82.1: read 만 정의하면 update 가 자동 인증 기본값으로
+    // fallback 되지 않으므로 로그인 유저에게 명시적 허용.
+    update: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {

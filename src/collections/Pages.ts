@@ -69,7 +69,14 @@ export const Pages: CollectionConfig = {
     group: '페이지',
   },
   access: {
+    // 공개 읽기 허용
     read: () => true,
+    // Payload 3.82.1: access 에 read 만 정의하면 나머지 규칙이 기본 인증으로
+    // fallback 되지 않고 거부되므로 로그인 유저에게 명시적 허용.
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
+    readVersions: ({ req: { user } }) => Boolean(user),
   },
   versions: {
     drafts: true,

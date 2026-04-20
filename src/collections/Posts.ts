@@ -18,11 +18,13 @@ const autoFillOgImage: CollectionBeforeChangeHook = ({ data }) => {
 }
 
 /**
- * Task #1.8: collection-level livePreview 복구.
+ * Task #1.8 (revised): collection-level livePreview → admin.preview 전환.
  *
- * root-level admin.livePreview 는 Payload 3.82.1 에서 Edit 탭 회귀(접근 금지
- * 아이콘 표시)를 유발했으므로 절대 건드리지 말 것. 여기 collection-level 만
- * 유지한다. serverURL 은 NEXT_PUBLIC_SERVER_URL → VERCEL_URL → localhost 순.
+ * Payload 3.82.1 은 `admin.livePreview.url` 함수를 클라이언트 config 로 직렬화
+ * 하지 못해 (JSON serialize 불가) Live Preview 탭이 렌더되지 않는다. 대신
+ * `admin.preview` 는 서버 사이드에서만 호출되므로 함수를 그대로 쓸 수 있고,
+ * 편집 화면 우상단에 "Preview" 버튼이 추가되어 새 탭에서 프리뷰가 열린다.
+ * root-level admin.livePreview 는 Edit 탭 회귀 이력이 있어 절대 건드리지 말 것.
  */
 const resolveServerURL = (): string =>
   process.env.NEXT_PUBLIC_SERVER_URL ||
@@ -34,21 +36,12 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', 'status', 'updatedAt'],
     group: '콘텐츠',
-    livePreview: {
-      url: ({ data, locale }) => {
-        const baseUrl = resolveServerURL()
-        const localeCode =
-          typeof locale === 'string'
-            ? locale
-            : ((locale as { code?: string } | undefined)?.code ?? 'ko')
-        const slug = (data as { slug?: string } | undefined)?.slug ?? ''
-        return `${baseUrl}/${localeCode}/insights/${slug}`
-      },
-      breakpoints: [
-        { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
-        { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
-        { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
-      ],
+    preview: (doc, { locale }) => {
+      const baseUrl = resolveServerURL()
+      const localeCode = typeof locale === 'string' && locale ? locale : 'ko'
+      const slug = (doc as { slug?: string } | undefined)?.slug ?? ''
+      if (!slug) return null
+      return `${baseUrl}/${localeCode}/insights/${slug}`
     },
   },
   access: {

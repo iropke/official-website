@@ -22,6 +22,66 @@ const autoFillOgImage: CollectionBeforeChangeHook = ({ data }) => {
 }
 
 /**
+ * Task #16 (2026-04-20): SEO 메타 자동 오버라이드 hook.
+ *
+ * 목적:
+ *   - 기본: title → meta.metaTitle, excerpt → meta.metaDescription 자동 동기화
+ *   - 예외: 사용자가 SEO 필드를 직접 다른 값으로 수정했다면 그 값을 보존
+ *
+ * 판별 로직 (스키마 변경 없이 originalDoc 비교):
+ *   "자동 모드" = metaTitle 이 비어있음 OR 이전 metaTitle === 이전 title
+ *   "수동 모드" = 그 외 (사용자가 title 과 다른 값을 직접 입력한 상태)
+ *
+ *   create 시에는 originalDoc 이 없으므로:
+ *     - metaTitle 비어있으면 → title 복사
+ *     - metaTitle 채워져 있으면 → 사용자 수동 입력으로 간주, 보존
+ *
+ * 자동 모드 복귀: meta 필드를 비우고 저장하면 다시 자동 동기화 시작.
+ */
+const autoFillSeoMeta: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
+  if (!data) return data
+
+  const prev = originalDoc as
+    | {
+        title?: string
+        excerpt?: string
+        meta?: { metaTitle?: string; metaDescription?: string }
+      }
+    | undefined
+
+  const newTitle = typeof data.title === 'string' ? data.title : undefined
+  const newMetaTitle =
+    typeof data.meta?.metaTitle === 'string' ? (data.meta.metaTitle as string) : undefined
+  const newExcerpt = typeof data.excerpt === 'string' ? data.excerpt : undefined
+  const newMetaDescription =
+    typeof data.meta?.metaDescription === 'string'
+      ? (data.meta.metaDescription as string)
+      : undefined
+
+  // ── metaTitle 자동 동기화 ─────────────────────────────────
+  const metaTitleIsEmpty = !newMetaTitle?.trim()
+  const metaTitleWasInAutoMode =
+    prev !== undefined &&
+    prev.meta?.metaTitle !== undefined &&
+    prev.meta.metaTitle === prev.title
+  if ((metaTitleIsEmpty || metaTitleWasInAutoMode) && newTitle) {
+    data.meta = { ...(data.meta ?? {}), metaTitle: newTitle }
+  }
+
+  // ── metaDescription 자동 동기화 ───────────────────────────
+  const metaDescIsEmpty = !newMetaDescription?.trim()
+  const metaDescWasInAutoMode =
+    prev !== undefined &&
+    prev.meta?.metaDescription !== undefined &&
+    prev.meta.metaDescription === prev.excerpt
+  if ((metaDescIsEmpty || metaDescWasInAutoMode) && newExcerpt) {
+    data.meta = { ...(data.meta ?? {}), metaDescription: newExcerpt }
+  }
+
+  return data
+}
+
+/**
  * Task #14 follow-up (revised 2026-04-20): publishedDate 자동 채움.
  *
  * 배경:
@@ -125,8 +185,8 @@ export const Posts: CollectionConfig = {
     drafts: true,
   },
   hooks: {
-    // Task #1.6, Task #14 follow-up (revised)
-    beforeChange: [autoFillOgImage, autoFillPublishedDate],
+    // Task #1.6, Task #16 (SEO 자동), Task #14 follow-up (revised)
+    beforeChange: [autoFillOgImage, autoFillSeoMeta, autoFillPublishedDate],
     // 안전망: publish 된 문서의 publishedDate 가 비어있으면 백필
     afterChange: [backfillPublishedDate],
   },
@@ -242,24 +302,37 @@ export const Posts: CollectionConfig = {
       name: 'meta',
       type: 'group',
       label: 'SEO 메타데이터',
+      admin: {
+        description:
+          '비워두면 본문 제목/요약이 자동으로 SEO 정보에 사용됩니다. 직접 입력한 값은 보존되며, 이후 본문 제목/요약이 바뀌어도 덮어쓰지 않습니다. 자동 모드로 돌아가려면 해당 필드를 비우고 저장하세요.',
+      },
       fields: [
         {
           name: 'metaTitle',
           type: 'text',
           label: '메타 제목',
           localized: true,
+          admin: {
+            description: '비워두면 본문 제목이 자동으로 사용됩니다.',
+          },
         },
         {
           name: 'metaDescription',
           type: 'textarea',
           label: '메타 설명',
           localized: true,
+          admin: {
+            description: '비워두면 요약(Excerpt)이 자동으로 사용됩니다.',
+          },
         },
         {
           name: 'ogImage',
           type: 'upload' as const,
           label: 'OG 이미지',
           relationTo: 'media',
+          admin: {
+            description: '비워두면 썸네일 이미지가 자동으로 사용됩니다.',
+          },
         },
       ],
     },

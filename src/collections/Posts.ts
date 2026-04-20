@@ -17,12 +17,39 @@ const autoFillOgImage: CollectionBeforeChangeHook = ({ data }) => {
   return data
 }
 
+/**
+ * Task #1.8: collection-level livePreview 복구.
+ *
+ * root-level admin.livePreview 는 Payload 3.82.1 에서 Edit 탭 회귀(접근 금지
+ * 아이콘 표시)를 유발했으므로 절대 건드리지 말 것. 여기 collection-level 만
+ * 유지한다. serverURL 은 NEXT_PUBLIC_SERVER_URL → VERCEL_URL → localhost 순.
+ */
+const resolveServerURL = (): string =>
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
 export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', 'status', 'updatedAt'],
     group: '콘텐츠',
+    livePreview: {
+      url: ({ data, locale }) => {
+        const baseUrl = resolveServerURL()
+        const localeCode =
+          typeof locale === 'string'
+            ? locale
+            : ((locale as { code?: string } | undefined)?.code ?? 'ko')
+        const slug = (data as { slug?: string } | undefined)?.slug ?? ''
+        return `${baseUrl}/${localeCode}/insights/${slug}`
+      },
+      breakpoints: [
+        { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
+        { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
+        { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
+      ],
+    },
   },
   access: {
     read: () => true,

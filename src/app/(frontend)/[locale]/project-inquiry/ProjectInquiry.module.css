@@ -57,7 +57,7 @@
 
 .formTitle {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-heading-h1-3);
   font-size: clamp(2rem, 3vw, 3rem);
   line-height: 1.05;
   letter-spacing: -0.03em;
@@ -157,14 +157,14 @@
   min-height: 172px;
   padding: 18px;
   resize: vertical;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-body);
 }
 
 .fieldInput::placeholder,
 .fieldTextarea::placeholder,
 .fieldDate::placeholder {
   color: #9b958f;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-body);
 }
 
 .fieldInput:focus,
@@ -449,7 +449,7 @@
 
 .processTitle {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-heading-h4-6);
   font-size: 1.55rem;
   line-height: 1.2;
   letter-spacing: -0.03em;
@@ -554,7 +554,7 @@
 
 .successModalTitle {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-heading-h1-3);
   font-size: 2rem;
   line-height: 1.15;
   letter-spacing: -0.03em;

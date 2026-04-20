@@ -217,14 +217,11 @@ export const SiteSettings: GlobalConfig = {
                 description: '페이지별 OG 이미지가 없을 때 사용하는 기본값',
               },
             },
-            {
-              name: 'googleAnalyticsId',
-              type: 'text',
-              label: 'Google Analytics ID (GA4)',
-              admin: {
-                description: '예: G-XXXXXXXXXX',
-              },
-            },
+            // googleAnalyticsId 필드는 2026-04-20 제거됨.
+            // GA4 추적은 Vercel env `NEXT_PUBLIC_GA_ID` + `@next/third-parties`
+            // 의 <GoogleAnalytics /> 로 일원화 (src/app/(frontend)/layout.tsx).
+            // 과거 이 필드에 입력된 값은 어떤 코드에서도 읽히지 않는 dead field
+            // 였다. 필요 시 admin 에서 데이터 정리 권장.
             {
               name: 'googleSearchConsoleVerification',
               type: 'text',

@@ -1,4 +1,8 @@
-import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+} from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 /**
@@ -18,18 +22,66 @@ const autoFillOgImage: CollectionBeforeChangeHook = ({ data }) => {
 }
 
 /**
- * Task #14 follow-up: publishedDate 자동 채움.
+ * Task #14 follow-up (revised 2026-04-20): publishedDate 자동 채움.
  *
- * Publish 시점(_status='published')에 publishedDate 가 비어있으면 현재 시각으로
- * 자동 주입. 수동 입력값이 이미 있으면 그대로 보존. 목록 정렬 기준이
- * publishedDate 이므로 null 방지로 안정적인 최신순 정렬을 보장한다.
+ * 배경:
+ *   Payload 3.82.1 은 `_status` 를 beforeChange 훅 호출 **이후** 에 내부적으로
+ *   할당한다. 따라서 beforeChange 시점의 `data._status` 는 `'published'` 가
+ *   아니며, 이전 구현(`data._status === 'published'` 체크)은 항상 false 였다.
+ *   Post #6 에서 publishedDate 가 null 로 남은 근본 원인.
+ *
+ * 수정:
+ *   발행 여부는 요청의 `?draft=` 쿼리 파라미터로 판별한다.
+ *     - `draft=true`  → 초안 저장 (publishedDate 건드리지 않음)
+ *     - 그 외         → 실제 publish (빈 publishedDate 를 현재 시각으로 채움)
+ *
+ *   수동 입력값이 이미 있으면 그대로 보존. 목록 정렬이 `-publishedDate` 이므로
+ *   null 방지가 목적.
  */
-const autoFillPublishedDate: CollectionBeforeChangeHook = ({ data }) => {
+const autoFillPublishedDate: CollectionBeforeChangeHook = ({ data, req }) => {
   if (!data) return data
-  if (data._status === 'published' && !data.publishedDate) {
+
+  const draftParam = (req as { query?: { draft?: unknown } } | undefined)?.query?.draft
+  const isDraftSave = draftParam === 'true' || draftParam === true
+
+  if (!isDraftSave && !data.publishedDate) {
     data.publishedDate = new Date().toISOString()
   }
   return data
+}
+
+/**
+ * 안전망: 이미 publish 된 문서인데 publishedDate 가 비어있으면 afterChange 에서
+ * 한 번 더 백필. beforeChange 가 어떤 이유로 누락됐을 때(예: 관리자 UI 가
+ * draft 쿼리 없이 PATCH 하되 publishedDate 를 명시적으로 빈 문자열로 전송하는 등)
+ * 를 대비한다. 재귀 루프 방지는 context 플래그로 처리.
+ */
+const backfillPublishedDate: CollectionAfterChangeHook = async ({
+  doc,
+  req,
+  operation,
+  context,
+}) => {
+  if (operation === 'create' || operation === 'update') {
+    if (context?.skipBackfillPublishedDate) return doc
+    if (doc?._status === 'published' && !doc?.publishedDate) {
+      try {
+        await req.payload.update({
+          collection: 'posts',
+          id: doc.id,
+          data: { publishedDate: new Date().toISOString() },
+          context: { skipBackfillPublishedDate: true },
+          overrideAccess: true,
+        })
+      } catch (err) {
+        req.payload.logger?.error?.(
+          { err },
+          'backfillPublishedDate: failed to backfill publishedDate',
+        )
+      }
+    }
+  }
+  return doc
 }
 
 /**
@@ -73,8 +125,10 @@ export const Posts: CollectionConfig = {
     drafts: true,
   },
   hooks: {
-    // Task #1.6, Task #14 follow-up
+    // Task #1.6, Task #14 follow-up (revised)
     beforeChange: [autoFillOgImage, autoFillPublishedDate],
+    // 안전망: publish 된 문서의 publishedDate 가 비어있으면 백필
+    afterChange: [backfillPublishedDate],
   },
   fields: [
     // ─── 기본 정보 ─────────────────────────────────────────────

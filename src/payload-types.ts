@@ -153,13 +153,6 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
   password?: string | null;
   collection: 'users';
 }
@@ -231,7 +224,6 @@ export interface Post {
    */
   tags?: (number | Tag)[] | null;
   publishedDate?: string | null;
-  status?: ('draft' | 'published' | 'archived') | null;
   /**
    * 이 게시물을 공개할 언어를 선택하세요. 미선택 언어는 목록에서 숨겨집니다.
    */
@@ -334,7 +326,6 @@ export interface Page {
           }
       )[]
     | null;
-  status?: ('draft' | 'published') | null;
   publishedLocales?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[] | null;
   meta?: {
     metaTitle?: string | null;
@@ -487,13 +478,6 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -534,7 +518,6 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   tags?: T;
   publishedDate?: T;
-  status?: T;
   publishedLocales?: T;
   aiGenerated?: T;
   translationStatus?: T;
@@ -605,7 +588,6 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  status?: T;
   publishedLocales?: T;
   meta?:
     | T
@@ -777,10 +759,6 @@ export interface SiteSetting {
    * 페이지별 OG 이미지가 없을 때 사용하는 기본값
    */
   ogImage?: (number | null) | Media;
-  /**
-   * 예: G-XXXXXXXXXX
-   */
-  googleAnalyticsId?: string | null;
   googleSearchConsoleVerification?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -920,7 +898,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   noReplyEmail?: T;
   recaptchaSiteKey?: T;
   ogImage?: T;
-  googleAnalyticsId?: T;
   googleSearchConsoleVerification?: T;
   updatedAt?: T;
   createdAt?: T;

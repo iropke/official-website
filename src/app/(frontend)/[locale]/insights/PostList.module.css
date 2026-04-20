@@ -501,4 +501,36 @@
     width: 100%;
     height: 34px;
     padding: 0;
-    border-radiu
+    border-radius: 999px;
+    font-size: 0.8125rem;
+  }
+
+  .paginationNav {
+    min-width: 0;
+  }
+
+  .paginationIcon {
+    width: 1em;
+    height: 1em;
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card .media img,
+  .titleArrow,
+  .titleText,
+  .titleText::after,
+  .paginationLink,
+  .reveal {
+    transition: none !important;
+  }
+
+  .card:hover,
+  .card:focus-visible,
+  .paginationLink:hover,
+  .paginationLink:focus-visible {
+    transform: none !important;
+  }
+}

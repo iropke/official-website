@@ -19,13 +19,13 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 /**
- * Payload 3.82.1 기준, serverURL 미설정 + collection-level livePreview 만 있으면
- * admin UI 에 Live Preview 탭이 뜨지 않는 케이스가 확인됨. root-level livePreview
- * 를 함께 선언하고 Vercel 의 기본 env (VERCEL_URL) 로 serverURL 을 계산하여
- * preview iframe 의 절대 URL 해석이 가능하도록 구성.
+ * serverURL 은 preview/livePreview 에서 절대 URL 을 생성할 때 참조.
  *
  * 우선순위:
- *   NEXT_PUBLIC_SERVER_URL → VERCEL_URL(자동 주입, 도메인만 있음) → localhost
+ *   NEXT_PUBLIC_SERVER_URL → VERCEL_URL(자동 주입, 도메인만) → localhost
+ *
+ * root-level admin.livePreview 는 Payload 3.82.1 에서 Edit 탭 회귀(접근 금지
+ * 아이콘 표시)를 유발하여 제거. collection-level livePreview 만 유지.
  */
 const serverURL =
   process.env.NEXT_PUBLIC_SERVER_URL ||
@@ -37,31 +37,6 @@ export default buildConfig({
     user: Users.slug,
     importMap: {
       baseDir: path.resolve(dirname),
-    },
-    // root-level livePreview — collection-level 과 함께 선언해 Payload 3.82.1
-    // 의 admin UI 가 Live Preview 탭을 인식하도록 보조.
-    livePreview: {
-      url: ({ data, collectionConfig, locale }) => {
-        const code =
-          typeof locale === 'string'
-            ? locale
-            : ((locale as { code?: string })?.code ?? 'ko')
-        const slug = (data as { slug?: string })?.slug ?? ''
-        const slugPart = slug ? `/${slug}` : ''
-        if (collectionConfig?.slug === 'posts') {
-          return `${serverURL}/${code}/insights${slugPart}`
-        }
-        if (collectionConfig?.slug === 'pages') {
-          return `${serverURL}/${code}${slugPart}`
-        }
-        return `${serverURL}/${code}`
-      },
-      collections: ['posts', 'pages'],
-      breakpoints: [
-        { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
-        { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
-        { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
-      ],
     },
   },
   collections: [Users, Media, Tags, Posts, Pages, Inquiries],

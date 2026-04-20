@@ -244,9 +244,21 @@ export interface Post {
     | number
     | boolean
     | null;
+  /**
+   * 비워두면 본문 제목/요약이 자동으로 SEO 정보에 사용됩니다. 직접 입력한 값은 보존되며, 이후 본문 제목/요약이 바뀌어도 덮어쓰지 않습니다. 자동 모드로 돌아가려면 해당 필드를 비우고 저장하세요.
+   */
   meta?: {
+    /**
+     * 비워두면 본문 제목이 자동으로 사용됩니다.
+     */
     metaTitle?: string | null;
+    /**
+     * 비워두면 요약(Excerpt)이 자동으로 사용됩니다.
+     */
     metaDescription?: string | null;
+    /**
+     * 비워두면 썸네일 이미지가 자동으로 사용됩니다.
+     */
     ogImage?: (number | null) | Media;
   };
   /**
@@ -759,7 +771,10 @@ export interface SiteSetting {
    * 페이지별 OG 이미지가 없을 때 사용하는 기본값
    */
   ogImage?: (number | null) | Media;
+<<<<<<< Updated upstream
   googleSearchConsoleVerification?: string | null;
+=======
+>>>>>>> Stashed changes
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -898,7 +913,10 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   noReplyEmail?: T;
   recaptchaSiteKey?: T;
   ogImage?: T;
+<<<<<<< Updated upstream
   googleSearchConsoleVerification?: T;
+=======
+>>>>>>> Stashed changes
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

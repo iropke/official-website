@@ -3,7 +3,7 @@ import type {
   CollectionBeforeChangeHook,
   CollectionConfig,
 } from 'payload'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 /**
  * Task #1.6: meta.ogImage 자동 복사 hook.
@@ -224,7 +224,200 @@ export const Posts: CollectionConfig = {
       type: 'richText',
       label: '본문',
       localized: true,
-      editor: lexicalEditor(),
+      /**
+       * Task #2 Phase 2 (2026-04-20): 커스텀 BlocksFeature 5종 추가.
+       *   - editorialTable / qnaList / codeBlock / rawHtml / videoEmbed
+       *   - 부모 richText 가 localized:true 이므로 block 내부 필드에는
+       *     localized 를 별도 지정하지 않음 (locale 별 JSON 이 자동 분리됨).
+       *   - 실제 렌더는 PostDetailClient.tsx 의 renderBlockNode switch 에서
+       *     Phase 3 에 추가 예정. 현재는 기본 fallback(<p> flatten)으로 동작.
+       */
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              // ─── 표 (editorialTable) ───
+              {
+                slug: 'editorialTable',
+                labels: { singular: 'Editorial 표', plural: 'Editorial 표' },
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'text',
+                    label: '접근성 캡션 (aria-label)',
+                    admin: {
+                      description: '스크린리더용 설명 (선택). 예: "솔루션 비교 표"',
+                    },
+                  },
+                  {
+                    name: 'headers',
+                    type: 'array',
+                    label: '열 헤더',
+                    minRows: 1,
+                    labels: { singular: '헤더', plural: '헤더' },
+                    admin: {
+                      description: '표의 첫 행에 표시될 열 헤더들 (순서대로)',
+                    },
+                    fields: [
+                      {
+                        name: 'text',
+                        type: 'text',
+                        label: '헤더 텍스트',
+                        required: true,
+                      },
+                    ],
+                  },
+                  {
+                    name: 'rows',
+                    type: 'array',
+                    label: '행',
+                    minRows: 1,
+                    labels: { singular: '행', plural: '행' },
+                    admin: {
+                      description: '각 행은 헤더 개수만큼의 셀을 가져야 합니다',
+                    },
+                    fields: [
+                      {
+                        name: 'cells',
+                        type: 'array',
+                        label: '셀',
+                        minRows: 1,
+                        labels: { singular: '셀', plural: '셀' },
+                        fields: [
+                          {
+                            name: 'text',
+                            type: 'textarea',
+                            label: '셀 내용',
+                            required: true,
+                            admin: { rows: 2 },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+
+              // ─── Q&A 리스트 (qnaList) ───
+              {
+                slug: 'qnaList',
+                labels: { singular: 'Q&A 리스트', plural: 'Q&A 리스트' },
+                fields: [
+                  {
+                    name: 'items',
+                    type: 'array',
+                    label: '항목',
+                    minRows: 1,
+                    labels: { singular: '항목', plural: '항목' },
+                    admin: {
+                      description: '질문/답변 쌍을 자유롭게 구성 (Q → A → Q → A 순서 권장)',
+                    },
+                    fields: [
+                      {
+                        name: 'role',
+                        type: 'select',
+                        label: '역할',
+                        required: true,
+                        defaultValue: 'question',
+                        options: [
+                          { label: '질문 (Question)', value: 'question' },
+                          { label: '답변 (Answer)', value: 'answer' },
+                        ],
+                      },
+                      {
+                        name: 'text',
+                        type: 'textarea',
+                        label: '내용',
+                        required: true,
+                        admin: { rows: 3 },
+                      },
+                    ],
+                  },
+                ],
+              },
+
+              // ─── 코드 블록 (codeBlock) ───
+              {
+                slug: 'codeBlock',
+                labels: { singular: '코드 블록', plural: '코드 블록' },
+                fields: [
+                  {
+                    name: 'language',
+                    type: 'text',
+                    label: '언어 라벨',
+                    admin: {
+                      description:
+                        '예: HTML, TypeScript, Bash. 블록 상단에 표시됩니다 (구문 강조는 적용되지 않음)',
+                    },
+                  },
+                  {
+                    name: 'code',
+                    type: 'textarea',
+                    label: '코드',
+                    required: true,
+                    admin: { rows: 10 },
+                  },
+                ],
+              },
+
+              // ─── Raw HTML (rawHtml) ───
+              {
+                slug: 'rawHtml',
+                labels: { singular: 'Raw HTML', plural: 'Raw HTML' },
+                fields: [
+                  {
+                    name: 'label',
+                    type: 'text',
+                    label: '라벨',
+                    admin: {
+                      description: '블록 상단에 표시되는 라벨 (선택). 예: "Raw HTML Example"',
+                    },
+                  },
+                  {
+                    name: 'html',
+                    type: 'textarea',
+                    label: 'HTML 소스',
+                    required: true,
+                    admin: {
+                      rows: 10,
+                      description:
+                        '⚠ 신뢰된 HTML만 입력하세요. 프론트엔드에서 그대로 삽입됩니다 (XSS 주의)',
+                    },
+                  },
+                ],
+              },
+
+              // ─── 동영상 임베드 (videoEmbed) ───
+              {
+                slug: 'videoEmbed',
+                labels: { singular: '동영상 임베드', plural: '동영상 임베드' },
+                fields: [
+                  {
+                    name: 'url',
+                    type: 'text',
+                    label: 'YouTube URL',
+                    required: true,
+                    admin: {
+                      description:
+                        '공유 URL 형식: https://youtu.be/xxxxx 또는 https://www.youtube.com/watch?v=xxxxx — 프론트에서 youtube-nocookie embed 로 자동 변환됩니다',
+                    },
+                  },
+                  {
+                    name: 'caption',
+                    type: 'textarea',
+                    label: '캡션',
+                    admin: {
+                      rows: 2,
+                      description: '영상 아래에 표시되는 설명 (선택)',
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
     },
 
     // ─── 분류 및 태그 ──────────────────────────────────────────

@@ -15,7 +15,12 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      required: true,
+      // drag & drop drawer 에서 alt 입력 기회 없이 즉시 저장할 수 있도록
+      // required 해제. 목록/상세 렌더 시 alt 가 비어있으면 filename fallback.
+      required: false,
+      admin: {
+        description: '접근성 / SEO 용 대체 텍스트 (선택 입력)',
+      },
     },
   ],
   upload: true,

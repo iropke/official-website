@@ -771,10 +771,6 @@ export interface SiteSetting {
    * 페이지별 OG 이미지가 없을 때 사용하는 기본값
    */
   ogImage?: (number | null) | Media;
-<<<<<<< Updated upstream
-  googleSearchConsoleVerification?: string | null;
-=======
->>>>>>> Stashed changes
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -913,10 +909,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   noReplyEmail?: T;
   recaptchaSiteKey?: T;
   ogImage?: T;
-<<<<<<< Updated upstream
-  googleSearchConsoleVerification?: T;
-=======
->>>>>>> Stashed changes
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

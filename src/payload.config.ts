@@ -31,8 +31,39 @@ const serverURL =
   process.env.NEXT_PUBLIC_SERVER_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
+/**
+ * CSRF / CORS 허용 오리진.
+ *
+ * Payload 3.x 는 mutation(POST/PATCH/DELETE) 요청의 Origin 을 `csrf` 배열과
+ * 대조하고 일치하지 않으면 req.user 를 주입하지 않아 403 "not allowed" 를
+ * 반환한다. 프리뷰 도메인에서 admin 에 접속하면 serverURL(프로덕션) 과
+ * origin 이 달라 mutation 이 모두 차단되는 문제가 있어 아래 화이트리스트 필요.
+ *
+ * 포함:
+ *   - serverURL (env 우선순위 결과)
+ *   - 프로덕션 고정 도메인
+ *   - 현재 작업 중인 프리뷰 브랜치 별칭
+ *   - 로컬 개발 (localhost:3000)
+ *   - Vercel 이 매 배포마다 자동 주입하는 VERCEL_URL (per-deploy 프리뷰 URL)
+ *
+ * 새 프리뷰 브랜치 별칭이 추가되면 이 배열에 명시적으로 넣어야 한다.
+ */
+const allowedOrigins = Array.from(
+  new Set(
+    [
+      serverURL,
+      'http://localhost:3000',
+      'https://official-website-topaz-gamma.vercel.app',
+      'https://official-website-git-feat-homepage-sections-iropkes-projects.vercel.app',
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+    ].filter((origin): origin is string => Boolean(origin)),
+  ),
+)
+
 export default buildConfig({
   serverURL,
+  csrf: allowedOrigins,
+  cors: allowedOrigins,
   admin: {
     user: Users.slug,
     importMap: {

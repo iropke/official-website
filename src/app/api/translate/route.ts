@@ -35,9 +35,28 @@ import {
 } from '@/lib/translation/claudeTranslator'
 import type { Post } from '@/payload-types'
 
-const SOURCE_LOCALE = 'ko'
+// Payload 가 요구하는 literal locale union. payload-types.ts 의
+// `locale: 'ko' | 'en' | ...` 와 동일하게 유지해야 `payload.update` 호출 시
+// overload matching 이 성공합니다.
+type Locale = 'ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar'
+
+const SOURCE_LOCALE: Locale = 'ko'
 const DEFAULT_FIELDS: FieldType[] = ['title']
-const ALLOWED_TARGET_LOCALES = new Set(['en', 'es', 'ru', 'de', 'fr', 'zh', 'ar'])
+const ALLOWED_TARGET_LOCALES = new Set<Locale>([
+  'en',
+  'es',
+  'ru',
+  'de',
+  'fr',
+  'zh',
+  'ar',
+])
+
+// Set<Locale>.has 는 인자로 Locale 을 요구하지만 사용자 입력은 임의 string.
+// 일반 string 을 Locale 로 좁히는 type guard.
+function isAllowedLocale(l: string): l is Locale {
+  return (ALLOWED_TARGET_LOCALES as Set<string>).has(l)
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,9 +86,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const targetLocales = (body.targetLocales ?? []).filter((l) =>
-      ALLOWED_TARGET_LOCALES.has(l),
-    )
+    const targetLocales: Locale[] = (body.targetLocales ?? []).filter(isAllowedLocale)
     if (targetLocales.length === 0) {
       return NextResponse.json(
         { success: false, error: 'targetLocales 가 비어있거나 지원되지 않는 언어만 포함.' },

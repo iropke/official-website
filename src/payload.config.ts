@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+import { cloudinaryStorage } from 'payload-cloudinary'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -83,7 +84,35 @@ export default buildConfig({
     },
   }),
   sharp,
-  plugins: [],
+  plugins: [
+    /**
+     * Cloudinary 스토리지 어댑터 (Task #Media-Upload-Fix, 2026-04-20)
+     *
+     * 이전에는 plugins 가 비어 있어 Media 업로드가 Payload 기본 로컬 디스크
+     * 저장소로 떨어졌고, Vercel serverless 파일시스템이 읽기 전용이라
+     * POST /api/media 가 500 을 반환했다. admin 클라이언트는 500 응답의
+     * `.doc` 를 읽다가 TypeError 로 상태 갱신을 중단 → 썸네일 미반영/저장
+     * 버튼 비활성 현상 유발.
+     *
+     * 자격증명은 .env / Vercel Environment Variables 에서 주입:
+     *   - CLOUDINARY_CLOUD_NAME
+     *   - CLOUDINARY_API_KEY
+     *   - CLOUDINARY_API_SECRET
+     *
+     * collections.media=true 로 설정 시 `media` slug 컬렉션의 업로드가
+     * 자동으로 Cloudinary 로 라우팅되고 `url` 필드에 Cloudinary URL 저장.
+     */
+    cloudinaryStorage({
+      config: {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
+        api_key: process.env.CLOUDINARY_API_KEY || '',
+        api_secret: process.env.CLOUDINARY_API_SECRET || '',
+      },
+      collections: {
+        media: true,
+      },
+    }),
+  ],
   localization: {
     locales: [
       { label: '한국어', code: 'ko' },

@@ -1,0 +1,82 @@
+/* ═══════════════════════════════════════════════════════════════
+   Core Message — single impact line, wide whitespace
+   ═══════════════════════════════════════════════════════════════ */
+
+.section {
+  padding: clamp(80px, 10vw, 160px) 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(94, 182, 178, 0.04) 50%, transparent 100%);
+}
+
+.section__shell {
+  position: relative;
+}
+
+.section__inner {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(24px, 3vw, 40px);
+}
+
+.section__mark {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.section__mark span {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--primary);
+  opacity: 0.72;
+}
+
+.section__mark span:nth-child(2) {
+  opacity: 0.32;
+}
+
+.section__message {
+  font-family: var(--font-accent-serif);
+  font-size: clamp(1.75rem, 3.6vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: var(--grayscale-gs-primary);
+  text-wrap: balance;
+  word-break: keep-all;
+  max-width: 22ch;
+}
+
+.section__subtext {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 0.5vw + 0.9rem, 1.15rem);
+  line-height: 1.65;
+  color: var(--grayscale-gs-secondary-1);
+  max-width: 56ch;
+  margin: 0 auto;
+  word-break: keep-all;
+}
+
+.section__rule {
+  display: block;
+  width: 56px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(94, 182, 178, 0.65),
+    transparent
+  );
+  margin-top: 12px;
+}
+
+@media (max-width: 767px) {
+  .section__message {
+    font-size: clamp(1.5rem, 7vw, 2.25rem);
+  }
+}

@@ -1,0 +1,291 @@
+/* ═══════════════════════════════════════════════════════════════
+   AI OS Grid — 4 system module cards
+   ═══════════════════════════════════════════════════════════════ */
+
+.section {
+  padding: clamp(72px, 9vw, 140px) 0;
+}
+
+.section__shell {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(32px, 4vw, 56px);
+}
+
+/* ── Header ── */
+.section__header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.section__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 8px 16px;
+  border: 1px solid rgba(94, 182, 178, 0.28);
+  background: rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: var(--body-6);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--primary-hover);
+  backdrop-filter: blur(8px);
+}
+
+.section__eyebrowDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px rgba(94, 182, 178, 0.18);
+}
+
+.section__title {
+  font-family: var(--font-accent-serif);
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--grayscale-gs-primary);
+}
+
+.section__lede {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 0.5vw + 0.85rem, 1.15rem);
+  line-height: 1.65;
+  color: var(--grayscale-gs-secondary-1);
+  max-width: 52ch;
+  word-break: keep-all;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 1.8vw, 24px);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.grid__item {
+  min-width: 0;
+  display: flex;
+}
+
+/* ── Card ── */
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(35, 35, 41, 0.08);
+  border-radius: 24px;
+  overflow: hidden;
+  transition:
+    transform 260ms ease,
+    box-shadow 260ms ease,
+    border-color 260ms ease;
+}
+
+a.card {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 60px rgba(20, 33, 38, 0.12);
+  border-color: rgba(94, 182, 178, 0.35);
+}
+
+/* ── Card media ── */
+.card__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  min-height: 200px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── Card uploaded image (optional) ── */
+.card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.card__imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  z-index: 0;
+}
+
+.card__mediaGrid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  mask-image: radial-gradient(circle at 30% 40%, rgba(0, 0, 0, 0.75), transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 30% 40%, rgba(0, 0, 0, 0.75), transparent 75%);
+}
+
+.card__number {
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  font-family: var(--font-mono);
+  font-size: var(--body-5);
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.card__icon {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
+}
+
+.card__moduleMark {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  width: 44px;
+  height: 44px;
+}
+
+.card__moduleMark span {
+  display: block;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  transition: transform 320ms ease, background-color 320ms ease;
+}
+
+.card:hover .card__moduleMark span:nth-child(1) {
+  transform: translate(-2px, -2px);
+}
+.card:hover .card__moduleMark span:nth-child(2) {
+  transform: translate(2px, -2px);
+}
+.card:hover .card__moduleMark span:nth-child(3) {
+  transform: translate(-2px, 2px);
+}
+.card:hover .card__moduleMark span:nth-child(4) {
+  transform: translate(2px, 2px);
+  background: var(--primary);
+}
+
+/* ── Card body ── */
+.card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(24px, 2.6vw, 36px);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card__name {
+  font-family: var(--font-accent-serif);
+  font-size: clamp(1.5rem, 1.6vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--grayscale-gs-primary);
+  line-height: 1.2;
+}
+
+.card__arrow {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(35, 35, 41, 0.12);
+  color: var(--grayscale-gs-primary);
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
+    transform 220ms ease;
+  flex-shrink: 0;
+}
+
+.card:hover .card__arrow {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  transform: rotate(-45deg);
+}
+
+.card__tagline {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 0.5vw + 0.85rem, 1.125rem);
+  font-weight: 600;
+  color: var(--grayscale-gs-primary);
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.card__description {
+  font-family: var(--font-body);
+  font-size: var(--body-4);
+  line-height: 1.6;
+  color: var(--grayscale-gs-secondary-1);
+  word-break: keep-all;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 320ms ease, opacity 260ms ease, margin-top 260ms ease;
+}
+
+.card:hover .card__description {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card__description {
+    /* Always visible on touch devices */
+    max-height: none;
+    opacity: 1;
+    overflow: visible;
+    margin-top: 4px;
+  }
+}

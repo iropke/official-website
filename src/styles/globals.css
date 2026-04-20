@@ -3,7 +3,19 @@
    Source: basic_en.css + FIGMA_DESIGN_GUIDE.md
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Fonts ── */
+/* ── Fonts ──
+   next/font/local 로드한 변수 (src/fonts/index.ts):
+     --font-korean          (Pretendard)
+     --font-iropke-batang   (IropkeBatangM — 브랜드 세리프)
+     --font-latin           (Noto Sans / Latin+Cyrillic+Greek 공통)
+     --font-latin-serif     (Noto Serif)
+     --font-latin-display   (Noto Serif Display)
+     --font-chinese         (Noto Sans SC)
+     --font-chinese-serif   (Noto Serif SC)
+     --font-arabic          (Noto Sans Arabic)
+     --font-arabic-naskh    (Noto Naskh Arabic)
+
+   Roboto 는 레거시 호환(이전 컴포넌트가 --font-body 로 직접 참조)을 위해 남겨둡니다. */
 @font-face {
   font-family: 'Roboto';
   src: url('/assets/fonts/Roboto-Regular.woff2') format('woff2'),
@@ -117,8 +129,8 @@
   /* Nav */
   --nav-height: 72px;
 
-  /* Page section top padding (layout-main already offsets for header) */
-  --iropke-page-top: 48px;
+  /* Page section top padding — Hero 섹션 padding과 일관되게 헤더(fixed) 클리어런스 확보 */
+  --iropke-page-top: clamp(80px, 9vw, 140px);
   --iropke-grid-gap: 24px;
 }
 
@@ -222,4 +234,82 @@ button, input, select, optgroup, textarea {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Locale별 font-family 우선순위 (v2, 2026-04-20)
+
+   역할 기반 변수 4종:
+   - --font-heading-h1-3  : H1~H3 타이틀
+   - --font-heading-h4-6  : H4~H6 부제
+   - --font-body          : 본문 (paragraph/list/blockquote/ui)
+   - --font-caption       : figcaption, .caption (에디터 캡션)
+
+   요구사항:
+   - Latin(en/es/de/fr/ru) / 아랍(ar):
+       H1~H3 = 세리프, H4~H6 + body = 산세리프
+   - 한국어(ko) / 중국어(zh):
+       H1~H6 + body = 산세리프 (ko=Pretendard, zh=NotoSansSC)
+       caption = 세리프 (ko=IropkeBatangM, zh=NotoSerifSC)
+
+   공통 Latin (NotoSans/NotoSerif/NotoSerifDisplay) 은 모든 locale 에서
+   마지막 fallback 으로 사용 → 특정 locale 의 전용 폰트가 로드 전이거나
+   missing 글리프여도 Latin 문자가 정상 표시됨.
+
+   레거시 alias (--font-body / --font-ui / --font-display / --font-accent-serif) 는
+   기존 컴포넌트 호환을 위해 유지하되 역할 변수로부터 파생시킵니다.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 기본값: 한국어 (SSR 시 <html lang="ko">) */
+html {
+  --font-heading-h1-3: var(--font-korean), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-heading-h4-6: var(--font-korean), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-body: var(--font-korean), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-caption: var(--font-iropke-batang), var(--font-latin-serif), Georgia, 'Times New Roman', serif;
+
+  /* 레거시 alias — 기존 컴포넌트 호환 */
+  --font-ui: var(--font-body);
+  --font-display: var(--font-heading-h1-3);
+  --font-accent-serif: var(--font-caption);
+}
+
+/* Latin + Cyrillic (en / es / de / fr / ru)
+   H1-H3 세리프 = NotoSerifDisplay(장식형 세리프, 헤드라인용) */
+html[lang="en"],
+html[lang="es"],
+html[lang="de"],
+html[lang="fr"],
+html[lang="ru"] {
+  --font-heading-h1-3: var(--font-latin-display), var(--font-latin-serif), Georgia, 'Times New Roman', serif;
+  --font-heading-h4-6: var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-body: var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-caption: var(--font-latin-serif), Georgia, 'Times New Roman', serif;
+
+  --font-ui: var(--font-body);
+  --font-display: var(--font-heading-h1-3);
+  --font-accent-serif: var(--font-caption);
+}
+
+/* 중국어 (zh) — 모든 제목/본문 산세리프, caption 만 NotoSerifSC */
+html[lang="zh"] {
+  --font-heading-h1-3: var(--font-chinese), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-heading-h4-6: var(--font-chinese), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-body: var(--font-chinese), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-caption: var(--font-chinese-serif), var(--font-chinese), var(--font-latin-serif), Georgia, serif;
+
+  --font-ui: var(--font-body);
+  --font-display: var(--font-heading-h1-3);
+  --font-accent-serif: var(--font-caption);
+}
+
+/* 아랍어 (ar, RTL) — H1-H3 세리프 = NotoNaskhArabic */
+html[lang="ar"] {
+  --font-heading-h1-3: var(--font-arabic-naskh), var(--font-arabic), var(--font-latin-serif), Georgia, serif;
+  --font-heading-h4-6: var(--font-arabic), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-body: var(--font-arabic), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+  --font-caption: var(--font-arabic), var(--font-latin), 'Roboto', Arial, Helvetica, sans-serif;
+
+  --font-ui: var(--font-body);
+  --font-display: var(--font-heading-h1-3);
+  --font-accent-serif: var(--font-caption);
 }

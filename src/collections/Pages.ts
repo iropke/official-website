@@ -65,11 +65,18 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     group: '페이지',
   },
   access: {
+    // 공개 읽기 허용
     read: () => true,
+    // Payload 3.82.1: access 에 read 만 정의하면 나머지 규칙이 기본 인증으로
+    // fallback 되지 않고 거부되므로 로그인 유저에게 명시적 허용.
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
+    readVersions: ({ req: { user } }) => Boolean(user),
   },
   versions: {
     drafts: true,
@@ -104,19 +111,8 @@ export const Pages: CollectionConfig = {
     },
 
     // ─── 발행 설정 ──────────────────────────────────────────
-    {
-      name: 'status',
-      type: 'select',
-      label: '상태',
-      defaultValue: 'draft',
-      options: [
-        { label: '초안 (Draft)', value: 'draft' },
-        { label: '발행됨 (Published)', value: 'published' },
-      ],
-      admin: {
-        position: 'sidebar',
-      },
-    },
+    // Task #14: 커스텀 status 필드 제거. Payload 내장 `_status` + "Publish
+    // changes" 버튼으로 발행 관리를 일원화.
     {
       name: 'publishedLocales',
       type: 'select',

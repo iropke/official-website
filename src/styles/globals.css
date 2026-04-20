@@ -44,13 +44,14 @@
   --breakpoint-2xl: 1600px;
   --breakpoint-3xl: 1920px;
 
-  /* Font Families */
+  /* Font Families
+     NOTE: --font-ui / --font-display / --font-body / --font-accent-serif /
+           --font-heading-h1-3 / --font-heading-h4-6 / --font-caption 는
+           아래의 `html` (ko 기본값) / `html[lang="..."]` (locale 별) 블록에서
+           정의합니다. :root 에 하드코딩하면 specificity(0,0,1,0)가 `html`(0,0,0,1)을
+           이겨버려 한국어 locale에서 Pretendard 로 상속되지 않기 때문에 여기엔 두지 않습니다. */
   --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
-  --font-ui: 'Roboto', Arial, Helvetica, sans-serif;
-  --font-display: 'Roboto', Arial, Helvetica, sans-serif;
-  --font-body: 'Roboto', Arial, Helvetica, sans-serif;
-  --font-accent-serif: Georgia, 'Times New Roman', serif;
 
   /* Primary Colors */
   --primary: #5eb6b2;

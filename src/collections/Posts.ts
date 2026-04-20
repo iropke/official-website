@@ -18,6 +18,21 @@ const autoFillOgImage: CollectionBeforeChangeHook = ({ data }) => {
 }
 
 /**
+ * Task #14 follow-up: publishedDate 자동 채움.
+ *
+ * Publish 시점(_status='published')에 publishedDate 가 비어있으면 현재 시각으로
+ * 자동 주입. 수동 입력값이 이미 있으면 그대로 보존. 목록 정렬 기준이
+ * publishedDate 이므로 null 방지로 안정적인 최신순 정렬을 보장한다.
+ */
+const autoFillPublishedDate: CollectionBeforeChangeHook = ({ data }) => {
+  if (!data) return data
+  if (data._status === 'published' && !data.publishedDate) {
+    data.publishedDate = new Date().toISOString()
+  }
+  return data
+}
+
+/**
  * Task #1.8 (revised): collection-level livePreview → admin.preview 전환.
  *
  * Payload 3.82.1 은 `admin.livePreview.url` 함수를 클라이언트 config 로 직렬화
@@ -58,8 +73,8 @@ export const Posts: CollectionConfig = {
     drafts: true,
   },
   hooks: {
-    // Task #1.6
-    beforeChange: [autoFillOgImage],
+    // Task #1.6, Task #14 follow-up
+    beforeChange: [autoFillOgImage, autoFillPublishedDate],
   },
   fields: [
     // ─── 기본 정보 ─────────────────────────────────────────────

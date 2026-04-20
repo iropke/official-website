@@ -65,7 +65,7 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     group: '페이지',
   },
   access: {
@@ -111,19 +111,8 @@ export const Pages: CollectionConfig = {
     },
 
     // ─── 발행 설정 ──────────────────────────────────────────
-    {
-      name: 'status',
-      type: 'select',
-      label: '상태',
-      defaultValue: 'draft',
-      options: [
-        { label: '초안 (Draft)', value: 'draft' },
-        { label: '발행됨 (Published)', value: 'published' },
-      ],
-      admin: {
-        position: 'sidebar',
-      },
-    },
+    // Task #14: 커스텀 status 필드 제거. Payload 내장 `_status` + "Publish
+    // changes" 버튼으로 발행 관리를 일원화.
     {
       name: 'publishedLocales',
       type: 'select',

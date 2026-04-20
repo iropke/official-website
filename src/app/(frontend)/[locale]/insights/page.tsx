@@ -73,11 +73,11 @@ export default async function InsightsPage({ params, searchParams }: PageProps) 
       limit: POSTS_PER_PAGE,
       page: currentPage,
       sort: '-publishedDate',
+      // Payload drafts: `payload.find` 는 draft:false(기본값) 에서 _status=published
+      // 버전만 반환하므로 별도 status 조건 불필요. publishedLocales 로 언어별
+      // 공개 여부만 필터링.
       where: {
-        and: [
-          { status: { equals: 'published' } },
-          { publishedLocales: { equals: locale } },
-        ],
+        publishedLocales: { equals: locale },
       },
     })
     docs = result.docs as Post[]

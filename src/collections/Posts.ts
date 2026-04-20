@@ -34,7 +34,7 @@ export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'publishedDate', 'status', 'updatedAt'],
+    defaultColumns: ['title', 'publishedDate', '_status', 'updatedAt'],
     group: '콘텐츠',
     preview: (doc, { locale }) => {
       const baseUrl = resolveServerURL()
@@ -121,20 +121,11 @@ export const Posts: CollectionConfig = {
         },
       },
     },
-    {
-      name: 'status',
-      type: 'select',
-      label: '상태',
-      defaultValue: 'draft',
-      options: [
-        { label: '초안 (Draft)', value: 'draft' },
-        { label: '발행됨 (Published)', value: 'published' },
-        { label: '보관됨 (Archived)', value: 'archived' },
-      ],
-      admin: {
-        position: 'sidebar',
-      },
-    },
+    // Task #14: 커스텀 status 필드 제거. Payload 내장 `_status` (versions.drafts
+     // 활성화 시 자동 생성) + 우상단 "Publish changes" 버튼으로 발행 상태를
+     // 일원화. 필터는 `payload.find` 가 `draft: false` 기본값으로 _status=published
+     // 만 반환하므로 쿼리 측 status 조건도 제거됨. "archived" 상태는 필요 시
+     // 별도 `isArchived: checkbox` 필드로 향후 추가.
     {
       name: 'publishedLocales',
       type: 'select',

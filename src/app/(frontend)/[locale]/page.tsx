@@ -100,11 +100,10 @@ export default async function HomePage({ params }: HomePageProps) {
       depth: 1,
       limit: insightsCount,
       sort: '-publishedDate',
+      // Payload drafts: 기본 draft:false 이므로 _status=published 만 반환 →
+      // 별도 status 조건 불필요. publishedLocales 로 언어별 공개 여부만 필터.
       where: {
-        and: [
-          { status: { equals: 'published' } },
-          { publishedLocales: { equals: locale } },
-        ],
+        publishedLocales: { equals: locale },
       },
     });
     latestPosts = postsResult.docs as Post[];

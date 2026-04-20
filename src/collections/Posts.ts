@@ -1,5 +1,21 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+/**
+ * Task #1.6: meta.ogImage 자동 복사 hook.
+ *
+ * 새 게시물 작성/수정 시 meta.ogImage 가 비어 있으면 thumbnail 값을 자동 복사.
+ * 이미 수동으로 ogImage 를 설정한 경우엔 건드리지 않음 (수동 설정 보존).
+ */
+const autoFillOgImage: CollectionBeforeChangeHook = ({ data }) => {
+  if (!data) return data
+  const ogImage = data.meta?.ogImage
+  const thumbnail = data.thumbnail
+  if (!ogImage && thumbnail) {
+    data.meta = { ...(data.meta ?? {}), ogImage: thumbnail }
+  }
+  return data
+}
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -7,12 +23,35 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', 'status', 'updatedAt'],
     group: '콘텐츠',
+    // Task #1.5: admin 우측 상단 "Preview" 버튼 → 프론트엔드 상세 페이지.
+    preview: (doc, { req }) => {
+      const locale = req?.locale || 'ko'
+      const slug = (doc as { slug?: string })?.slug ?? ''
+      return `/${locale}/insights/${slug}`
+    },
+    // Task #1.5: Live Preview (편집 중 실시간 미리보기 iframe).
+    livePreview: {
+      url: ({ data, locale }) => {
+        const code = locale?.code ?? 'ko'
+        const slug = (data as { slug?: string })?.slug ?? ''
+        return `/${code}/insights/${slug}`
+      },
+      breakpoints: [
+        { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
+        { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
+        { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
+      ],
+    },
   },
   access: {
     read: () => true,
   },
   versions: {
     drafts: true,
+  },
+  hooks: {
+    // Task #1.6
+    beforeChange: [autoFillOgImage],
   },
   fields: [
     // ─── 기본 정보 ─────────────────────────────────────────────

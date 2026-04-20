@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════
+   Lexical (RichText) 본문 공용 타이포그래피
+
+   사용처:
+   1) 프론트엔드 insights 상세 페이지의 본문 컨테이너
+      → <article className="article-content"> ... </article>
+   2) Payload admin 의 Lexical 편집기 영역
+      → .rich-text-lexical [contenteditable][data-lexical-editor="true"]
+
+   references/design/en/postDetail.html 의 editorial 톤을 기준으로,
+   heading / paragraph / list / blockquote / image(figure) / code 6종의
+   기본 스타일을 공유합니다. 상세 디자인 튜닝은 프론트 rendering
+   (Task #3) 단계에서 확장 예정.
+   ═══════════════════════════════════════════════════════════════ */
+
+.article-content,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] {
+  font-family: var(--font-body, 'Roboto', Arial, sans-serif);
+  color: var(--layout-text, #232329);
+  font-size: var(--body-2, 16px);
+  line-height: 1.75;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* ── Headings ──
+   H1-H3: var(--font-heading-h1-3)
+     - Latin / 아랍: 세리프 (NotoSerifDisplay / NotoNaskhArabic)
+     - 한국어 / 중국어: 산세리프 (Pretendard / NotoSansSC)
+   H4-H6: var(--font-heading-h4-6) — 모든 locale 산세리프 */
+.article-content h1,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] h1 {
+  font-family: var(--font-heading-h1-3, var(--font-display, inherit));
+  font-size: var(--h1, clamp(34px, 2vw + 22px, 62px));
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 1.6em 0 0.6em;
+}
+
+.article-content h2,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] h2 {
+  font-family: var(--font-heading-h1-3, var(--font-display, inherit));
+  font-size: var(--h2, clamp(28px, 0.65vw + 26px, 38px));
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  margin: 1.5em 0 0.55em;
+}
+
+.article-content h3,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] h3 {
+  font-family: var(--font-heading-h1-3, var(--font-display, inherit));
+  font-size: var(--h3, clamp(24px, 0.3vw + 22.5px, 28px));
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 1.4em 0 0.5em;
+}
+
+.article-content h4,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] h4 {
+  font-family: var(--font-heading-h4-6, var(--font-body, inherit));
+  font-size: var(--h4, clamp(20px, 0.3vw + 18.5px, 24px));
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 1.3em 0 0.5em;
+}
+
+.article-content h5,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] h5,
+.article-content h6,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] h6 {
+  font-family: var(--font-heading-h4-6, var(--font-body, inherit));
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 1.2em 0 0.4em;
+}
+
+/* ── Paragraph ── */
+.article-content p,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] p {
+  margin: 0 0 1.1em;
+}
+
+.article-content p + p,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] p + p {
+  margin-top: 0;
+}
+
+/* ── Lists ── */
+.article-content ul,
+.article-content ol,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] ul,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] ol {
+  padding-left: 1.6em;
+  margin: 0 0 1.2em;
+}
+
+.article-content ul,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] ul {
+  list-style: disc;
+}
+
+.article-content ol,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] ol {
+  list-style: decimal;
+}
+
+.article-content li,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] li {
+  margin: 0.35em 0;
+  padding-left: 0.25em;
+}
+
+.article-content li > ul,
+.article-content li > ol,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] li > ul,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] li > ol {
+  margin: 0.4em 0 0.4em;
+}
+
+/* ── Blockquote ──
+   blockquote 는 본문 산세리프 기조 유지. 세리프 인용 스타일이 필요하면
+   사용자가 blockquote 내부에 .caption 클래스를 달아 caption 체로 쓸 수 있음. */
+.article-content blockquote,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] blockquote {
+  border-left: 3px solid var(--layout-accent, #5eb6b2);
+  padding: 0.1em 0 0.1em 1.2em;
+  margin: 1.6em 0;
+  color: var(--layout-text-muted, #68687b);
+  font-family: var(--font-body, Georgia, serif);
+  font-style: italic;
+  font-size: var(--body-1, clamp(20px, 0.3vw + 18.5px, 24px));
+  line-height: 1.6;
+}
+
+/* ── Inline ── */
+.article-content strong,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] strong {
+  font-weight: 700;
+}
+
+.article-content em,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] em {
+  font-style: italic;
+}
+
+.article-content a,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] a {
+  color: var(--layout-accent-strong, #22908b);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.article-content a:hover,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] a:hover {
+  color: var(--primary-pressed, #15716d);
+}
+
+/* ── Images / Figures ── */
+.article-content figure,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] figure {
+  margin: 2em 0;
+}
+
+.article-content img,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius, 8px);
+  display: block;
+}
+
+/* ── Caption ──
+   figcaption, .caption 클래스: var(--font-caption)
+     - 한국어(ko): IropkeBatangM (이롭게 10년 전 제작한 전용 세리프)
+     - 중국어(zh): NotoSerifSC
+     - 라틴/아랍: 기본 세리프(NotoSerif) 혹은 body와 동일
+   에디터에서 caption 체 필요 시 사용자가 .caption 클래스를 적용. */
+.article-content figure figcaption,
+.article-content .caption,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] figure figcaption,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] .caption {
+  margin-top: 0.6em;
+  font-family: var(--font-caption, Georgia, serif);
+  font-size: var(--body-5, 13px);
+  color: var(--layout-text-soft, #a1a1af);
+  text-align: center;
+  font-style: italic;
+}
+
+/* ── Code ── */
+.article-content code,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] code {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 0.9em;
+  background: var(--grayscale-gs-background-darker, #f3f4f7);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+.article-content pre,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] pre {
+  background: var(--grayscale-gs-primary, #232329);
+  color: var(--grayscale-gs-white, #fff);
+  padding: 1.1em 1.3em;
+  border-radius: var(--border-radius, 8px);
+  overflow-x: auto;
+  margin: 1.6em 0;
+  line-height: 1.55;
+  font-size: var(--body-4, 14px);
+}
+
+.article-content pre code,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* ── Horizontal rule ── */
+.article-content hr,
+.rich-text-lexical [contenteditable][data-lexical-editor="true"] hr {
+  border: none;
+  border-top: 1px solid var(--layout-border, rgba(35, 35, 41, 0.08));
+  margin: 2.4em 0;
+}

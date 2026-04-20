@@ -1,0 +1,200 @@
+/* ═══════════════════════════════════════════════════════════════
+   Payload Admin 커스텀 스타일 (v2.1, 2026-04-20)
+
+   목표: admin 에디터에서 작성할 때 프론트엔드와 동일한 폰트로 보이도록.
+         한 편집 세션 안에서 한/영/중/아랍 글리프가 모두 정상 표시.
+
+   구성:
+   1) Admin 용 @font-face 전체 (public/assets/fonts 참조)
+      - Pretendard 9종 (한국어 본문/제목)
+      - IropkeBatangM (한국어 caption, 이롭게 10년 전 자체 제작 세리프)
+      - NotoSans / NotoSerif / NotoSerifDisplay (라틴/키릴 공통)
+      - NotoSansSC / NotoSerifSC (중국어)
+      - NotoSansArabic / NotoNaskhArabic (아랍어)
+   2) Admin body 기본 변수 주입 (한국어 기준)
+      - admin 환경은 <html lang="..."> 이 locale 에 따라 바뀌지 않으므로
+        globals.css 의 locale 분기 대신, 한국어 기준 기본값을 직접 주입
+      - font-family chain 안에 CJK / 아랍 폰트를 함께 두어, 브라우저가
+        글리프별로 matching font 를 자동 선택(한글→Pretendard, 중문→SC,
+        아랍→Arabic, 라틴→NotoSans) 하도록 설계
+   3) Lexical 편집기 본문 스타일은 공용 css (src/styles/lexical-content.css) import
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Pretendard 9종 (한국어 기본) ─────────────────────────── */
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-Thin.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-ExtraLight.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/assets/fonts/Pretendard-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── IropkeBatangM (이롭게 10년 전 제작 전용 세리프 / caption 용) ── */
+@font-face {
+  font-family: 'IropkeBatangM';
+  src: url('/assets/fonts/IropkeBatangM.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── NotoSans / NotoSerif / NotoSerifDisplay (라틴+키릴 공통) ── */
+@font-face {
+  font-family: 'IropkeNotoSans';
+  src: url('/assets/fonts/NotoSans-VariableFont_wdth,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IropkeNotoSans';
+  src: url('/assets/fonts/NotoSans-Italic-VariableFont_wdth,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IropkeNotoSerif';
+  src: url('/assets/fonts/NotoSerif-VariableFont_wdth,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IropkeNotoSerif';
+  src: url('/assets/fonts/NotoSerif-Italic-VariableFont_wdth,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IropkeNotoSerifDisplay';
+  src: url('/assets/fonts/NotoSerifDisplay-VariableFont_wdth,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── NotoSansSC / NotoSerifSC (중국어) ── */
+@font-face {
+  font-family: 'IropkeNotoSansSC';
+  src: url('/assets/fonts/NotoSansSC-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IropkeNotoSerifSC';
+  src: url('/assets/fonts/NotoSerifSC-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── NotoSansArabic / NotoNaskhArabic (아랍어) ── */
+@font-face {
+  font-family: 'IropkeNotoSansArabic';
+  src: url('/assets/fonts/NotoSansArabic-VariableFont_wdth,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IropkeNotoNaskhArabic';
+  src: url('/assets/fonts/NotoNaskhArabic-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Admin body 기본 폰트 변수 (한국어 기준) ──
+   Payload 가 사용하는 변수(--font-body / mono / serif)와
+   iropke 역할 변수(--font-heading-h1-3 등)를 함께 주입.
+   locale selector 로 변경해도 admin 은 이 기본값을 사용합니다. */
+/* 산세리프 기본 chain: Pretendard(한) → NotoSansSC(중) → NotoSansArabic(아랍) →
+   IropkeNotoSans(라틴/키릴) → 시스템 */
+html[data-theme='light'],
+html[data-theme='dark'],
+.payload-default-theme,
+body {
+  /* Payload 기본 변수 */
+  --font-body: 'Pretendard', 'IropkeNotoSansSC', 'IropkeNotoSansArabic', 'IropkeNotoSans',
+    -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  --font-serif: 'IropkeBatangM', 'IropkeNotoSerifSC', 'IropkeNotoNaskhArabic', 'IropkeNotoSerif',
+    Georgia, 'Times New Roman', serif;
+
+  /* iropke 역할 변수 (한국어 기준, 글리프 fallback 체인 포함) */
+  --font-heading-h1-3: 'Pretendard', 'IropkeNotoSansSC', 'IropkeNotoSansArabic', 'IropkeNotoSans',
+    -apple-system, system-ui, sans-serif;
+  --font-heading-h4-6: 'Pretendard', 'IropkeNotoSansSC', 'IropkeNotoSansArabic', 'IropkeNotoSans',
+    -apple-system, system-ui, sans-serif;
+  --font-caption: 'IropkeBatangM', 'IropkeNotoSerifSC', 'IropkeNotoNaskhArabic', 'IropkeNotoSerif',
+    Georgia, 'Times New Roman', serif;
+  --font-ui: var(--font-body);
+  --font-display: var(--font-heading-h1-3);
+  --font-accent-serif: var(--font-caption);
+}
+
+/* ── Lexical 편집기 본문 스타일 ──
+   프론트엔드 렌더링과 동일한 타이포그래피를 admin 편집기에도 적용하여,
+   편집 시점에 최종 결과를 그대로 확인할 수 있도록 공통 CSS 를 import.
+   공용 css 가 var(--font-heading-h1-3) 등을 참조하므로 위에서 주입한
+   한국어 기본 변수가 그대로 사용됩니다. */
+@import '../../styles/lexical-content.css';

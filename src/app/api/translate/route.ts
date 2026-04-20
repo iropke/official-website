@@ -33,6 +33,7 @@ import {
   translateWithClaude,
   type FieldType,
 } from '@/lib/translation/claudeTranslator'
+import type { Post } from '@/payload-types'
 
 const SOURCE_LOCALE = 'ko'
 const DEFAULT_FIELDS: FieldType[] = ['title']
@@ -79,19 +80,25 @@ export async function POST(req: NextRequest) {
     const fields = body.fields?.length ? body.fields : DEFAULT_FIELDS
 
     // ── 3. KO 원본 조회 ──────────────────────────────────────────
-    const source = (await payload.findByID({
+    // Payload 가 반환하는 Post 타입은 index signature 가 없어 직접 Record<>
+    // cast 가 막힙니다. `unknown` 경유로 two-step cast (`as unknown as ...`)
+    // 하여 동적 필드 접근이 가능하도록 합니다 — 기존 프로젝트에서 FormData
+    // cast 시도 동일 패턴을 씁니다.
+    const sourceDoc = await payload.findByID({
       collection: 'posts',
       id: body.postId,
       locale: SOURCE_LOCALE,
       depth: 0,
-    })) as Record<string, unknown>
+    })
 
-    if (!source) {
+    if (!sourceDoc) {
       return NextResponse.json(
         { success: false, error: 'Post not found.' },
         { status: 404 },
       )
     }
+
+    const source = sourceDoc as unknown as Record<string, unknown>
 
     // ── 4. 각 locale 별 번역 + 저장 ───────────────────────────────
     const results: Record<string, Record<string, string>> = {}
@@ -118,11 +125,14 @@ export async function POST(req: NextRequest) {
       }
 
       if (Object.keys(translated).length > 0) {
+        // `translated` 는 Record<string, string> 이지만 payload.update 는
+        // Posts 스키마의 구조적 타입을 기대합니다. two-step cast (`as unknown as ...`)
+        // 로 overlap 검사 우회 — 필드 이름은 Posts 스키마 존재 필드만 사용.
         await payload.update({
           collection: 'posts',
           id: body.postId,
           locale,
-          data: translated,
+          data: translated as unknown as Partial<Post>,
         })
         results[locale] = translated
       }

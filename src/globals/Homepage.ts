@@ -9,6 +9,9 @@ export const Homepage: GlobalConfig = {
   },
   access: {
     read: () => true,
+    // Payload 3.82.1: read 만 정의하면 update 가 자동 인증 기본값으로
+    // fallback 되지 않으므로 로그인 유저에게 명시적 허용.
+    update: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {
@@ -32,6 +35,15 @@ export const Homepage: GlobalConfig = {
               type: 'textarea',
               label: '서브카피',
               localized: true,
+            },
+            {
+              name: 'heroBackgroundImage',
+              type: 'upload' as const,
+              label: 'Hero 배경 이미지',
+              relationTo: 'media',
+              admin: {
+                description: 'Hero 섹션 전체 배경으로 사용됩니다. 업로드 시 기존 그라데이션/그리드 위에 어두운 오버레이와 함께 표시됩니다.',
+              },
             },
             {
               name: 'heroCta',
@@ -126,6 +138,15 @@ export const Homepage: GlobalConfig = {
                 { name: 'link', type: 'text', label: '상세 페이지 링크' },
                 { name: 'gradient', type: 'text', label: '카드 배경 그라데이션' },
                 { name: 'icon', type: 'upload' as const, label: '아이콘 (SVG)', relationTo: 'media' },
+                {
+                  name: 'image',
+                  type: 'upload' as const,
+                  label: '카드 대표 이미지',
+                  relationTo: 'media',
+                  admin: {
+                    description: '카드의 배경/대표 비주얼로 사용됩니다. 아이콘과 별개로 큰 이미지를 표시할 때 사용하세요.',
+                  },
+                },
               ],
             },
           ],
@@ -187,6 +208,15 @@ export const Homepage: GlobalConfig = {
               label: '"View All" 링크',
               defaultValue: '/insights',
             },
+            {
+              name: 'insightsBackgroundImage',
+              type: 'upload' as const,
+              label: 'Insights 섹션 배경 이미지 (선택)',
+              relationTo: 'media',
+              admin: {
+                description: '선택 사항입니다. 업로드하면 Insights 섹션 배경으로 사용되며, 비워두면 기본 배경이 유지됩니다.',
+              },
+            },
           ],
         },
 
@@ -221,6 +251,15 @@ export const Homepage: GlobalConfig = {
               label: '배경 그라데이션',
               admin: {
                 description: '예: linear-gradient(135deg, #5EB6B2 0%, #15716D 100%)',
+              },
+            },
+            {
+              name: 'ctaBannerBackgroundImage',
+              type: 'upload' as const,
+              label: 'CTA Banner 배경 이미지 (선택)',
+              relationTo: 'media',
+              admin: {
+                description: '선택 사항입니다. 업로드하면 그라데이션 위에 이미지가 오버레이되며, 비워두면 그라데이션만 표시됩니다.',
               },
             },
           ],

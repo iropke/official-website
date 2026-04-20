@@ -795,6 +795,10 @@ export interface Homepage {
   id: number;
   heroHeadline: string;
   heroSubCopy?: string | null;
+  /**
+   * Hero 섹션 전체 배경으로 사용됩니다. 업로드 시 기존 그라데이션/그리드 위에 어두운 오버레이와 함께 표시됩니다.
+   */
+  heroBackgroundImage?: (number | null) | Media;
   heroCta?:
     | {
         label: string;
@@ -824,6 +828,10 @@ export interface Homepage {
         link?: string | null;
         gradient?: string | null;
         icon?: (number | null) | Media;
+        /**
+         * 카드의 배경/대표 비주얼로 사용됩니다. 아이콘과 별개로 큰 이미지를 표시할 때 사용하세요.
+         */
+        image?: (number | null) | Media;
         id?: string | null;
       }[]
     | null;
@@ -836,6 +844,10 @@ export interface Homepage {
   insightsCount?: number | null;
   insightsCtaLabel?: string | null;
   insightsCtaUrl?: string | null;
+  /**
+   * 선택 사항입니다. 업로드하면 Insights 섹션 배경으로 사용되며, 비워두면 기본 배경이 유지됩니다.
+   */
+  insightsBackgroundImage?: (number | null) | Media;
   ctaBannerMessage: string;
   ctaBannerCtaLabel?: string | null;
   ctaBannerCtaUrl?: string | null;
@@ -843,6 +855,10 @@ export interface Homepage {
    * 예: linear-gradient(135deg, #5EB6B2 0%, #15716D 100%)
    */
   ctaBannerGradient?: string | null;
+  /**
+   * 선택 사항입니다. 업로드하면 그라데이션 위에 이미지가 오버레이되며, 비워두면 그라데이션만 표시됩니다.
+   */
+  ctaBannerBackgroundImage?: (number | null) | Media;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -917,6 +933,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
 export interface HomepageSelect<T extends boolean = true> {
   heroHeadline?: T;
   heroSubCopy?: T;
+  heroBackgroundImage?: T;
   heroCta?:
     | T
     | {
@@ -947,6 +964,7 @@ export interface HomepageSelect<T extends boolean = true> {
         link?: T;
         gradient?: T;
         icon?: T;
+        image?: T;
         id?: T;
       };
   coreMessage?: T;
@@ -955,10 +973,12 @@ export interface HomepageSelect<T extends boolean = true> {
   insightsCount?: T;
   insightsCtaLabel?: T;
   insightsCtaUrl?: T;
+  insightsBackgroundImage?: T;
   ctaBannerMessage?: T;
   ctaBannerCtaLabel?: T;
   ctaBannerCtaUrl?: T;
   ctaBannerGradient?: T;
+  ctaBannerBackgroundImage?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

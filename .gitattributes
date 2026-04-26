@@ -1,0 +1,54 @@
+# 라인 엔딩 정책
+# 2026-04-26 추가 — Windows(대표님) ↔ Linux(Vercel/Supabase) 혼용 환경에서
+# CRLF 노이즈로 거대한 diff 가 생기는 이슈 방지.
+#
+# 동작:
+#   * text=auto eol=lf : 텍스트로 판정된 모든 파일은 저장소에 LF 로 저장,
+#                        체크아웃 시 OS 와 무관하게 LF 유지
+#   * binary           : 절대 변환하지 않음
+#   * eol=crlf         : Windows 전용 스크립트는 강제 CRLF
+#
+# 적용 후 첫 커밋 또는 일괄 정규화가 필요하면 PowerShell 에서:
+#   git add --renormalize .
+
+# 기본: 텍스트 자동 감지 + LF
+* text=auto eol=lf
+
+# Windows 전용 스크립트는 CRLF 유지
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+
+# Shell 스크립트는 LF 강제
+*.sh        text eol=lf
+
+# SVG 는 텍스트로 취급 (diff 가능)
+*.svg       text eol=lf
+
+# 이미지 (바이너리)
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.webp      binary
+*.bmp       binary
+
+# 폰트 (바이너리)
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.otf       binary
+*.eot       binary
+
+# 문서/압축 (바이너리)
+*.pdf       binary
+*.zip       binary
+*.gz        binary
+*.tar       binary
+*.7z        binary
+
+# 미디어 (바이너리)
+*.mp4       binary
+*.webm      binary
+*.mp3       binary

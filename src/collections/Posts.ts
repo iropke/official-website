@@ -414,6 +414,63 @@ export const Posts: CollectionConfig = {
                   },
                 ],
               },
+
+              // ─── 이미지 + 캡션 (editorialMedia) ───
+              // Phase A 1b 단계 4 (2026-04-27): editor_requirements_v2.md §4-1 표 매핑.
+              //   - image:    upload (Media collection 참조). 필수.
+              //   - caption:  textarea (rows: 2). 비어있으면 figcaption 미렌더.
+              //   - alt:      text. 비어있으면 Media 의 기본 alt 사용.
+              //   - alignment: select (full/center/wide). 기본값 center.
+              // 렌더는 Phase 3 (PostDetailClient.tsx renderBlockNode) 에서 별도 추가.
+              {
+                slug: 'editorialMedia',
+                labels: { singular: '이미지 + 캡션', plural: '이미지 + 캡션' },
+                fields: [
+                  {
+                    name: 'image',
+                    type: 'upload' as const,
+                    label: '이미지',
+                    relationTo: 'media',
+                    required: true,
+                    admin: {
+                      description: '본문에 삽입할 이미지 (Cloudinary 업로드)',
+                    },
+                  },
+                  {
+                    name: 'caption',
+                    type: 'textarea',
+                    label: '캡션',
+                    admin: {
+                      rows: 2,
+                      description: '이미지 하단 설명 (선택). 비어있으면 figcaption 미렌더.',
+                    },
+                  },
+                  {
+                    name: 'alt',
+                    type: 'text',
+                    label: '대체 텍스트 (alt)',
+                    admin: {
+                      description:
+                        '접근성용 이미지 설명 (선택). 비어있으면 Media 의 기본 alt 가 사용됩니다.',
+                    },
+                  },
+                  {
+                    name: 'alignment',
+                    type: 'select',
+                    label: '본문 폭 배치',
+                    defaultValue: 'center',
+                    options: [
+                      { label: '본문 폭 (center)', value: 'center' },
+                      { label: '확장 폭 (wide)', value: 'wide' },
+                      { label: '전체 폭 (full)', value: 'full' },
+                    ],
+                    admin: {
+                      description:
+                        '본문 폭 대비 이미지 배치. center=본문 폭, wide=좌우 약간 확장, full=화면 전체 폭.',
+                    },
+                  },
+                ],
+              },
             ],
           }),
         ],

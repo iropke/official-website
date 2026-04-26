@@ -28,10 +28,10 @@
 
 | 단계 | 작업 | 상태 |
 |------|------|------|
-| 0 | Payload migration 전환 (`pnpm payload migrate` 체계로 일원화) | 대기 |
+| 0 | Payload migration 전환 (옵션 B - clean reset + baseline + Vercel pipeline) | ✅ 2026-04-27 완료 |
 | 0.5 | OS 언어 라우팅 미들웨어 (`src/middleware.ts`) | ✅ 2026-04-26 완료 |
-| 1a | **에디터 요구사항 구체화 세션** (별도 1세션) | 진행 중 |
-| 1b | 에디터 기능 완성 (썸네일 DnD · 이미지 업로드 · BlocksFeature Phase 3 렌더 · TableFeature 전환) | 대기 |
+| 1a | 에디터 요구사항 구체화 세션 (별도 1세션) | ✅ 2026-04-26 완료 (`references/requirements/editor_requirements_v2.md`) |
+| 1b | **에디터 기능 완성** (editorialMedia 신규 + Phase 3 렌더 + Shiki + editorialTable 사용성) | ⏳ **다음 세션 진입점 — 단계 4 (editorialMedia) 부터** |
 | 1c | Insights (블로그) 목록 + 상세 — **영문** | 대기 |
 | 2 | Project Inquiry 폼 + Resend 연동 — 영문 | 대기 |
 | 3 | 첫화면 콘텐츠 관리 — 영문 | 대기 |
@@ -83,12 +83,39 @@
 - **프론트 + 백엔드 + DB 한 세트씩 순차** (여러 기능 병렬 개발 금지)
 - 한 세트 완료 = admin UI · API · 프론트 렌더 · 시각 검증까지 모두 통과
 
-### 스키마 변경 정책
+### 스키마 변경 정책 (2026-04-27 정착)
 
-- ❌ ad-hoc ALTER TABLE 금지 (Drizzle prepared statement 캐시 / Vercel 번들 스냅샷과 불일치 위험)
-- ✅ `pnpm payload migrate:create --name <name>` 으로 migration 파일 생성
-- ✅ `pnpm payload migrate` 로 적용
-- Migration 실행은 Supabase Direct connection (port 5432) 사용 (transaction pooler 6543 은 DDL 비호환)
+**핵심 원칙**
+
+- ❌ ad-hoc `ALTER TABLE` / `CREATE TABLE` / `DROP COLUMN` (Supabase SQL Editor 직접) 금지
+- ✅ 모든 schema 변경 = migration 파일 생성 + 코드와 함께 **동일 commit** + push
+- ✅ Vercel build 가 `scripts/build.mjs` wrapper 를 통해 자동 migrate 적용
+- ⚠ 로컬 `pnpm build` 는 migration 자동 실행 안 함 (사고 차단 — 의도)
+
+**워크플로 (코드의 collection / global / 필드 / Lexical BlocksFeature 변경 직후)**
+
+1. PowerShell 에서 `DATABASE_URL` 을 Session pooler 로 swap:
+
+   ```powershell
+   $env:DATABASE_URL = ((Get-Content .env | Where-Object { $_ -match '^DATABASE_URL_DIRECT=' }) -replace '^DATABASE_URL_DIRECT=', '').Trim()
+   ```
+
+2. `pnpm payload migrate:create --name <변경요약>` (예: `add-editorial-media`)
+3. 생성된 `src/migrations/<ts>-<name>.ts` 검토 — 의도와 일치 확인
+4. (선택) 로컬 적용: `pnpm payload migrate`
+5. **코드 + migration 파일을 동일 commit** 으로 묶어서 push
+6. Vercel build 가 자동 적용 (idempotent — 이미 적용된 migration 은 자동 skip)
+
+**환경변수 두 가지**
+
+| 변수 | 용도 | Port | 등록 위치 |
+|------|------|------|----------|
+| `DATABASE_URL` | runtime / 일반 쿼리 | 6543 (Transaction pooler) | `.env` + Vercel UI (모든 환경) |
+| `DATABASE_URL_DIRECT` | Migration 실행 (DDL) | 5432 (Session pooler) | `.env` + Vercel UI (모든 환경) |
+
+→ host 동일 (`aws-1-us-east-1.pooler.supabase.com`), port 만 다름.
+
+⚠ Direct connection (`db.<ref>.supabase.co`) 는 IPv4 비호환으로 사용 금지. 반드시 Session pooler URL.
 
 ### 번역 정책
 
@@ -135,9 +162,12 @@
 
 | 메모리 | 용도 |
 |--------|------|
-| `project_iropke_roadmap_v2.md` | 현행 로드맵 (이 파일과 동일 내용) |
-| `project_iropke_payload_migrations.md` | Phase A 단계 0 상세 |
-| `project_iropke_posts_phase2.md` | Phase A 단계 1b 시작점 (BlocksFeature 5종 admin 스키마 완료 상태) |
+| `project_iropke_roadmap_v2.md` | 현행 로드맵 (이 파일과 동일 내용 + Phase B 상세) |
+| `project_iropke_editor_requirements_v2.md` | Phase A 단계 1b 본 작업 진입점 (12단계 중 4번부터) |
+| `project_iropke_payload_migrations.md` | Phase A 단계 0 작업 기록 (완료) |
+| `feedback_iropke_schema_discipline.md` | **schema 변경 시 매번 적용할 영구 워크플로** |
+| `reference_iropke_database_urls.md` | DATABASE_URL / DATABASE_URL_DIRECT 두 변수 운영 규칙 |
+| `project_iropke_posts_phase2.md` | BlocksFeature 5종 스냅샷 (editorialMedia 가 6번째로 추가됨) |
 | `project_iropke_translation_api.md` | Phase B-1 직전에 활성화 |
 | `project_iropke_fonts.md` | 폰트 시스템 (라틴 검증용) |
 | `project_iropke_launch_d7_checklist.md` | 런칭 직전 스테이지 분리 체크리스트 |
@@ -149,3 +179,4 @@
 | 날짜 | 변경 |
 |------|------|
 | 2026-04-26 | 초안 생성. v2 로드맵 / OS 라우팅 / SEO 의무 항목 / 번역 패러다임 전환 (KO→EN) 반영 |
+| 2026-04-27 | Phase A 단계 0 완료 (옵션 B clean reset + baseline migration + scripts/build.mjs Vercel pipeline). 스키마 변경 정책 워크플로 정식화. DATABASE_URL_DIRECT (Session pooler 5432) 도입. Payload 3.82.1 → 3.83.0 정렬 |

@@ -238,6 +238,9 @@ export const Posts: CollectionConfig = {
           BlocksFeature({
             blocks: [
               // ─── 표 (editorialTable) ───
+              // Phase A 1b 단계 9: 옵션 B — Word/Excel 에서 표를 복사하면
+              //   탭(\t) 구분 TSV 형태로 클립보드에 들어온다.
+              //   첫 줄 = 헤더, 나머지 줄 = 데이터 행. 렌더러에서 파싱.
               {
                 slug: 'editorialTable',
                 labels: { singular: 'Editorial 표', plural: 'Editorial 표' },
@@ -251,50 +254,17 @@ export const Posts: CollectionConfig = {
                     },
                   },
                   {
-                    name: 'headers',
-                    type: 'array',
-                    label: '열 헤더',
-                    minRows: 1,
-                    labels: { singular: '헤더', plural: '헤더' },
+                    name: 'data',
+                    type: 'textarea',
+                    label: '표 데이터 (TSV)',
+                    required: true,
                     admin: {
-                      description: '표의 첫 행에 표시될 열 헤더들 (순서대로)',
+                      rows: 8,
+                      description:
+                        'Word · Excel 에서 표를 복사(Ctrl+C)한 뒤 이 칸에 붙여넣기(Ctrl+V)하세요. ' +
+                        '첫 줄이 헤더, 나머지 줄이 데이터 행으로 처리됩니다. ' +
+                        '열 구분: 탭(Tab) | 행 구분: 줄바꿈(Enter)',
                     },
-                    fields: [
-                      {
-                        name: 'text',
-                        type: 'text',
-                        label: '헤더 텍스트',
-                        required: true,
-                      },
-                    ],
-                  },
-                  {
-                    name: 'rows',
-                    type: 'array',
-                    label: '행',
-                    minRows: 1,
-                    labels: { singular: '행', plural: '행' },
-                    admin: {
-                      description: '각 행은 헤더 개수만큼의 셀을 가져야 합니다',
-                    },
-                    fields: [
-                      {
-                        name: 'cells',
-                        type: 'array',
-                        label: '셀',
-                        minRows: 1,
-                        labels: { singular: '셀', plural: '셀' },
-                        fields: [
-                          {
-                            name: 'text',
-                            type: 'textarea',
-                            label: '셀 내용',
-                            required: true,
-                            admin: { rows: 2 },
-                          },
-                        ],
-                      },
-                    ],
                   },
                 ],
               },

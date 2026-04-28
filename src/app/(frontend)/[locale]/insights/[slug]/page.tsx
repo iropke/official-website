@@ -2,8 +2,10 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Media, Post, Tag } from '@/payload-types'
+import { codeToHtml } from 'shiki'
 
 import PostDetailClient, {
+  type LexicalContent,
   type PostDetailData,
   type RelatedPostData,
   type TagData,
@@ -77,6 +79,36 @@ function toRelatedData(post: Post, locale: SupportedLocale): RelatedPostData {
   }
 }
 
+/* ── Shiki server-side pre-rendering ────────────────────────── */
+async function preRenderCodeBlocks(
+  content: LexicalContent | null,
+): Promise<Record<string, string>> {
+  if (!content?.root?.children) return {}
+  const result: Record<string, string> = {}
+
+  for (const node of content.root.children) {
+    if (
+      node.type === 'block' &&
+      (node as { fields?: { blockType?: string } }).fields?.blockType === 'codeBlock'
+    ) {
+      const fields = (node as { fields?: { id?: string; language?: string; code?: string } }).fields ?? {}
+      const { id, language, code } = fields
+      if (code && id) {
+        try {
+          result[id] = await codeToHtml(code, {
+            lang: (language ?? 'text').toLowerCase().trim(),
+            theme: 'github-dark',
+          })
+        } catch {
+          result[id] = `<pre><code>${code}</code></pre>`
+        }
+      }
+    }
+  }
+
+  return result
+}
+
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>
 }
@@ -134,13 +166,17 @@ export default async function PostDetailPage({ params }: PageProps) {
 
   // ── 3) Client props 로 변환 ────────────────────────────────
   const heroThumb = resolveMedia(post.thumbnail, post.title ?? '')
+  const contentRaw = (post.content ?? null) as LexicalContent | null
+  const highlightedCode = await preRenderCodeBlocks(contentRaw)
+
   const postData: PostDetailData = {
     title: post.title ?? '',
     intro: post.excerpt ?? '',
     heroImageUrl: heroThumb.url,
     heroImageAlt: heroThumb.alt,
-    content: post.content ?? null,
+    content: contentRaw,
     tags: resolveTags(post.tags, locale),
+    highlightedCode,
   }
   const relatedPosts: RelatedPostData[] = relatedDocs.map((p) => toRelatedData(p, locale))
 

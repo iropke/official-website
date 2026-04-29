@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
 } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { WordTablePasteFeature } from '@/lexical/features/wordTablePaste/feature.server'
 
 /**
  * Task #1.6: meta.ogImage 자동 복사 hook.
@@ -163,12 +164,20 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', '_status', 'updatedAt'],
     group: '콘텐츠',
+    /**
+     * Admin Preview 는 Draft 상태 게시물도 확인할 수 있어야 하므로
+     * `/api/preview?path=...` 로 라우팅해 Next.js draftMode 를 활성화한다.
+     * preview route 는 인증된 Payload 사용자에게만 응답하며, draftMode 가
+     * 켜지면 `[slug]/page.tsx` 가 `payload.find({ draft: true })` 로
+     * 최신 draft 버전을 조회한다.
+     */
     preview: (doc, { locale }) => {
       const baseUrl = resolveServerURL()
       const localeCode = typeof locale === 'string' && locale ? locale : 'ko'
       const slug = (doc as { slug?: string } | undefined)?.slug ?? ''
       if (!slug) return null
-      return `${baseUrl}/${localeCode}/insights/${slug}`
+      const path = `/${localeCode}/insights/${slug}`
+      return `${baseUrl}/api/preview?path=${encodeURIComponent(path)}`
     },
   },
   access: {
@@ -235,6 +244,11 @@ export const Posts: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          // Phase A 1b 디버깅 (2026-04-29):
+          //   Word/Excel 표 클립보드(text/html) 를 editorialTable 블록으로 자동 변환.
+          //   src/lexical/features/wordTablePaste/Plugin.tsx 의 PASTE_COMMAND 핸들러가
+          //   `<table>` 감지 시 INSERT_BLOCK_COMMAND 디스패치.
+          WordTablePasteFeature(),
           BlocksFeature({
             blocks: [
               // ─── 표 (editorialTable) ───

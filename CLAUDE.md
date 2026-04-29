@@ -31,8 +31,8 @@
 | 0 | Payload migration 전환 (옵션 B - clean reset + baseline + Vercel pipeline) | ✅ 2026-04-27 완료 |
 | 0.5 | OS 언어 라우팅 미들웨어 (`src/middleware.ts`) | ✅ 2026-04-26 완료 |
 | 1a | 에디터 요구사항 구체화 세션 (별도 1세션) | ✅ 2026-04-26 완료 (`references/requirements/editor_requirements_v2.md`) |
-| 1b | **에디터 기능 완성** (editorialMedia 신규 + Phase 3 렌더 + Shiki + editorialTable 사용성) | ⏳ **다음 세션 진입점 — 단계 4 (editorialMedia) 부터** |
-| 1c | Insights (블로그) 목록 + 상세 — **영문** | 대기 |
+| 1b | **에디터 기능 완성** (editorialMedia 신규 + Phase 3 렌더 + Shiki + editorialTable 사용성) | ✅ 2026-04-29 완료 — PR #15 (`feat/editor-1b`) 병합 대기 중. 테스트 후 디버깅 필요 |
+| 1c | Insights (블로그) 목록 + 상세 — **영문** | ⏳ **다음 작업 — 1b PR 병합 + 디버깅 완료 후 진입** |
 | 2 | Project Inquiry 폼 + Resend 연동 — 영문 | 대기 |
 | 3 | 첫화면 콘텐츠 관리 — 영문 | 대기 |
 | 4 | Solution / Service 페이지 관리 — 영문 | 대기 |
@@ -180,3 +180,4 @@
 |------|------|
 | 2026-04-26 | 초안 생성. v2 로드맵 / OS 라우팅 / SEO 의무 항목 / 번역 패러다임 전환 (KO→EN) 반영 |
 | 2026-04-27 | Phase A 단계 0 완료 (옵션 B clean reset + baseline migration + scripts/build.mjs Vercel pipeline). 스키마 변경 정책 워크플로 정식화. DATABASE_URL_DIRECT (Session pooler 5432) 도입. Payload 3.82.1 → 3.83.0 정렬 |
+| 2026-04-29 | Phase A 단계 1b 완료. editorialMedia 블록 스키마 + 렌더러 (alignment 3종). codeBlock Shiki github-dark 서버사이드 색상화. qnaList / videoEmbed / rawHtml 렌더러. editorialTable → TSV textarea 방식 (Word 붙여넣기). shiki 4.0.2 추가. PR #15 (`feat/editor-1b`) 생성. 테스트 결과 디버깅 필요 항목 있음 — 다음 세션에서 처리 예정 |

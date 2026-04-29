@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Media, Post, Tag } from '@/payload-types'
@@ -119,6 +120,15 @@ export default async function PostDetailPage({ params }: PageProps) {
 
   const payload = await getPayload({ config })
 
+  /**
+   * Draft preview (Phase A 1b 디버깅, 2026-04-29):
+   *   admin Preview 버튼은 `/api/preview?path=...` 를 거쳐 Next.js draftMode
+   *   를 활성화한 뒤 이 페이지로 리다이렉트한다. draftMode 가 켜져 있으면
+   *   `payload.find({ draft: true })` 로 최신 draft 버전을 가져오고,
+   *   `publishedLocales` 필터도 건너뛴다 (아직 공개되지 않은 글도 미리보기).
+   */
+  const { isEnabled: isDraft } = await draftMode()
+
   // ── 1) Target post 조회 (slug + publishedLocales 필터) ───────
   let post: Post | undefined
   try {
@@ -127,10 +137,13 @@ export default async function PostDetailPage({ params }: PageProps) {
       locale,
       depth: 2, // thumbnail + tags (localized name) populate
       limit: 1,
+      draft: isDraft,
       where: {
         and: [
           { slug: { equals: slug } },
-          { publishedLocales: { contains: locale } },
+          ...(isDraft
+            ? []
+            : [{ publishedLocales: { contains: locale } } as const]),
         ],
       },
     })

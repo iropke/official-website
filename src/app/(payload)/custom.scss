@@ -198,3 +198,64 @@ body {
    공용 css 가 var(--font-heading-h1-3) 등을 참조하므로 위에서 주입한
    한국어 기본 변수가 그대로 사용됩니다. */
 @import '../../styles/lexical-content.css';
+
+/* ═══════════════════════════════════════════════════════════════
+   Lexical BlocksFeature — 항상 펼친 상태로 렌더 (Phase A 1b 디버깅)
+
+   배경:
+     BlocksFeature 의 블록(이미지+캡션, 표, 코드, Q&A, Raw HTML, videoEmbed
+     6종)은 doc preferences 에 저장된 collapsed 상태를 따라가는데, 한 번
+     접힌 블록은 이후 세션에서도 collapsed 로 렌더되어 사용자가 입력한
+     캡션/데이터가 시각적으로 가려진다. (DOM/DB 에는 저장되어 있음.)
+
+   동작:
+     - `.LexicalEditorTheme__block__container` 하위의 collapsible content 를
+       항상 표시 (rah-static height 와 inner div display 를 강제 펼침).
+     - collapse 토글 버튼/인디케이터 자체를 숨겨 UX 일관성 유지.
+
+   범위 한정:
+     `.LexicalEditorTheme__block__container` 클래스 selector 로 Lexical
+     블록 영역 내부에만 적용. Payload 의 다른 collapsible field UI
+     (배열 필드, 컬렉터블 그룹 등) 에는 영향 없음.
+   ═══════════════════════════════════════════════════════════════ */
+.LexicalEditorTheme__block__container {
+  .collapsible.collapsible--collapsed > .rah-static {
+    height: auto !important;
+  }
+  .collapsible.collapsible--collapsed > .rah-static > div {
+    display: block !important;
+  }
+  .collapsible__toggle-wrap,
+  .collapsible__indicator {
+    display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Lexical 에디터 — Horizontal rule (Phase A 1b 디버깅)
+
+   프론트엔드의 `editorialDelimiter` (PostDetail.module.css L279-309)
+   디자인을 admin Lexical 에디터에서도 동일하게 노출.
+     · 좌우 1px 라인 + 가운데 ✦ 마크 + 세로 마진 56px
+   <hr> 자체는 빈 element 이므로 ::before/::after 콘텐츠를 사용할 수 없어,
+   다중 background-image (linear-gradient + inline SVG ✦) 로 합성한다.
+   ═══════════════════════════════════════════════════════════════ */
+.rich-text-lexical [contenteditable][data-lexical-editor='true'] hr {
+  border: none;
+  height: 18px;
+  margin: 56px 0;
+  background-color: transparent;
+  background-image:
+    linear-gradient(rgba(35, 35, 41, 0.12), rgba(35, 35, 41, 0.12)),
+    linear-gradient(rgba(35, 35, 41, 0.12), rgba(35, 35, 41, 0.12)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><text x='9' y='14' text-anchor='middle' font-family='Georgia,serif' font-size='15' fill='%239ca3ad'>%E2%9C%A6</text></svg>");
+  background-size:
+    calc(50% - 16px) 1px,
+    calc(50% - 16px) 1px,
+    18px 18px;
+  background-position:
+    left center,
+    right center,
+    center center;
+  background-repeat: no-repeat;
+}

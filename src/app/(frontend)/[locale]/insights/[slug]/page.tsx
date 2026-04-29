@@ -1,9 +1,12 @@
 import { notFound } from 'next/navigation'
+import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Media, Post, Tag } from '@/payload-types'
+import { codeToHtml } from 'shiki'
 
 import PostDetailClient, {
+  type LexicalContent,
   type PostDetailData,
   type RelatedPostData,
   type TagData,
@@ -77,6 +80,36 @@ function toRelatedData(post: Post, locale: SupportedLocale): RelatedPostData {
   }
 }
 
+/* ── Shiki server-side pre-rendering ────────────────────────── */
+async function preRenderCodeBlocks(
+  content: LexicalContent | null,
+): Promise<Record<string, string>> {
+  if (!content?.root?.children) return {}
+  const result: Record<string, string> = {}
+
+  for (const node of content.root.children) {
+    if (
+      node.type === 'block' &&
+      (node as { fields?: { blockType?: string } }).fields?.blockType === 'codeBlock'
+    ) {
+      const fields = (node as { fields?: { id?: string; language?: string; code?: string } }).fields ?? {}
+      const { id, language, code } = fields
+      if (code && id) {
+        try {
+          result[id] = await codeToHtml(code, {
+            lang: (language ?? 'text').toLowerCase().trim(),
+            theme: 'github-dark',
+          })
+        } catch {
+          result[id] = `<pre><code>${code}</code></pre>`
+        }
+      }
+    }
+  }
+
+  return result
+}
+
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>
 }
@@ -87,6 +120,15 @@ export default async function PostDetailPage({ params }: PageProps) {
 
   const payload = await getPayload({ config })
 
+  /**
+   * Draft preview (Phase A 1b 디버깅, 2026-04-29):
+   *   admin Preview 버튼은 `/api/preview?path=...` 를 거쳐 Next.js draftMode
+   *   를 활성화한 뒤 이 페이지로 리다이렉트한다. draftMode 가 켜져 있으면
+   *   `payload.find({ draft: true })` 로 최신 draft 버전을 가져오고,
+   *   `publishedLocales` 필터도 건너뛴다 (아직 공개되지 않은 글도 미리보기).
+   */
+  const { isEnabled: isDraft } = await draftMode()
+
   // ── 1) Target post 조회 (slug + publishedLocales 필터) ───────
   let post: Post | undefined
   try {
@@ -95,10 +137,13 @@ export default async function PostDetailPage({ params }: PageProps) {
       locale,
       depth: 2, // thumbnail + tags (localized name) populate
       limit: 1,
+      draft: isDraft,
       where: {
         and: [
           { slug: { equals: slug } },
-          { publishedLocales: { contains: locale } },
+          ...(isDraft
+            ? []
+            : [{ publishedLocales: { contains: locale } } as const]),
         ],
       },
     })
@@ -134,13 +179,17 @@ export default async function PostDetailPage({ params }: PageProps) {
 
   // ── 3) Client props 로 변환 ────────────────────────────────
   const heroThumb = resolveMedia(post.thumbnail, post.title ?? '')
+  const contentRaw = (post.content ?? null) as LexicalContent | null
+  const highlightedCode = await preRenderCodeBlocks(contentRaw)
+
   const postData: PostDetailData = {
     title: post.title ?? '',
     intro: post.excerpt ?? '',
     heroImageUrl: heroThumb.url,
     heroImageAlt: heroThumb.alt,
-    content: post.content ?? null,
+    content: contentRaw,
     tags: resolveTags(post.tags, locale),
+    highlightedCode,
   }
   const relatedPosts: RelatedPostData[] = relatedDocs.map((p) => toRelatedData(p, locale))
 

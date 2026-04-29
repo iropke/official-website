@@ -6,7 +6,7 @@ import Image from 'next/image';
 import styles from './PostDetail.module.css';
 
 /* ═══════════════════════════════════════════════════════════════
-   Public types — produced by the server component (page.tsx)
+   Public types
    ═══════════════════════════════════════════════════════════════ */
 export interface TagData {
   label: string;
@@ -22,10 +22,6 @@ export interface RelatedPostData {
   thumbnailAlt: string;
 }
 
-/**
- * Lexical SerializedEditorState shape (loose typing — Payload 의 richText 필드가
- * `{ root: { children: [...] } }` 구조를 반환. 런타임 JSON 을 그대로 받는다).
- */
 export interface LexicalContent {
   root: {
     type?: string;
@@ -53,6 +49,8 @@ export interface PostDetailData {
   heroImageAlt: string;
   content: LexicalContent | null;
   tags: TagData[];
+  /** blockId → Shiki pre-rendered HTML (server에서 주입) */
+  highlightedCode?: Record<string, string>;
 }
 
 interface PostDetailClientProps {
@@ -62,14 +60,39 @@ interface PostDetailClientProps {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Lexical 기본 블록 렌더러
-   Phase 1 스코프: root / heading / paragraph / list / listitem / quote /
-                 upload(image) / horizontalrule / link / text (format bitmask)
-   커스텀 블록(table/qna/code/rawHtml/video)은 Phase 2-3 에서 BlocksFeature
-   기반으로 확장 예정.
+   Inline SVG Icons
    ═══════════════════════════════════════════════════════════════ */
+function QuoteIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      <path d="M19 14C13.4772 14 9 18.4772 9 24V34H21V24H15C15 21.7909 16.7909 20 19 20V14Z" fill="currentColor"/>
+      <path d="M39 14C33.4772 14 29 18.4772 29 24V34H41V24H35C35 21.7909 36.7909 20 39 20V14Z" fill="currentColor"/>
+    </svg>
+  );
+}
 
-// Lexical TextNode.format 비트 플래그
+function QuestionIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M9.5 9.5C9.5 8.12 10.62 7 12 7s2.5 1.12 2.5 2.5C14.5 11 12 11.5 12 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="12" cy="16" r="0.75" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function AnswerIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Text / inline renderers
+   ═══════════════════════════════════════════════════════════════ */
 const FORMAT_BOLD = 1;
 const FORMAT_ITALIC = 1 << 1;
 const FORMAT_STRIKETHROUGH = 1 << 2;
@@ -114,23 +137,34 @@ function renderInlineChildren(children: LexicalNode[] | undefined): React.ReactN
         </a>
       );
     }
-    // autolink, mark 등 기타 inline 은 children 을 flatten
     return <React.Fragment key={i}>{renderInlineChildren(child.children)}</React.Fragment>;
   });
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   Block renderer
+   ═══════════════════════════════════════════════════════════════ */
 interface RenderBlockArgs {
   node: LexicalNode;
   index: number;
   revealClass: string;
   delay: string;
   styles: { [k: string]: string };
+  highlightedCode?: Record<string, string>;
 }
 
-function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderBlockArgs): React.ReactNode {
+function renderBlockNode({
+  node,
+  index,
+  revealClass,
+  delay,
+  styles: s,
+  highlightedCode,
+}: RenderBlockArgs): React.ReactNode {
   const t = node.type;
   const key = index;
 
+  /* ── Lexical 기본 블록 ── */
   if (t === 'heading') {
     const rawTag = typeof node.tag === 'string' ? node.tag : 'h2';
     const allowedTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
@@ -145,7 +179,6 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
   }
 
   if (t === 'paragraph') {
-    // 빈 paragraph 는 vertical spacing 역할만 하도록 유지
     return (
       <p key={key} className={revealClass} style={{ transitionDelay: delay }}>
         {renderInlineChildren(node.children)}
@@ -202,27 +235,183 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
     const width = value?.width ?? 1200;
     const height = value?.height ?? Math.round(width * (675 / 1200));
     return (
-      <div
-        key={key}
-        className={`${s.editorialMedia} ${revealClass}`}
-        style={{ transitionDelay: delay }}
-      >
+      <div key={key} className={`${s.editorialMedia} ${revealClass}`} style={{ transitionDelay: delay }}>
         <figure>
           <div className={s.editorialMediaFrame}>
-            <Image
-              src={url}
-              alt={alt}
-              width={width}
-              height={height}
-              sizes="(max-width: 1079px) 100vw, 75vw"
-            />
+            <Image src={url} alt={alt} width={width} height={height} sizes="(max-width: 1079px) 100vw, 75vw" />
           </div>
         </figure>
       </div>
     );
   }
 
-  // 알 수 없는 블록: children 이 있다면 텍스트로 fallback
+  /* ── BlocksFeature 커스텀 블록 ── */
+  if (t === 'block') {
+    const fields = (node as { fields?: Record<string, unknown> }).fields ?? {};
+    const blockType = fields.blockType as string | undefined;
+    const blockId = fields.id as string | undefined;
+
+    /* editorialMedia — 이미지 + 캡션 */
+    if (blockType === 'editorialMedia') {
+      const imageField = (fields.image as { url?: string; alt?: string; width?: number; height?: number } | null | undefined);
+      const url = imageField?.url;
+      if (!url) return null;
+
+      const alt = (fields.alt as string | undefined) || imageField?.alt || '';
+      const caption = fields.caption as string | undefined;
+      const alignment = (fields.alignment as string) || 'center';
+      const width = imageField?.width ?? 1200;
+      const height = imageField?.height ?? 675;
+
+      const alignClass =
+        alignment === 'wide' ? s.editorialMediaWide
+        : alignment === 'full' ? s.editorialMediaFull
+        : s.editorialMediaCenter;
+
+      return (
+        <div key={key} className={`${s.editorialMedia} ${alignClass ?? ''} ${revealClass}`} style={{ transitionDelay: delay }}>
+          <figure>
+            <div className={s.editorialMediaFrame}>
+              <Image
+                src={url}
+                alt={alt}
+                width={width}
+                height={height}
+                sizes="(max-width: 1079px) 100vw, 75vw"
+              />
+            </div>
+            {caption && <figcaption className={s.editorialMediaCaption}>{caption}</figcaption>}
+          </figure>
+        </div>
+      );
+    }
+
+    /* editorialTable — 표 (TSV 파싱) */
+    if (blockType === 'editorialTable') {
+      const caption = fields.caption as string | undefined;
+      const data = (fields.data as string | undefined) ?? '';
+      const lines = data.split('\n').map(l => l.trimEnd()).filter(l => l.length > 0);
+      if (!lines.length) return null;
+
+      const [headerLine, ...dataLines] = lines;
+      const headers = headerLine.split('\t');
+      const rows = dataLines.map(l => l.split('\t'));
+
+      return (
+        <div key={key} className={`${s.editorialTable} ${revealClass}`} style={{ transitionDelay: delay }}>
+          <div className={s.editorialTableWrap}>
+            <table aria-label={caption || undefined}>
+              <thead>
+                <tr>
+                  {headers.map((h, i) => <th key={i}>{h}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, ri) => (
+                  <tr key={ri}>
+                    {row.map((cell, ci) => <td key={ci}>{cell}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className={s.editorialTableSwipeHint}>← swipe →</p>
+        </div>
+      );
+    }
+
+    /* videoEmbed — YouTube 임베드 */
+    if (blockType === 'videoEmbed') {
+      const url = fields.url as string | undefined;
+      const caption = fields.caption as string | undefined;
+      if (!url) return null;
+
+      const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^?&\n]+)/);
+      if (!ytMatch) return null;
+      const embedUrl = `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`;
+
+      return (
+        <div key={key} className={`${s.editorialMedia} ${revealClass}`} style={{ transitionDelay: delay }}>
+          <figure>
+            <div className={s.editorialMediaFrame}>
+              <iframe
+                src={embedUrl}
+                title={caption || 'Video'}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+            {caption && <figcaption className={s.editorialMediaCaption}>{caption}</figcaption>}
+          </figure>
+        </div>
+      );
+    }
+
+    /* rawHtml — Raw HTML 삽입 */
+    if (blockType === 'rawHtml') {
+      const label = fields.label as string | undefined;
+      const html = fields.html as string | undefined;
+      if (!html) return null;
+
+      return (
+        <div key={key} className={`${s.editorialRaw} ${revealClass}`} style={{ transitionDelay: delay }}>
+          {label && <p className={s.editorialRawLabel}>{label}</p>}
+          <div dangerouslySetInnerHTML={{ __html: html }} />
+        </div>
+      );
+    }
+
+    /* codeBlock — Shiki 구문 강조 */
+    if (blockType === 'codeBlock') {
+      const language = fields.language as string | undefined;
+      const code = fields.code as string | undefined;
+      const preRendered = blockId ? highlightedCode?.[blockId] : undefined;
+
+      return (
+        <div key={key} className={`${s.editorialCode} ${revealClass}`} style={{ transitionDelay: delay }}>
+          <div className={s.editorialCodeHead}>
+            <span className={s.editorialCodeDots}>
+              <span /><span /><span />
+            </span>
+            {language && <span>{language}</span>}
+          </div>
+          {preRendered
+            ? <div dangerouslySetInnerHTML={{ __html: preRendered }} />
+            : <pre><code>{code}</code></pre>
+          }
+        </div>
+      );
+    }
+
+    /* qnaList — Q&A 리스트 */
+    if (blockType === 'qnaList') {
+      type QnaItem = { id?: string; role?: string; text?: string };
+      const items = (fields.items as QnaItem[] | undefined) ?? [];
+      if (!items.length) return null;
+
+      return (
+        <div key={key} className={`${s.editorialQna} ${revealClass}`} style={{ transitionDelay: delay }}>
+          {items.map((item, i) => (
+            <div key={item.id ?? i} className={s.editorialQnaItem}>
+              <span className={`${s.editorialQnaIcon} ${item.role === 'answer' ? s.editorialQnaIconAnswer : ''}`}>
+                {item.role === 'answer' ? <AnswerIcon width={28} height={28} /> : <QuestionIcon width={28} height={28} />}
+              </span>
+              <div>
+                <p className={s.editorialQnaLabel}>
+                  {item.role === 'answer' ? 'Answer' : 'Question'}
+                </p>
+                <p className={s.editorialQnaText}>{item.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
+  }
+
+  /* 알 수 없는 블록 — children 텍스트로 fallback */
   if (Array.isArray(node.children) && node.children.length > 0) {
     return (
       <p key={key} className={revealClass} style={{ transitionDelay: delay }}>
@@ -233,7 +422,16 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
   return null;
 }
 
-function LexicalRenderer({ content }: { content: LexicalContent | null }) {
+/* ═══════════════════════════════════════════════════════════════
+   LexicalRenderer
+   ═══════════════════════════════════════════════════════════════ */
+function LexicalRenderer({
+  content,
+  highlightedCode,
+}: {
+  content: LexicalContent | null;
+  highlightedCode?: Record<string, string>;
+}) {
   if (!content || !content.root || !Array.isArray(content.root.children)) return null;
 
   return (
@@ -246,21 +444,10 @@ function LexicalRenderer({ content }: { content: LexicalContent | null }) {
           revealClass: styles.reveal,
           delay,
           styles,
+          highlightedCode,
         });
       })}
     </>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   Inline SVG Icons
-   ═══════════════════════════════════════════════════════════════ */
-function QuoteIcon(props: React.SVGAttributes<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
-      <path d="M19 14C13.4772 14 9 18.4772 9 24V34H21V24H15C15 21.7909 16.7909 20 19 20V14Z" fill="currentColor"/>
-      <path d="M39 14C33.4772 14 29 18.4772 29 24V34H41V24H35C35 21.7909 36.7909 20 39 20V14Z" fill="currentColor"/>
-    </svg>
   );
 }
 
@@ -336,7 +523,7 @@ export default function PostDetailClient({
             </header>
 
             <div className={styles.editorial}>
-              <LexicalRenderer content={post.content} />
+              <LexicalRenderer content={post.content} highlightedCode={post.highlightedCode} />
 
               {post.tags.length > 0 && (
                 <section className={`${styles.postTags} ${styles.reveal}`} aria-label="Post tags">

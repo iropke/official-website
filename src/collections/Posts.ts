@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
 } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { WordTablePasteFeature } from '@/lexical/features/wordTablePaste/feature.server'
 
 /**
  * Task #1.6: meta.ogImage 자동 복사 hook.
@@ -153,9 +154,28 @@ const backfillPublishedDate: CollectionAfterChangeHook = async ({
  * 편집 화면 우상단에 "Preview" 버튼이 추가되어 새 탭에서 프리뷰가 열린다.
  * root-level admin.livePreview 는 Edit 탭 회귀 이력이 있어 절대 건드리지 말 것.
  */
-const resolveServerURL = (): string =>
-  process.env.NEXT_PUBLIC_SERVER_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+/**
+ * admin.preview 의 base URL 해석.
+ *
+ *   1) Vercel preview/development 배포에서는 deployment 별 URL (VERCEL_BRANCH_URL
+ *      또는 VERCEL_URL) 을 우선. preview 빌드의 admin 에서 Preview 버튼이
+ *      production 도메인으로 빠지는 것을 방지 (preview 코드와 production 도메인은
+ *      서로 다른 빌드를 가리킬 수 있음).
+ *   2) production 배포 / 일반 환경: NEXT_PUBLIC_SERVER_URL (custom 도메인) → VERCEL_URL → localhost.
+ */
+const resolveServerURL = (): string => {
+  const vercelEnv = process.env.VERCEL_ENV
+  const isVercelNonProd = vercelEnv === 'preview' || vercelEnv === 'development'
+  if (isVercelNonProd) {
+    const branchURL = process.env.VERCEL_BRANCH_URL
+    if (branchURL) return `https://${branchURL}`
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  }
+  return (
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  )
+}
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -163,12 +183,20 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', '_status', 'updatedAt'],
     group: '콘텐츠',
+    /**
+     * Admin Preview 는 Draft 상태 게시물도 확인할 수 있어야 하므로
+     * `/api/preview?path=...` 로 라우팅해 Next.js draftMode 를 활성화한다.
+     * preview route 는 인증된 Payload 사용자에게만 응답하며, draftMode 가
+     * 켜지면 `[slug]/page.tsx` 가 `payload.find({ draft: true })` 로
+     * 최신 draft 버전을 조회한다.
+     */
     preview: (doc, { locale }) => {
       const baseUrl = resolveServerURL()
       const localeCode = typeof locale === 'string' && locale ? locale : 'ko'
       const slug = (doc as { slug?: string } | undefined)?.slug ?? ''
       if (!slug) return null
-      return `${baseUrl}/${localeCode}/insights/${slug}`
+      const path = `/${localeCode}/insights/${slug}`
+      return `${baseUrl}/api/preview?path=${encodeURIComponent(path)}`
     },
   },
   access: {
@@ -235,9 +263,17 @@ export const Posts: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          // Phase A 1b 디버깅 (2026-04-29):
+          //   Word/Excel 표 클립보드(text/html) 를 editorialTable 블록으로 자동 변환.
+          //   src/lexical/features/wordTablePaste/Plugin.tsx 의 PASTE_COMMAND 핸들러가
+          //   `<table>` 감지 시 INSERT_BLOCK_COMMAND 디스패치.
+          WordTablePasteFeature(),
           BlocksFeature({
             blocks: [
               // ─── 표 (editorialTable) ───
+              // Phase A 1b 단계 9: 옵션 B — Word/Excel 에서 표를 복사하면
+              //   탭(\t) 구분 TSV 형태로 클립보드에 들어온다.
+              //   첫 줄 = 헤더, 나머지 줄 = 데이터 행. 렌더러에서 파싱.
               {
                 slug: 'editorialTable',
                 labels: { singular: 'Editorial 표', plural: 'Editorial 표' },
@@ -251,50 +287,17 @@ export const Posts: CollectionConfig = {
                     },
                   },
                   {
-                    name: 'headers',
-                    type: 'array',
-                    label: '열 헤더',
-                    minRows: 1,
-                    labels: { singular: '헤더', plural: '헤더' },
+                    name: 'data',
+                    type: 'textarea',
+                    label: '표 데이터 (TSV)',
+                    required: true,
                     admin: {
-                      description: '표의 첫 행에 표시될 열 헤더들 (순서대로)',
+                      rows: 8,
+                      description:
+                        'Word · Excel 에서 표를 복사(Ctrl+C)한 뒤 이 칸에 붙여넣기(Ctrl+V)하세요. ' +
+                        '첫 줄이 헤더, 나머지 줄이 데이터 행으로 처리됩니다. ' +
+                        '열 구분: 탭(Tab) | 행 구분: 줄바꿈(Enter)',
                     },
-                    fields: [
-                      {
-                        name: 'text',
-                        type: 'text',
-                        label: '헤더 텍스트',
-                        required: true,
-                      },
-                    ],
-                  },
-                  {
-                    name: 'rows',
-                    type: 'array',
-                    label: '행',
-                    minRows: 1,
-                    labels: { singular: '행', plural: '행' },
-                    admin: {
-                      description: '각 행은 헤더 개수만큼의 셀을 가져야 합니다',
-                    },
-                    fields: [
-                      {
-                        name: 'cells',
-                        type: 'array',
-                        label: '셀',
-                        minRows: 1,
-                        labels: { singular: '셀', plural: '셀' },
-                        fields: [
-                          {
-                            name: 'text',
-                            type: 'textarea',
-                            label: '셀 내용',
-                            required: true,
-                            admin: { rows: 2 },
-                          },
-                        ],
-                      },
-                    ],
                   },
                 ],
               },

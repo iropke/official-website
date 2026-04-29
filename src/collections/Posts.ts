@@ -154,9 +154,28 @@ const backfillPublishedDate: CollectionAfterChangeHook = async ({
  * 편집 화면 우상단에 "Preview" 버튼이 추가되어 새 탭에서 프리뷰가 열린다.
  * root-level admin.livePreview 는 Edit 탭 회귀 이력이 있어 절대 건드리지 말 것.
  */
-const resolveServerURL = (): string =>
-  process.env.NEXT_PUBLIC_SERVER_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+/**
+ * admin.preview 의 base URL 해석.
+ *
+ *   1) Vercel preview/development 배포에서는 deployment 별 URL (VERCEL_BRANCH_URL
+ *      또는 VERCEL_URL) 을 우선. preview 빌드의 admin 에서 Preview 버튼이
+ *      production 도메인으로 빠지는 것을 방지 (preview 코드와 production 도메인은
+ *      서로 다른 빌드를 가리킬 수 있음).
+ *   2) production 배포 / 일반 환경: NEXT_PUBLIC_SERVER_URL (custom 도메인) → VERCEL_URL → localhost.
+ */
+const resolveServerURL = (): string => {
+  const vercelEnv = process.env.VERCEL_ENV
+  const isVercelNonProd = vercelEnv === 'preview' || vercelEnv === 'development'
+  if (isVercelNonProd) {
+    const branchURL = process.env.VERCEL_BRANCH_URL
+    if (branchURL) return `https://${branchURL}`
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  }
+  return (
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  )
+}
 
 export const Posts: CollectionConfig = {
   slug: 'posts',

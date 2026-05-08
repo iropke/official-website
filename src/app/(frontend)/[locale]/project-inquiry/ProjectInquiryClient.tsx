@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import styles from './ProjectInquiry.module.css';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -78,6 +79,9 @@ const fieldConfigs: FieldConfig[] = [
    Page Component
    ═══════════════════════════════════════════════════════════════ */
 export default function ProjectInquiryClient() {
+  const params = useParams<{ locale?: string }>();
+  const locale = params?.locale ?? 'en';
+
   /* ── Form state ── */
   const [formData, setFormData] = useState<FormData>({
     companyName: '',
@@ -96,6 +100,8 @@ export default function ProjectInquiryClient() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showModal, setShowModal] = useState(false);
   const [uploadFileName, setUploadFileName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
   const modalCloseRef = useRef<HTMLButtonElement>(null);
@@ -188,8 +194,9 @@ export default function ProjectInquiryClient() {
 
   /* ── Submit ── */
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
+      if (submitting) return;
 
       let allValid = true;
       const newTouched: Record<string, boolean> = {};
@@ -219,29 +226,68 @@ export default function ProjectInquiryClient() {
         return;
       }
 
-      /* TODO: Replace with actual Payload CMS / API submission */
-      lastFocusedRef.current = document.activeElement as HTMLElement;
-      setShowModal(true);
-      document.body.style.overflow = 'hidden';
+      /* Submit to Payload via /api/inquiries */
+      setSubmitError(null);
+      setSubmitting(true);
+      try {
+        const fd = new globalThis.FormData();
+        fd.append('companyName', formData.companyName);
+        fd.append('contactName', formData.contactName);
+        fd.append('jobTitle', formData.jobTitle);
+        fd.append('phone', formData.phone);
+        fd.append('email', formData.email);
+        fd.append('projectOverview', formData.projectOverview);
+        fd.append('website', formData.website);
+        fd.append('launchDate', formData.launchDate);
+        fd.append('notRobot', String(formData.notRobot));
+        fd.append('submittedLocale', locale);
+        if (formData.rfpFile) fd.append('rfpFile', formData.rfpFile);
 
-      /* Reset form */
-      setFormData({
-        companyName: '',
-        contactName: '',
-        jobTitle: '',
-        phone: '',
-        email: '',
-        projectOverview: '',
-        website: '',
-        launchDate: '',
-        notRobot: false,
-        rfpFile: null,
-      });
-      setUploadFileName('');
-      setFieldStates({});
-      setTouched({});
+        const res = await fetch('/api/inquiries', {
+          method: 'POST',
+          body: fd,
+        });
+
+        if (!res.ok) {
+          const data = (await res.json().catch(() => null)) as
+            | { error?: string; errors?: Array<{ field: string; message: string }> }
+            | null;
+          const msg =
+            data?.errors?.map((e) => `${e.field}: ${e.message}`).join(' · ') ||
+            data?.error ||
+            `Submission failed (${res.status}).`;
+          setSubmitError(msg);
+          return;
+        }
+
+        /* Success — show modal and reset form */
+        lastFocusedRef.current = document.activeElement as HTMLElement;
+        setShowModal(true);
+        document.body.style.overflow = 'hidden';
+
+        setFormData({
+          companyName: '',
+          contactName: '',
+          jobTitle: '',
+          phone: '',
+          email: '',
+          projectOverview: '',
+          website: '',
+          launchDate: '',
+          notRobot: false,
+          rfpFile: null,
+        });
+        setUploadFileName('');
+        setFieldStates({});
+        setTouched({});
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Network error. Please try again.';
+        setSubmitError(msg);
+      } finally {
+        setSubmitting(false);
+      }
     },
-    [formData, validateField],
+    [formData, locale, submitting, validateField],
   );
 
   /* ── Modal close ── */
@@ -552,8 +598,18 @@ export default function ProjectInquiryClient() {
 
                 {/* Submit */}
                 <div className={styles.actions}>
-                  <button className={styles.submitButton} type="submit">
-                    Submit Project Inquiry
+                  {submitError && (
+                    <p className={styles.submitError} role="alert">
+                      {submitError}
+                    </p>
+                  )}
+                  <button
+                    className={styles.submitButton}
+                    type="submit"
+                    disabled={submitting}
+                    aria-busy={submitting}
+                  >
+                    {submitting ? 'Submitting…' : 'Submit Project Inquiry'}
                   </button>
                 </div>
               </form>

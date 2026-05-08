@@ -404,6 +404,16 @@
   margin-top: 16px;
 }
 
+.submitError {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fdecea;
+  color: #b71c1c;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
 .submitButton {
   display: inline-flex;
   align-items: center;

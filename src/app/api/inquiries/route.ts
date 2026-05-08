@@ -1,0 +1,250 @@
+/**
+ * POST /api/inquiries
+ *
+ * Project Inquiry 폼 (`/[locale]/project-inquiry`) 의 제출 endpoint.
+ * 공개(비로그인) 호출 가능 — `Inquiries.access.create` 가 `() => true` 로
+ * 열려있고, 이 라우트는 본인 서버에서 직접 Payload local API 를 호출하므로
+ * 외부 인증 없이 접수 가능합니다.
+ *
+ * 입력 형식: `multipart/form-data` (또는 `application/json` — 파일 미첨부 시)
+ *
+ * 필드 매핑 (form → Inquiries 컬렉션):
+ *   companyName     → company        (required)
+ *   contactName     → contactName    (required)
+ *   jobTitle        → jobTitle
+ *   phone           → phone          (required)
+ *   email           → email          (required)
+ *   projectOverview → projectOverview(required)
+ *   website         → websiteUrl
+ *   launchDate      → launchDate
+ *   rfpFile (File)  → media collection 업로드 후 ID 를 rfpFile 에 저장
+ *   notRobot        → 검증만, DB 저장 안 함 (스팸 방지 — Phase A 단계 2 추후 reCAPTCHA)
+ *
+ * 메타 필드:
+ *   submittedLocale → 폼이 보낸 locale (헤더 또는 form 필드)
+ *   ipAddress       → x-forwarded-for / x-real-ip
+ *
+ * ⚠ 메일 발송: Resend 연동은 Phase A 단계 2 후속 작업. 현 단계는 미구현.
+ */
+
+import { NextResponse, type NextRequest } from 'next/server'
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+const SUPPORTED_LOCALES = new Set(['ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar'])
+const MAX_FILE_BYTES = 20 * 1024 * 1024 // 20MB — 폼 안내 문구와 일치
+const ALLOWED_FILE_EXTS = ['ppt', 'pptx', 'doc', 'docx', 'pdf', 'zip']
+
+interface InquiryInput {
+  companyName: string
+  contactName: string
+  jobTitle: string
+  phone: string
+  email: string
+  projectOverview: string
+  website: string
+  launchDate: string
+  notRobot: boolean
+  submittedLocale: string
+}
+
+type ValidationError = {
+  field: string
+  message: string
+}
+
+function validate(input: InquiryInput): ValidationError[] {
+  const errors: ValidationError[] = []
+
+  if (!input.companyName.trim()) errors.push({ field: 'companyName', message: 'Required.' })
+  if (!input.contactName.trim()) errors.push({ field: 'contactName', message: 'Required.' })
+  if (!input.projectOverview.trim())
+    errors.push({ field: 'projectOverview', message: 'Required.' })
+
+  // phone — 숫자 7~15 자리, 기호 허용
+  const phone = input.phone.trim()
+  const digits = phone.replace(/\D/g, '')
+  if (!phone || !/^[+\d\s().-]+$/.test(phone) || digits.length < 7 || digits.length > 15) {
+    errors.push({ field: 'phone', message: 'Invalid phone number.' })
+  }
+
+  // email
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())) {
+    errors.push({ field: 'email', message: 'Invalid email address.' })
+  }
+
+  // website (필수 — 폼 정책)
+  const website = input.website.trim()
+  if (!website) {
+    errors.push({ field: 'website', message: 'Required.' })
+  } else {
+    const normalized = /^https?:\/\//i.test(website) ? website : `https://${website}`
+    try {
+      const u = new URL(normalized)
+      if (!u.hostname || !u.hostname.includes('.')) throw new Error('bad host')
+    } catch {
+      errors.push({ field: 'website', message: 'Invalid URL.' })
+    }
+  }
+
+  // launchDate (선택, YYYY-MM-DD 형식)
+  if (input.launchDate.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(input.launchDate.trim())) {
+    errors.push({ field: 'launchDate', message: 'Invalid date format (YYYY-MM-DD).' })
+  }
+
+  if (!input.notRobot) {
+    errors.push({ field: 'notRobot', message: 'Spam check is required.' })
+  }
+
+  return errors
+}
+
+function getClientIp(req: NextRequest): string | undefined {
+  const fwd = req.headers.get('x-forwarded-for')
+  if (fwd) return fwd.split(',')[0]?.trim()
+  return req.headers.get('x-real-ip') ?? undefined
+}
+
+function asString(v: FormDataEntryValue | null | undefined): string {
+  if (typeof v === 'string') return v
+  return ''
+}
+
+function asBool(v: FormDataEntryValue | null | undefined): boolean {
+  const s = asString(v).toLowerCase()
+  return s === 'true' || s === '1' || s === 'on'
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const payload = await getPayload({ config })
+
+    // ── 1. 입력 파싱 (multipart 또는 JSON) ──────────────────────
+    const contentType = req.headers.get('content-type') ?? ''
+    let input: InquiryInput
+    let file: File | null = null
+
+    if (contentType.includes('multipart/form-data')) {
+      const fd = await req.formData()
+      input = {
+        companyName: asString(fd.get('companyName')),
+        contactName: asString(fd.get('contactName')),
+        jobTitle: asString(fd.get('jobTitle')),
+        phone: asString(fd.get('phone')),
+        email: asString(fd.get('email')),
+        projectOverview: asString(fd.get('projectOverview')),
+        website: asString(fd.get('website')),
+        launchDate: asString(fd.get('launchDate')),
+        notRobot: asBool(fd.get('notRobot')),
+        submittedLocale: asString(fd.get('submittedLocale')),
+      }
+      const f = fd.get('rfpFile')
+      if (f instanceof File && f.size > 0) file = f
+    } else {
+      const json = (await req.json().catch(() => null)) as Partial<InquiryInput> | null
+      if (!json) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid JSON body.' },
+          { status: 400 },
+        )
+      }
+      input = {
+        companyName: asString(json.companyName),
+        contactName: asString(json.contactName),
+        jobTitle: asString(json.jobTitle),
+        phone: asString(json.phone),
+        email: asString(json.email),
+        projectOverview: asString(json.projectOverview),
+        website: asString(json.website),
+        launchDate: asString(json.launchDate),
+        notRobot: Boolean(json.notRobot),
+        submittedLocale: asString(json.submittedLocale),
+      }
+    }
+
+    // ── 2. 검증 ──────────────────────────────────────────────────
+    const errors = validate(input)
+    if (errors.length > 0) {
+      return NextResponse.json(
+        { success: false, error: 'Validation failed.', errors },
+        { status: 400 },
+      )
+    }
+
+    // submittedLocale fallback: Accept-Language 첫 토큰
+    let submittedLocale = input.submittedLocale.trim()
+    if (!submittedLocale || !SUPPORTED_LOCALES.has(submittedLocale)) {
+      const accept = req.headers.get('accept-language') ?? ''
+      const first = accept.split(',')[0]?.split('-')[0]?.toLowerCase() ?? ''
+      submittedLocale = SUPPORTED_LOCALES.has(first) ? first : 'en'
+    }
+
+    // ── 3. (선택) 파일 업로드 → media 컬렉션 ────────────────────
+    let rfpFileId: number | undefined
+    if (file) {
+      // 파일 검증
+      if (file.size > MAX_FILE_BYTES) {
+        return NextResponse.json(
+          { success: false, error: 'File exceeds 20MB limit.' },
+          { status: 400 },
+        )
+      }
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+      if (!ALLOWED_FILE_EXTS.includes(ext)) {
+        return NextResponse.json(
+          { success: false, error: `Unsupported file type: .${ext}` },
+          { status: 400 },
+        )
+      }
+
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const created = await payload.create({
+        collection: 'media',
+        data: { alt: `RFP — ${input.companyName}` },
+        file: {
+          data: buffer,
+          mimetype: file.type || 'application/octet-stream',
+          name: file.name,
+          size: file.size,
+        },
+        // Media.access.create 는 인증 유저만 허용. 본 서버 라우트는 신뢰
+        // 컨텍스트이므로 access 우회.
+        overrideAccess: true,
+      })
+      rfpFileId = created.id
+    }
+
+    // ── 4. inquiries 레코드 생성 ─────────────────────────────────
+    const ip = getClientIp(req)
+
+    const inquiry = await payload.create({
+      collection: 'inquiries',
+      data: {
+        company: input.companyName,
+        contactName: input.contactName,
+        jobTitle: input.jobTitle || undefined,
+        phone: input.phone,
+        email: input.email,
+        projectOverview: input.projectOverview,
+        websiteUrl: input.website || undefined,
+        launchDate: input.launchDate || undefined,
+        rfpFile: rfpFileId,
+        status: 'new',
+        submittedLocale,
+        ipAddress: ip,
+      },
+    })
+
+    // ── 5. 메일 발송 (Resend) — 미구현 ──────────────────────────
+    // TODO: Resend integration pending — see CLAUDE.md Phase A 단계 2
+    //   - 신규 접수 알림: hello@iropke.com 으로 요약 발송
+    //   - 신청자 자동 회신: input.email 로 접수 확인 메일
+    //   - 외부 환경변수 RESEND_API_KEY 필요. Phase A 단계 2 진입 시 활성화.
+
+    return NextResponse.json({ success: true, id: inquiry.id }, { status: 201 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[api/inquiries] error:', err)
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
+  }
+}

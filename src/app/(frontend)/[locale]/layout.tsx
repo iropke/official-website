@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Header from '@/components/layout/Header/Header'
 import Footer from '@/components/layout/Footer/Footer'
 import FloatingActions from '@/components/layout/FloatingActions/FloatingActions'
+import CookieConsent from '@/components/CookieConsent/CookieConsent'
 import LocaleHtmlAttributes from './LocaleHtmlAttributes'
 import { normalizeLocale } from '@/i18n/locales'
 import { SITE_BASE_URL, buildAlternates } from '@/i18n/alternates'
@@ -43,6 +44,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <Footer />
       </div>
       <FloatingActions inquiryHref={`/${locale}/project-inquiry`} />
+      <CookieConsent />
     </>
   )
 }

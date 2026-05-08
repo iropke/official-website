@@ -30,7 +30,7 @@ const LOCALE_NAMES: Record<Locale, string> = {
 
 export type SupportedLocale = Locale
 
-export type FieldType = 'title' | 'excerpt' | 'metaTitle' | 'metaDescription'
+export type FieldType = 'title' | 'excerpt' | 'metaTitle' | 'metaDescription' | 'content'
 
 export interface TranslationRequest {
   /** 번역할 원문 */
@@ -73,6 +73,8 @@ function buildPrompt(req: TranslationRequest): string {
       'This is an SEO meta title (under ~60 characters). Keep the key nouns and brand terms, no quotation marks.',
     metaDescription:
       'This is an SEO meta description (under ~155 characters). Make it informative and neutral.',
+    content:
+      'This is a fragment of body text from a Lexical rich-text node. Translate it naturally; preserve any inline markup-like characters verbatim. Do NOT add line breaks or quotes.',
   }
 
   const hint = req.fieldType ? fieldHints[req.fieldType] : ''

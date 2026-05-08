@@ -1,0 +1,138 @@
+/* ── IROPKE Error Screen ──────────────────────────────────────
+   기획서 (references/requirements/iropke_error.md) 요구사항:
+   - global header 없이 isolated 한 화면
+   - 차분, 약간의 위트, 명확한 복귀 동선
+   - error code 가 가장 강한 시각 요소
+   - mobile 에서 버튼 stacked
+*/
+
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 48px);
+  background: var(--main-bg-color-light, #f5f5f5);
+  color: var(--primary-2, #43434e);
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.content {
+  max-width: 640px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.code {
+  font-family: var(--font-iropke-batang, var(--font-latin-serif, serif));
+  font-size: clamp(72px, 14vw, 140px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--primary-2, #43434e);
+  margin: 0;
+}
+
+.title {
+  font-family: var(--font-heading-h1-3, var(--font-body));
+  font-size: clamp(22px, 3.4vw, 30px);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--grayscale-gs-primary, #232329);
+  margin: 4px 0 0;
+}
+
+.witty {
+  font-family: var(--font-iropke-batang, var(--font-latin-serif, serif));
+  font-style: italic;
+  font-size: clamp(16px, 1.8vw, 18px);
+  line-height: 1.5;
+  color: var(--primary, #5eb6b2);
+  margin: 0;
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--primary-2, #43434e);
+  opacity: 0.85;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  font-family: inherit;
+}
+
+.btnPrimary {
+  background: var(--primary, #5eb6b2);
+  color: #fff;
+  border-color: var(--primary, #5eb6b2);
+}
+
+.btnPrimary:hover,
+.btnPrimary:focus-visible {
+  background: var(--primary-hover, #22908b);
+  border-color: var(--primary-hover, #22908b);
+}
+
+.btnSecondary {
+  background: transparent;
+  color: var(--primary-2, #43434e);
+  border-color: var(--primary-2, #43434e);
+}
+
+.btnSecondary:hover,
+.btnSecondary:focus-visible {
+  background: var(--primary-2, #43434e);
+  color: #fff;
+}
+
+.hint {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--primary-2, #43434e);
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

@@ -1,13 +1,18 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { IconSearch } from '@/components/icons/SvgIcons';
+import { normalizeLocale } from '@/i18n/locales';
 import styles from './SearchToggle.module.css';
 
 export default function SearchToggle() {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname() ?? '/';
+  const segment = pathname.split('/').filter(Boolean)[0] ?? '';
+  const locale = normalizeLocale(segment);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -40,7 +45,12 @@ export default function SearchToggle() {
       >
         <IconSearch className={styles.icon} />
       </button>
-      <form className={styles.searchForm} action="#" role="search">
+      <form
+        className={styles.searchForm}
+        action={`/${locale}/search`}
+        method="GET"
+        role="search"
+      >
         <label className="sr-only" htmlFor="layoutSearchInput">Search site</label>
         <input
           ref={inputRef}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getPayload } from 'payload';
 import config from '@payload-config';
 import type { Homepage as HomepageGlobal, Post } from '@/payload-types';
+import { buildAlternates } from '@/i18n/alternates';
 
 import Hero from '@/components/home/Hero/Hero';
 import SubCarousel from '@/components/home/SubCarousel/SubCarousel';
@@ -46,6 +47,7 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   return {
     title,
     description,
+    alternates: buildAlternates(locale, ''),
     openGraph: {
       title,
       description,

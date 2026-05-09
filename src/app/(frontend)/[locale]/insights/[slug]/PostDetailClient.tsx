@@ -280,7 +280,153 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
       );
     }
 
-    // PR-2 에서 추가 예정: editorialTable / videoEmbed / rawHtml / qnaList / codeBlock
+    // editorialTable: caption + headers[] + rows[].cells[]
+    if (blockType === 'editorialTable') {
+      type Cell = { text?: unknown };
+      type Row = { cells?: Cell[] };
+      type Header = { text?: unknown };
+      const caption = typeof fields?.caption === 'string' ? fields.caption.trim() : '';
+      const headers = Array.isArray(fields?.headers) ? (fields.headers as Header[]) : [];
+      const rows = Array.isArray(fields?.rows) ? (fields.rows as Row[]) : [];
+      if (!headers.length || !rows.length) return null;
+      return (
+        <div
+          key={key}
+          className={`${s.editorialTable} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          <div className={s.editorialTableWrap}>
+            <table {...(caption ? { 'aria-label': caption } : {})}>
+              <thead>
+                <tr>
+                  {headers.map((h, hi) => (
+                    <th key={hi} scope="col">
+                      {typeof h?.text === 'string' ? h.text : ''}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, ri) => (
+                  <tr key={ri}>
+                    {(row.cells ?? []).map((cell, ci) => (
+                      <td key={ci}>{typeof cell?.text === 'string' ? cell.text : ''}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    // qnaList: items[] of { role: 'question'|'answer', text }
+    if (blockType === 'qnaList') {
+      type QnaItem = { role?: unknown; text?: unknown };
+      const items = Array.isArray(fields?.items) ? (fields.items as QnaItem[]) : [];
+      if (!items.length) return null;
+      return (
+        <div
+          key={key}
+          className={`${s.editorialQna} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          {items.map((item, ii) => {
+            const role = item?.role === 'answer' ? 'answer' : 'question';
+            const text = typeof item?.text === 'string' ? item.text : '';
+            const iconClass =
+              role === 'answer'
+                ? `${s.editorialQnaIcon} ${s.editorialQnaIconAnswer}`
+                : s.editorialQnaIcon;
+            return (
+              <div key={ii} className={s.editorialQnaItem}>
+                <span className={iconClass} aria-hidden="true">
+                  {role === 'answer' ? <AnswerIcon /> : <QuestionIcon />}
+                </span>
+                <div>
+                  <div className={s.editorialQnaLabel}>{role === 'answer' ? 'A' : 'Q'}</div>
+                  <p className={s.editorialQnaText}>{text}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // codeBlock: language + code (Shiki 색상화는 PR-3 에서 추가; 여기서는 plain pre/code)
+    if (blockType === 'codeBlock') {
+      const language = typeof fields?.language === 'string' ? fields.language.trim() : '';
+      const code = typeof fields?.code === 'string' ? fields.code : '';
+      if (!code) return null;
+      return (
+        <div
+          key={key}
+          className={`${s.editorialCode} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          <div className={s.editorialCodeHead}>
+            <span className={s.editorialCodeDots} aria-hidden="true">
+              <span /><span /><span />
+            </span>
+            <span>{language || 'code'}</span>
+          </div>
+          <pre>
+            <code>{code}</code>
+          </pre>
+        </div>
+      );
+    }
+
+    // rawHtml: label + html (신뢰된 HTML 만 — admin description 에 XSS 경고 명시됨)
+    if (blockType === 'rawHtml') {
+      const label = typeof fields?.label === 'string' ? fields.label.trim() : '';
+      const html = typeof fields?.html === 'string' ? fields.html : '';
+      if (!html) return null;
+      return (
+        <div
+          key={key}
+          className={`${s.editorialRaw} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          {label && <div className={s.editorialRawLabel}>{label}</div>}
+          <div dangerouslySetInnerHTML={{ __html: html }} />
+        </div>
+      );
+    }
+
+    // videoEmbed: YouTube URL → youtube-nocookie embed (editorial-media 프레임 재사용)
+    if (blockType === 'videoEmbed') {
+      const url = typeof fields?.url === 'string' ? fields.url.trim() : '';
+      const caption = typeof fields?.caption === 'string' ? fields.caption.trim() : '';
+      const videoId = parseYouTubeId(url);
+      if (!videoId) return null;
+      const embedSrc = `https://www.youtube-nocookie.com/embed/${videoId}`;
+      return (
+        <div
+          key={key}
+          className={`${s.editorialMedia} ${s.editorialMediaCenter} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          <figure>
+            <div className={s.editorialMediaFrame}>
+              <iframe
+                src={embedSrc}
+                title={caption || 'YouTube video'}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                loading="lazy"
+              />
+            </div>
+            {caption && (
+              <figcaption className={s.editorialMediaCaption}>{caption}</figcaption>
+            )}
+          </figure>
+        </div>
+      );
+    }
+
     return null;
   }
 
@@ -315,6 +461,33 @@ function LexicalRenderer({ content }: { content: LexicalContent | null }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   YouTube URL → video ID 추출
+   지원: youtu.be/<id>, youtube.com/watch?v=<id>, youtube.com/embed/<id>
+   ═══════════════════════════════════════════════════════════════ */
+function parseYouTubeId(rawUrl: string): string | null {
+  if (!rawUrl) return null;
+  try {
+    const u = new URL(rawUrl);
+    const host = u.hostname.replace(/^www\./, '');
+    if (host === 'youtu.be') {
+      const id = u.pathname.replace(/^\//, '').split('/')[0];
+      return /^[A-Za-z0-9_-]{6,}$/.test(id) ? id : null;
+    }
+    if (host === 'youtube.com' || host === 'youtube-nocookie.com' || host.endsWith('.youtube.com')) {
+      if (u.pathname === '/watch') {
+        const v = u.searchParams.get('v');
+        return v && /^[A-Za-z0-9_-]{6,}$/.test(v) ? v : null;
+      }
+      const m = u.pathname.match(/^\/(embed|shorts|v)\/([A-Za-z0-9_-]{6,})/);
+      if (m) return m[2];
+    }
+  } catch {
+    // 잘못된 URL → null
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Inline SVG Icons
    ═══════════════════════════════════════════════════════════════ */
 function QuoteIcon(props: React.SVGAttributes<SVGSVGElement>) {
@@ -322,6 +495,25 @@ function QuoteIcon(props: React.SVGAttributes<SVGSVGElement>) {
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
       <path d="M19 14C13.4772 14 9 18.4772 9 24V34H21V24H15C15 21.7909 16.7909 20 19 20V14Z" fill="currentColor"/>
       <path d="M39 14C33.4772 14 29 18.4772 29 24V34H41V24H35C35 21.7909 36.7909 20 39 20V14Z" fill="currentColor"/>
+    </svg>
+  );
+}
+
+function QuestionIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M9.5 9.2c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5c0 1.1-.7 1.7-1.4 2.2-.7.5-1.1.9-1.1 1.6V14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="17" r="0.9" fill="currentColor" />
+    </svg>
+  );
+}
+
+function AnswerIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M7.5 12.4l3 3 6-6.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

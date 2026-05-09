@@ -631,17 +631,7 @@ export const Posts: CollectionConfig = {
       },
     },
 
-    // ─── AI 기능 관련 ─────────────────────────────────────────
-    {
-      name: 'aiGenerated',
-      type: 'checkbox',
-      label: 'AI 생성 콘텐츠',
-      defaultValue: false,
-      admin: {
-        position: 'sidebar',
-        description: 'AI가 초안을 생성한 경우 체크',
-      },
-    },
+    // ─── 번역 상태 ────────────────────────────────────────────
     {
       name: 'translationStatus',
       type: 'json',

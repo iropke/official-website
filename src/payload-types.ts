@@ -400,10 +400,6 @@ export interface Post {
    */
   clusterRole?: ('pillar' | 'spoke') | null;
   /**
-   * AI가 초안을 생성한 경우 체크
-   */
-  aiGenerated?: boolean | null;
-  /**
    * 각 언어별 번역 완료 상태 (자동 관리)
    */
   translationStatus?:
@@ -753,7 +749,6 @@ export interface PostsSelect<T extends boolean = true> {
   publishedLocales?: T;
   cluster?: T;
   clusterRole?: T;
-  aiGenerated?: T;
   translationStatus?: T;
   meta?:
     | T

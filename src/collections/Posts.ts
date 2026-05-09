@@ -586,6 +586,32 @@ export const Posts: CollectionConfig = {
      // 일원화. 필터는 `payload.find` 가 `draft: false` 기본값으로 _status=published
      // 만 반환하므로 쿼리 측 status 조건도 제거됨. "archived" 상태는 필요 시
      // 별도 `isArchived: checkbox` 필드로 향후 추가.
+
+    // ─── 분류 (카테고리) ──────────────────────────────────────
+    // category: 'insight' | 'story' | 'portfolio'. 라우트 분기
+    //   (/insights · /stories · /portfolio) + sitemap + 관련 글 query 의 기준.
+    //   content-generation 의 meta.json 에서 import 시 그대로 바인딩됨.
+    //   모든 운영 글은 이 셋 중 하나에 속함. defaultValue 'insight' 라
+    //   기존 데이터 / 미지정 import 는 자동으로 'insight' 로 분류.
+    // 비-localized — 카테고리 분류는 콘텐츠 언어와 무관한 글 자체의 속성.
+    {
+      name: 'category',
+      type: 'select',
+      label: '카테고리',
+      required: true,
+      defaultValue: 'insight',
+      options: [
+        { label: 'Insight (인사이트)', value: 'insight' },
+        { label: 'Story (스토리)', value: 'story' },
+        { label: 'Portfolio (포트폴리오)', value: 'portfolio' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          'insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례. 라우트와 sitemap 분기 기준입니다.',
+      },
+    },
+
     {
       name: 'publishedLocales',
       type: 'select',

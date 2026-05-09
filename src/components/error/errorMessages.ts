@@ -5,11 +5,12 @@
  *   - "위트 있되 어린 톤은 아니어야 함"
  *   - "차분, 신뢰 유지, 명확한 복귀 동선"
  *
- * 9개 locale 모두 1차 번역 완료. Phase B 에서 admin 번역 API 활성화 시
- * 자연스러운 표현으로 추가 정제 가능.
+ * 9 locale (ko/en/ja/es/ru/de/fr/zh/ar) 1차 번역 완료. 나머지 11 locale
+ * (pt/hi/nl/it/sv/th/pl/id/ms/da/tr) 은 getErrorCopy 가 en fallback 으로
+ * 처리. Phase B 에서 admin 번역 API 활성화 시 빈 항목 보완 + 정제.
  */
 
-import type { SupportedLocale } from '@/i18n/locales'
+import type { Locale } from '@/i18n/locales'
 
 export type ErrorKind = '404' | '500' | '503' | '403'
 
@@ -389,7 +390,7 @@ const ar: Record<ErrorKind, ErrorCopy> = {
   },
 }
 
-const dictionaries: Record<SupportedLocale, Record<ErrorKind, ErrorCopy>> = {
+const dictionaries: Partial<Record<Locale, Record<ErrorKind, ErrorCopy>>> = {
   ko,
   en,
   ja,
@@ -401,9 +402,6 @@ const dictionaries: Record<SupportedLocale, Record<ErrorKind, ErrorCopy>> = {
   ar,
 }
 
-export function getErrorCopy(
-  locale: SupportedLocale,
-  kind: ErrorKind,
-): ErrorCopy {
+export function getErrorCopy(locale: Locale, kind: ErrorKind): ErrorCopy {
   return dictionaries[locale]?.[kind] ?? en[kind]
 }

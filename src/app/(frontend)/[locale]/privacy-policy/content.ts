@@ -12,7 +12,7 @@
  * locale 정책: ko / en 만 큐레이션, 나머지 7개는 영문 fallback (TODO).
  */
 
-import type { SupportedLocale } from '@/i18n/locales'
+import type { Locale } from '@/i18n/locales'
 
 export interface PrivacySection {
   /** anchor href 에 그대로 사용되는 id (기획서의 Anchor ID 와 동일) */
@@ -285,12 +285,12 @@ const ko: PrivacyPolicyCopy = {
   ],
 }
 
-const dictionaries: Partial<Record<SupportedLocale, PrivacyPolicyCopy>> = {
+const dictionaries: Partial<Record<Locale, PrivacyPolicyCopy>> = {
   ko,
   en,
   // TODO: ja / es / ru / de / fr / zh / ar 번역은 Phase B 에서 추가
 }
 
-export function getPrivacyPolicy(locale: SupportedLocale): PrivacyPolicyCopy {
+export function getPrivacyPolicy(locale: Locale): PrivacyPolicyCopy {
   return dictionaries[locale] ?? en
 }

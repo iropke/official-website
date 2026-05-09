@@ -4,7 +4,7 @@
  * locale 정책: ko/en 큐레이션, 나머지 7개 영문 fallback (TODO Phase B).
  */
 
-import type { SupportedLocale } from '@/i18n/locales'
+import type { Locale } from '@/i18n/locales'
 
 export interface CookieCategoryCopy {
   title: string
@@ -93,12 +93,12 @@ const ko: CookieConsentCopy = {
   },
 }
 
-const dictionaries: Partial<Record<SupportedLocale, CookieConsentCopy>> = {
+const dictionaries: Partial<Record<Locale, CookieConsentCopy>> = {
   ko,
   en,
   // TODO: ja / es / ru / de / fr / zh / ar — Phase B 번역 단계에서 추가
 }
 
-export function getCookieConsentCopy(locale: SupportedLocale): CookieConsentCopy {
+export function getCookieConsentCopy(locale: Locale): CookieConsentCopy {
   return dictionaries[locale] ?? en
 }

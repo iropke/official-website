@@ -3,7 +3,7 @@
  * ko/en 큐레이션, 나머지 7개 locale 영문 fallback (TODO: Phase B 번역).
  */
 
-import type { SupportedLocale } from '@/i18n/locales'
+import type { Locale } from '@/i18n/locales'
 
 export interface SearchCopy {
   pageTitle: string
@@ -71,12 +71,12 @@ const ko: SearchCopy = {
   cardDateLabel: '게시일',
 }
 
-const dictionaries: Partial<Record<SupportedLocale, SearchCopy>> = {
+const dictionaries: Partial<Record<Locale, SearchCopy>> = {
   ko,
   en,
   // TODO: ja / es / ru / de / fr / zh / ar 카피는 Phase B 에서 추가
 }
 
-export function getSearchCopy(locale: SupportedLocale): SearchCopy {
+export function getSearchCopy(locale: Locale): SearchCopy {
   return dictionaries[locale] ?? en
 }

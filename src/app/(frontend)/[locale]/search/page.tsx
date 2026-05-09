@@ -5,11 +5,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Post, Page } from '@/payload-types'
 
-import {
-  normalizeLocale,
-  toPayloadLocale,
-  type SupportedLocale,
-} from '@/i18n/locales'
+import { normalizeLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
 import { getSearchCopy } from './messages'
 import styles from './Search.module.css'
 
@@ -66,13 +62,12 @@ export async function generateMetadata({
   }
 }
 
-function formatDate(dateString: string | null | undefined, locale: SupportedLocale): string {
+function formatDate(dateString: string | null | undefined, locale: Locale): string {
   if (!dateString) return ''
   try {
     const d = new Date(dateString)
     if (Number.isNaN(d.getTime())) return ''
-    const intlLocale = locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : 'en-US'
-    return new Intl.DateTimeFormat(intlLocale, {
+    return new Intl.DateTimeFormat(LOCALE_INTL_TAG[locale], {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -84,21 +79,20 @@ function formatDate(dateString: string | null | undefined, locale: SupportedLoca
 
 async function searchPosts(
   query: string,
-  locale: SupportedLocale,
+  locale: Locale,
 ): Promise<SearchResultItem[]> {
   const payload = await getPayload({ config })
-  const payloadLocale = toPayloadLocale(locale)
 
   try {
     const result = await payload.find({
       collection: 'posts',
-      locale: payloadLocale,
+      locale,
       depth: 0,
       limit: RESULTS_PER_PAGE,
       sort: '-publishedDate',
       where: {
         and: [
-          { publishedLocales: { equals: payloadLocale } },
+          { publishedLocales: { equals: locale } },
           {
             or: [
               { title: { like: query } },
@@ -125,20 +119,19 @@ async function searchPosts(
 
 async function searchPages(
   query: string,
-  locale: SupportedLocale,
+  locale: Locale,
 ): Promise<SearchResultItem[]> {
   const payload = await getPayload({ config })
-  const payloadLocale = toPayloadLocale(locale)
 
   try {
     const result = await payload.find({
       collection: 'pages',
-      locale: payloadLocale,
+      locale,
       depth: 0,
       limit: RESULTS_PER_PAGE,
       where: {
         and: [
-          { publishedLocales: { equals: payloadLocale } },
+          { publishedLocales: { equals: locale } },
           { title: { like: query } },
         ],
       },

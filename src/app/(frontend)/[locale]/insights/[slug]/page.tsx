@@ -80,9 +80,6 @@ interface PageProps {
   searchParams?: Promise<{ preview?: string }>
 }
 
-<<<<<<< HEAD
-export default async function PostDetailPage({ params, searchParams }: PageProps) {
-=======
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params
   const locale = normalizeLocale(rawLocale)
@@ -91,8 +88,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function PostDetailPage({ params }: PageProps) {
->>>>>>> 6c02293 (feat(seo): hreflang alternates + metadataBase across locale pages)
+export default async function PostDetailPage({ params, searchParams }: PageProps) {
   const { locale: rawLocale, slug } = await params
   const locale = normalizeLocale(rawLocale)
   const search = (await searchParams) ?? {}

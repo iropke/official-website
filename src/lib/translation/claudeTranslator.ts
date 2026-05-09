@@ -6,29 +6,29 @@
  * - 호출 방식: Anthropic REST API 직접 호출 (SDK 의존성 없음)
  * - 환경 변수: ANTHROPIC_API_KEY
  *
- * iropke 지원 locale: ko, en, es, ru, de, fr, zh, ar
+ * iropke 지원 locale: src/i18n/locales.ts 의 LOCALES (20개) — EN 원본 기준
  *
- * 이 모듈은 오늘 세션(2026-04-20)에 뼈대만 작성되었고, admin UI 의
- * "Translate from KO" 버튼(Task #5)과 연결되는 것은 다음 세션입니다.
- * 현 단계에서는 title 한 필드만 지원합니다. excerpt / content(lexical JSON) 는
- * 다음 세션에서 fieldType 분기를 확장하며 추가 예정.
+ * 이 모듈은 뼈대만 작성된 상태이며, admin UI "Translate" 버튼(Task #5)과
+ * 연결되는 시점은 Phase B-1 입니다. 현 단계에서는 title 한 필드만 지원하며
+ * excerpt / content(lexical JSON) 는 Phase B 진입 시 fieldType 분기를 확장하며
+ * 추가 예정.
  */
+
+import { LOCALE_LABELS_EN, type Locale } from '@/i18n/locales'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-haiku-4-5-20251001'
 
-const LOCALE_NAMES: Record<string, string> = {
-  ko: 'Korean',
-  en: 'English',
-  es: 'Spanish',
-  ru: 'Russian',
-  de: 'German',
-  fr: 'French',
+/**
+ * Claude prompt 에 들어가는 언어명. LOCALE_LABELS_EN 와 거의 같지만 zh 만
+ * 'Simplified Chinese' 로 명시 (모델이 zh-CN 변형을 정확히 산출하도록).
+ */
+const LOCALE_NAMES: Record<Locale, string> = {
+  ...LOCALE_LABELS_EN,
   zh: 'Simplified Chinese',
-  ar: 'Arabic',
 }
 
-export type SupportedLocale = keyof typeof LOCALE_NAMES | string
+export type SupportedLocale = Locale
 
 export type FieldType = 'title' | 'excerpt' | 'metaTitle' | 'metaDescription'
 
@@ -61,8 +61,8 @@ export interface TranslationResult {
 }
 
 function buildPrompt(req: TranslationRequest): string {
-  const source = LOCALE_NAMES[req.sourceLocale] ?? req.sourceLocale
-  const target = LOCALE_NAMES[req.targetLocale] ?? req.targetLocale
+  const source = LOCALE_NAMES[req.sourceLocale]
+  const target = LOCALE_NAMES[req.targetLocale]
 
   const fieldHints: Record<FieldType, string> = {
     title:

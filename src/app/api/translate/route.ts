@@ -1,25 +1,25 @@
 /**
  * POST /api/translate
  *
- * Posts 컬렉션 콘텐츠를 KO 기준으로 지정 locale 들로 번역하여 저장합니다.
- * admin UI "Translate from KO" 버튼(Task #5) 이 이 endpoint 를 호출합니다.
+ * Posts 컬렉션 콘텐츠를 EN(원본) 기준으로 지정 locale 들로 번역하여 저장합니다.
+ * admin UI "Translate" 버튼(Task #5) 이 이 endpoint 를 호출합니다.
  *
  * 요청 body:
  * {
  *   postId: string,
- *   targetLocales: string[],            // 예: ['en', 'ar']
+ *   targetLocales: string[],            // 예: ['ko', 'ja']
  *   fields?: Array<'title'>             // 기본: ['title']
  * }
  *
- * 오늘 세션(2026-04-20)은 title 필드 1종만 지원. 다음 세션에서 excerpt,
- * metaTitle, metaDescription, content(lexical JSON) 순으로 확장.
+ * 현 단계는 title 필드 1종만 지원. Phase B 에서 excerpt, metaTitle,
+ * metaDescription, content(lexical JSON) 순으로 확장 예정.
  *
  * 응답 예시:
  * {
  *   success: true,
  *   results: {
- *     en: { title: "..." },
- *     ar: { title: "..." }
+ *     ko: { title: "..." },
+ *     ja: { title: "..." }
  *   },
  *   usage: { inputTokens: 120, outputTokens: 80 }
  * }
@@ -34,26 +34,16 @@ import {
   type FieldType,
 } from '@/lib/translation/claudeTranslator'
 import type { Post } from '@/payload-types'
+import { LOCALES, type Locale } from '@/i18n/locales'
 
-// Payload 가 요구하는 literal locale union. payload-types.ts 의
-// `locale: 'ko' | 'en' | ...` 와 동일하게 유지해야 `payload.update` 호출 시
-// overload matching 이 성공합니다.
-type Locale = 'ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar'
-
-const SOURCE_LOCALE: Locale = 'ko'
+const SOURCE_LOCALE: Locale = 'en'
 const DEFAULT_FIELDS: FieldType[] = ['title']
-const ALLOWED_TARGET_LOCALES = new Set<Locale>([
-  'en',
-  'es',
-  'ru',
-  'de',
-  'fr',
-  'zh',
-  'ar',
-])
 
-// Set<Locale>.has 는 인자로 Locale 을 요구하지만 사용자 입력은 임의 string.
-// 일반 string 을 Locale 로 좁히는 type guard.
+// SOURCE 를 제외한 모든 locale 을 번역 대상으로 허용.
+const ALLOWED_TARGET_LOCALES = new Set<Locale>(
+  LOCALES.filter((code) => code !== SOURCE_LOCALE),
+)
+
 function isAllowedLocale(l: string): l is Locale {
   return (ALLOWED_TARGET_LOCALES as Set<string>).has(l)
 }

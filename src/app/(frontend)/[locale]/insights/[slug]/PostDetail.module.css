@@ -591,6 +591,68 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   References (참고 문서)
+   ═══════════════════════════════════════════════════════════════ */
+.postReferences {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(35, 35, 41, 0.1);
+}
+
+.postReferencesHeading {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #232329;
+  letter-spacing: 0;
+}
+
+.postReferencesList {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #232329;
+}
+
+.postReferencesItem {
+  list-style: disc;
+  margin: 0;
+}
+
+.postReferencesItem::marker {
+  color: rgba(35, 35, 41, 0.5);
+}
+
+.postReferencesTitle {
+  font-weight: 700;
+}
+
+.postReferencesContent {
+  white-space: pre-line;
+}
+
+.postReferencesLink,
+.postReferencesLink:visited {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(35, 35, 41, 0.25);
+  text-underline-offset: 3px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.postReferencesLink:hover,
+.postReferencesLink:focus-visible {
+  color: #5eb6b2;
+  text-decoration-color: #5eb6b2;
+  outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Post Tags
    ═══════════════════════════════════════════════════════════════ */
 .postTags {

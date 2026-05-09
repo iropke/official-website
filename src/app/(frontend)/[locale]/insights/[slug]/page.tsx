@@ -9,6 +9,7 @@ import { buildAlternates } from '@/i18n/alternates'
 
 import PostDetailClient, {
   type PostDetailData,
+  type ReferenceData,
   type RelatedPostData,
   type TagData,
 } from './PostDetailClient'
@@ -60,6 +61,17 @@ function resolveTags(
       href: `/${locale}/insights?tag=${encodeURIComponent(t.slug ?? '')}`,
     }))
     .filter((t) => t.label.length > 0)
+}
+
+function resolveReferences(rows: Post['references']): ReferenceData[] {
+  if (!Array.isArray(rows)) return []
+  return rows
+    .map((row) => ({
+      title: typeof row?.title === 'string' ? row.title.trim() : '',
+      content: typeof row?.content === 'string' ? row.content.trim() : '',
+      link: typeof row?.link === 'string' ? row.link.trim() : '',
+    }))
+    .filter((r) => r.title || r.content || r.link)
 }
 
 function toRelatedData(post: Post, locale: Locale): RelatedPostData {
@@ -135,23 +147,50 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
     notFound()
   }
 
-  // ── 2) 관련글 조회 (같은 locale 공개 + 현 slug 제외, 최근 5건) ──
+  // ── 2) 관련글 조회 ─────────────────────────────────────────
+  //   클러스터 우선:
+  //     - post.cluster 가 있으면 같은 cluster 의 형제 글만 (pillar 우선 정렬)
+  //     - cluster 가 비어있는 legacy 글은 fallback 으로 같은 locale 의 최근 글
+  //   둘 다 publishedLocales 필터(F8) + 현 slug 제외 공통 적용.
+  const postCluster = typeof post.cluster === 'string' ? post.cluster.trim() : ''
   let relatedDocs: Post[] = []
   try {
-    const relatedResult = await payload.find({
-      collection: 'posts',
-      locale,
-      depth: 1, // thumbnail 만 populate
-      limit: RELATED_POSTS_LIMIT,
-      sort: '-publishedDate',
-      where: {
-        and: [
-          { publishedLocales: { contains: locale } },
-          { slug: { not_equals: slug } },
-        ],
-      },
-    })
-    relatedDocs = relatedResult.docs as Post[]
+    if (postCluster) {
+      const relatedResult = await payload.find({
+        collection: 'posts',
+        locale,
+        depth: 1,
+        limit: RELATED_POSTS_LIMIT * 2, // pillar 우선 재정렬 여지 확보
+        sort: '-publishedDate',
+        where: {
+          and: [
+            { publishedLocales: { contains: locale } },
+            { slug: { not_equals: slug } },
+            { cluster: { equals: postCluster } },
+          ],
+        },
+      })
+      const docs = relatedResult.docs as Post[]
+      // PILLAR 가 목록 최상단에 오도록 안정 정렬 (sort 는 동일 cluster 내에서만 의미).
+      const pillars = docs.filter((d) => d.clusterRole === 'pillar')
+      const others = docs.filter((d) => d.clusterRole !== 'pillar')
+      relatedDocs = [...pillars, ...others].slice(0, RELATED_POSTS_LIMIT)
+    } else {
+      const relatedResult = await payload.find({
+        collection: 'posts',
+        locale,
+        depth: 1,
+        limit: RELATED_POSTS_LIMIT,
+        sort: '-publishedDate',
+        where: {
+          and: [
+            { publishedLocales: { contains: locale } },
+            { slug: { not_equals: slug } },
+          ],
+        },
+      })
+      relatedDocs = relatedResult.docs as Post[]
+    }
   } catch (err) {
     console.error('[PostDetailPage] Failed to load related posts:', err)
   }
@@ -165,6 +204,7 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
     heroImageAlt: heroThumb.alt,
     content: post.content ?? null,
     tags: resolveTags(post.tags, locale),
+    references: resolveReferences(post.references),
   }
   const relatedPosts: RelatedPostData[] = relatedDocs.map((p) => toRelatedData(p, locale))
 

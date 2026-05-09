@@ -9,13 +9,13 @@
 | 항목 | 값 |
 |------|----|
 | 프로젝트명 | Iropke 공식 홈페이지 (iropke.com) |
-| 목적 | Payload CMS 기반 다국어(8개) 회사 홈페이지 개편 |
+| 목적 | Payload CMS 기반 다국어(20개) 회사 홈페이지 개편 |
 | 라이브 URL | https://official-website-topaz-gamma.vercel.app/en |
 | GitHub | https://github.com/iropke/official-website (main = Production) |
 | 로컬 경로 | `D:\Claude\iropke\website` |
 | 기술 스택 | Next.js 16.2.3 (App Router) · Payload CMS 3.82.1 · TypeScript 5.7.3 · pnpm |
 | 인프라 | Supabase PostgreSQL (us-east-1 MICRO) · Cloudinary · Resend · Vercel Pro |
-| 지원 locale | ko / en / es / ru / de / fr / zh / ar (8개) |
+| 지원 locale | en, zh, ja, de, fr, es, ko, pt, hi, ru, nl, it, ar, sv, th, pl, id, ms, da, tr (20개, 모든 select/switcher 공통 순서) — 단일 소스 `src/i18n/locales.ts` |
 
 ## 2. 현행 로드맵 (v2 — 2026-04-26 확정)
 
@@ -180,3 +180,4 @@
 |------|------|
 | 2026-04-26 | 초안 생성. v2 로드맵 / OS 라우팅 / SEO 의무 항목 / 번역 패러다임 전환 (KO→EN) 반영 |
 | 2026-04-27 | Phase A 단계 0 완료 (옵션 B clean reset + baseline migration + scripts/build.mjs Vercel pipeline). 스키마 변경 정책 워크플로 정식화. DATABASE_URL_DIRECT (Session pooler 5432) 도입. Payload 3.82.1 → 3.83.0 정렬 |
+| 2026-05-09 | **8 → 20 locale 일괄 확장** (PR #18 머지). 신규 12개: ja, pt, hi, nl, it, sv, th, pl, id, ms, da, tr. 모든 select/switcher 공통 순서 (en→zh→ja→de→fr→es→ko→pt→hi→ru→nl→it→ar→sv→th→pl→id→ms→da→tr). `src/i18n/locales.ts` 중앙 상수 (LOCALES, LOCALE_LABELS_NATIVE/EN/ADMIN, LOCALE_DIRS, LOCALE_HTML_LANG, LOCALE_HREFLANG, LOCALE_INTL_TAG, isLocale, normalizeLocale, isRtl). LangSwitcher 검색박스 + 3중 매칭(native/EN/code). Postgres 9 ENUM clean baseline 재생성 (구 baseline 폐기 + drop schema + 신규 baseline `20260509_091136`). 후행 브랜치 `feat/seo-essentials` / `feat/static-pages` / `feat/inquiry-translate` 모두 새 main 위로 rebase + force-push. ⚠ 운영 DB 전체 wipe — admin 계정 첫 부팅 시 `/admin/create-first-user` 로 재생성 필요 |

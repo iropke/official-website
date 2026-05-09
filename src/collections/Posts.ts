@@ -164,11 +164,13 @@ export const Posts: CollectionConfig = {
     defaultColumns: ['title', 'publishedDate', '_status', 'updatedAt'],
     group: '콘텐츠',
     preview: (doc, { locale }) => {
+      // v2 (2026-04-26): 영문 단일 파이프라인 정책. locale 미지정 시 'en' 기본.
+      // ?preview=true 쿼리 + payload-token 쿠키가 모두 있어야 page.tsx 가 draft 모드로 응답.
       const baseUrl = resolveServerURL()
-      const localeCode = typeof locale === 'string' && locale ? locale : 'ko'
+      const localeCode = typeof locale === 'string' && locale ? locale : 'en'
       const slug = (doc as { slug?: string } | undefined)?.slug ?? ''
       if (!slug) return null
-      return `${baseUrl}/${localeCode}/insights/${slug}`
+      return `${baseUrl}/${localeCode}/insights/${slug}?preview=true`
     },
   },
   access: {

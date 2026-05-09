@@ -1,9 +1,11 @@
+import type { Metadata } from 'next'
 import { headers as nextHeaders } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Media, Post, Tag } from '@/payload-types'
 import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
+import { buildAlternates } from '@/i18n/alternates'
 
 import PostDetailClient, {
   type PostDetailData,
@@ -76,6 +78,14 @@ function toRelatedData(post: Post, locale: Locale): RelatedPostData {
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>
   searchParams?: Promise<{ preview?: string }>
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale: rawLocale, slug } = await params
+  const locale = normalizeLocale(rawLocale)
+  return {
+    alternates: buildAlternates(locale, `/insights/${slug}`),
+  }
 }
 
 export default async function PostDetailPage({ params, searchParams }: PageProps) {

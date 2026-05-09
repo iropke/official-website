@@ -1,7 +1,9 @@
+import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Post, Media } from '@/payload-types'
 import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
+import { buildAlternates } from '@/i18n/alternates'
 
 import PostListClient, { type PostCardData } from './PostListClient'
 
@@ -48,6 +50,14 @@ function toCardData(post: Post, locale: Locale): PostCardData {
 interface PageProps {
   params: Promise<{ locale: string }>
   searchParams: Promise<{ page?: string }>
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale: rawLocale } = await params
+  const locale = normalizeLocale(rawLocale)
+  return {
+    alternates: buildAlternates(locale, '/insights'),
+  }
 }
 
 export default async function InsightsPage({ params, searchParams }: PageProps) {

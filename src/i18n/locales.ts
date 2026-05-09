@@ -176,6 +176,16 @@ export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value)
 }
 
+/**
+ * Coerce a route param (or any user input) to a known Locale, falling
+ * back to DEFAULT_LOCALE when the value is unknown. Used by `[locale]`
+ * route handlers so a typo in the URL still renders a page instead of
+ * crashing.
+ */
+export function normalizeLocale(value: string): Locale {
+  return isLocale(value) ? value : DEFAULT_LOCALE
+}
+
 /** Convenience for components that only need direction. */
 export function isRtl(locale: Locale): boolean {
   return LOCALE_DIRS[locale] === 'rtl'

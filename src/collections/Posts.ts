@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
 } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { WordTablePasteFeature } from '@/lexical/features/wordTablePaste/feature.server'
 import { LOCALES, LOCALE_LABELS_NATIVE } from '../i18n/locales'
 
 const LOCALE_SELECT_OPTIONS = LOCALES.map((code) => ({
@@ -160,13 +161,17 @@ const backfillPublishedDate: CollectionAfterChangeHook = async ({
  * root-level admin.livePreview 는 Edit 탭 회귀 이력이 있어 절대 건드리지 말 것.
  */
 const resolveServerURL = (): string => {
-  // Vercel preview/development 배포는 자기 자신의 VERCEL_URL 우선.
+  // Vercel preview/development 배포는 자기 자신의 deployment URL 우선.
   // (그렇지 않으면 NEXT_PUBLIC_SERVER_URL=production 이라 PREVIEW 버튼이
   //  production 으로 향해 feature branch 의 코드가 적용되지 않은 곳에서 검증됨)
+  // VERCEL_BRANCH_URL 은 per-branch 고정 alias 라서 deployment 별
+  // VERCEL_URL 보다 안정적 → BRANCH_URL → URL 순으로 fallback.
   const isPreviewEnv =
     process.env.VERCEL_ENV === 'preview' || process.env.VERCEL_ENV === 'development'
-  if (isPreviewEnv && process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
+  if (isPreviewEnv) {
+    const branchURL = process.env.VERCEL_BRANCH_URL
+    if (branchURL) return `https://${branchURL}`
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
   }
   return (
     process.env.NEXT_PUBLIC_SERVER_URL ||
@@ -254,6 +259,11 @@ export const Posts: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          // Phase A 1b 디버깅 (2026-04-29):
+          //   Word/Excel 표 클립보드(text/html) 를 editorialTable 블록으로 자동 변환.
+          //   src/lexical/features/wordTablePaste/Plugin.tsx 의 PASTE_COMMAND 핸들러가
+          //   `<table>` 감지 시 INSERT_BLOCK_COMMAND 디스패치.
+          WordTablePasteFeature(),
           BlocksFeature({
             blocks: [
               // ─── 표 (editorialTable) ───

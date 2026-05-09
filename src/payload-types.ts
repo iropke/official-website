@@ -98,8 +98,50 @@ export interface Config {
     | ('false' | 'none' | 'null')
     | false
     | null
-    | ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')
-    | ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[];
+    | (
+        | 'en'
+        | 'zh'
+        | 'ja'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'ko'
+        | 'pt'
+        | 'hi'
+        | 'ru'
+        | 'nl'
+        | 'it'
+        | 'ar'
+        | 'sv'
+        | 'th'
+        | 'pl'
+        | 'id'
+        | 'ms'
+        | 'da'
+        | 'tr'
+      )
+    | (
+        | 'en'
+        | 'zh'
+        | 'ja'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'ko'
+        | 'pt'
+        | 'hi'
+        | 'ru'
+        | 'nl'
+        | 'it'
+        | 'ar'
+        | 'sv'
+        | 'th'
+        | 'pl'
+        | 'id'
+        | 'ms'
+        | 'da'
+        | 'tr'
+      )[];
   globals: {
     navigation: Navigation;
     'site-settings': SiteSetting;
@@ -110,7 +152,27 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
   };
-  locale: 'ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar';
+  locale:
+    | 'en'
+    | 'zh'
+    | 'ja'
+    | 'de'
+    | 'fr'
+    | 'es'
+    | 'ko'
+    | 'pt'
+    | 'hi'
+    | 'ru'
+    | 'nl'
+    | 'it'
+    | 'ar'
+    | 'sv'
+    | 'th'
+    | 'pl'
+    | 'id'
+    | 'ms'
+    | 'da'
+    | 'tr';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -291,7 +353,30 @@ export interface Post {
   /**
    * 이 게시물을 공개할 언어를 선택하세요. 미선택 언어는 목록에서 숨겨집니다.
    */
-  publishedLocales?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[] | null;
+  publishedLocales?:
+    | (
+        | 'en'
+        | 'zh'
+        | 'ja'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'ko'
+        | 'pt'
+        | 'hi'
+        | 'ru'
+        | 'nl'
+        | 'it'
+        | 'ar'
+        | 'sv'
+        | 'th'
+        | 'pl'
+        | 'id'
+        | 'ms'
+        | 'da'
+        | 'tr'
+      )[]
+    | null;
   /**
    * AI가 초안을 생성한 경우 체크
    */
@@ -402,7 +487,30 @@ export interface Page {
           }
       )[]
     | null;
-  publishedLocales?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[] | null;
+  publishedLocales?:
+    | (
+        | 'en'
+        | 'zh'
+        | 'ja'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'ko'
+        | 'pt'
+        | 'hi'
+        | 'ru'
+        | 'nl'
+        | 'it'
+        | 'ar'
+        | 'sv'
+        | 'th'
+        | 'pl'
+        | 'id'
+        | 'ms'
+        | 'da'
+        | 'tr'
+      )[]
+    | null;
   meta?: {
     metaTitle?: string | null;
     metaDescription?: string | null;
@@ -830,8 +938,54 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
-  defaultLocale?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar') | null;
-  enabledLocales?: ('ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar')[] | null;
+  defaultLocale?:
+    | (
+        | 'en'
+        | 'zh'
+        | 'ja'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'ko'
+        | 'pt'
+        | 'hi'
+        | 'ru'
+        | 'nl'
+        | 'it'
+        | 'ar'
+        | 'sv'
+        | 'th'
+        | 'pl'
+        | 'id'
+        | 'ms'
+        | 'da'
+        | 'tr'
+      )
+    | null;
+  enabledLocales?:
+    | (
+        | 'en'
+        | 'zh'
+        | 'ja'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'ko'
+        | 'pt'
+        | 'hi'
+        | 'ru'
+        | 'nl'
+        | 'it'
+        | 'ar'
+        | 'sv'
+        | 'th'
+        | 'pl'
+        | 'id'
+        | 'ms'
+        | 'da'
+        | 'tr'
+      )[]
+    | null;
   /**
    * 아랍어 등 우→좌 방향 언어. HTML dir="rtl" 자동 적용
    */

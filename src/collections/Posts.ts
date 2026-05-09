@@ -506,6 +506,58 @@ export const Posts: CollectionConfig = {
       }),
     },
 
+    // ─── 참고 문서 (references) ─────────────────────────────────
+    // 본문 하단에 ul 로 노출. 제목/내용/링크 중 하나 이상 입력 시 항목 표시.
+    // localized:true — locale 별로 번역된 참고 자료 목록을 가질 수 있음 (자동 번역
+    // walker 가 Phase B-1 에서 array 필드를 순회하도록 보강 예정).
+    {
+      name: 'references',
+      type: 'array',
+      label: '참고 문서',
+      localized: true,
+      labels: { singular: '참고 문서', plural: '참고 문서' },
+      admin: {
+        description:
+          '본문 하단에 ul 로 노출됩니다. 제목 / 내용 / 링크 중 하나 이상 입력해야 저장됩니다. 링크가 있으면 새 창으로 열립니다.',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          label: '제목',
+        },
+        {
+          name: 'content',
+          type: 'textarea',
+          label: '내용',
+          admin: { rows: 2 },
+        },
+        {
+          name: 'link',
+          type: 'text',
+          label: '링크 (URL)',
+          admin: {
+            description: '입력 시 새 창(rel=noopener noreferrer)으로 열립니다.',
+          },
+        },
+      ],
+      validate: (rows) => {
+        if (!Array.isArray(rows)) return true
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i] as
+            | { title?: string | null; content?: string | null; link?: string | null }
+            | undefined
+          const hasAny = Boolean(
+            row?.title?.trim() || row?.content?.trim() || row?.link?.trim(),
+          )
+          if (!hasAny) {
+            return `${i + 1}번째 참고 문서: 제목 / 내용 / 링크 중 하나 이상은 입력해주세요.`
+          }
+        }
+        return true
+      },
+    },
+
     // ─── 분류 및 태그 ──────────────────────────────────────────
     {
       name: 'tags',
@@ -543,6 +595,39 @@ export const Posts: CollectionConfig = {
       admin: {
         position: 'sidebar',
         description: '이 게시물을 공개할 언어를 선택하세요. 미선택 언어는 목록에서 숨겨집니다.',
+      },
+    },
+
+    // ─── 클러스터 (관련 포스트 노출 단위) ────────────────────────
+    // cluster: slug 형태의 식별자 (예: privacy-compliance). 같은 cluster 값을 가진
+    //   포스트끼리 상세 페이지 우측 "관련 글" 영역에 묶여 노출됨.
+    //   클러스터 정의 / 신규 cluster slug 추가는 content-generation 리포의
+    //   `briefs/_topic-clusters.md` 가 단일 진실 공급원.
+    // clusterRole: 'pillar' | 'spoke'. PILLAR 1건 + spokes N건 구조에서 PILLAR 를
+    //   관련 글 목록 상단에 우선 정렬하기 위한 분류. 옵션 (legacy 글은 비워둠).
+    // 둘 다 비-localized — 클러스터 식별은 콘텐츠 언어와 무관하게 글 자체의 속성.
+    {
+      name: 'cluster',
+      type: 'text',
+      label: '클러스터 slug',
+      admin: {
+        position: 'sidebar',
+        description:
+          '같은 cluster 값을 가진 포스트끼리 상세 페이지 "관련 글" 에 묶여 노출됩니다. slug 형식 (영문 소문자/숫자/하이픈). 예: privacy-compliance. 클러스터 정의는 briefs/_topic-clusters.md 참조.',
+      },
+    },
+    {
+      name: 'clusterRole',
+      type: 'select',
+      label: '클러스터 역할',
+      options: [
+        { label: 'PILLAR (대표 글)', value: 'pillar' },
+        { label: 'SPOKE (세부 글)', value: 'spoke' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          'PILLAR 는 관련 글 목록 상단에 우선 정렬됩니다. cluster 가 비어있으면 의미 없음.',
       },
     },
 

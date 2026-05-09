@@ -23,6 +23,19 @@ export interface RelatedPostData {
 }
 
 /**
+ * 참고 문서 (references) — 본문 하단 ul 항목.
+ * 세 필드 모두 trim 후 빈 문자열일 수 있음. 적어도 하나는 비지 않음을 server 가 보장.
+ *  - title: <strong> 으로 굵게
+ *  - content: 본문 (whitespace pre-line 보존)
+ *  - link: 입력 시 새 창. http(s):// 미입력 시 자동 보정.
+ */
+export interface ReferenceData {
+  title: string;
+  content: string;
+  link: string;
+}
+
+/**
  * Lexical SerializedEditorState shape (loose typing — Payload 의 richText 필드가
  * `{ root: { children: [...] } }` 구조를 반환. 런타임 JSON 을 그대로 받는다).
  */
@@ -53,6 +66,20 @@ export interface PostDetailData {
   heroImageAlt: string;
   content: LexicalContent | null;
   tags: TagData[];
+  references: ReferenceData[];
+}
+
+/**
+ * 참고 문서 link 의 외부 URL 보정.
+ * - http://, https://, // 로 시작 → 그대로
+ * - 그 외 (도메인만, 또는 mailto: 등) → href 그대로 두되, http(s) 가 빠진 경우만 https:// 보정
+ */
+function normalizeReferenceLink(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  if (/^(https?:)?\/\//i.test(trimmed)) return trimmed;
+  if (/^(mailto:|tel:|#|\/)/i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
 }
 
 interface PostDetailClientProps {
@@ -591,6 +618,53 @@ export default function PostDetailClient({
 
             <div className={styles.editorial}>
               <LexicalRenderer content={post.content} />
+
+              {post.references.length > 0 && (
+                <section
+                  className={`${styles.postReferences} ${styles.reveal}`}
+                  aria-label={locale === 'ko' ? '참고 문서' : 'References'}
+                >
+                  <h2 className={styles.postReferencesHeading}>
+                    {locale === 'ko' ? '참고 문서' : 'References'}
+                  </h2>
+                  <ul className={styles.postReferencesList}>
+                    {post.references.map((ref, i) => {
+                      const href = normalizeReferenceLink(ref.link);
+                      const titleNode = ref.title ? (
+                        <strong className={styles.postReferencesTitle}>{ref.title}</strong>
+                      ) : null;
+                      const contentNode = ref.content ? (
+                        <span className={styles.postReferencesContent}>{ref.content}</span>
+                      ) : null;
+
+                      const inner = (
+                        <>
+                          {titleNode}
+                          {titleNode && contentNode ? ' ' : null}
+                          {contentNode}
+                        </>
+                      );
+
+                      return (
+                        <li key={i} className={styles.postReferencesItem}>
+                          {href ? (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.postReferencesLink}
+                            >
+                              {titleNode || contentNode ? inner : href}
+                            </a>
+                          ) : (
+                            inner
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              )}
 
               {post.tags.length > 0 && (
                 <section className={`${styles.postTags} ${styles.reveal}`} aria-label="Post tags">

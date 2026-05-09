@@ -346,6 +346,20 @@ export interface Post {
     [k: string]: unknown;
   } | null;
   /**
+   * 본문 하단에 ul 로 노출됩니다. 제목 / 내용 / 링크 중 하나 이상 입력해야 저장됩니다. 링크가 있으면 새 창으로 열립니다.
+   */
+  references?:
+    | {
+        title?: string | null;
+        content?: string | null;
+        /**
+         * 입력 시 새 창(rel=noopener noreferrer)으로 열립니다.
+         */
+        link?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * 게시물에 연결할 태그 선택 (복수 선택 가능)
    */
   tags?: (number | Tag)[] | null;
@@ -377,6 +391,14 @@ export interface Post {
         | 'tr'
       )[]
     | null;
+  /**
+   * 같은 cluster 값을 가진 포스트끼리 상세 페이지 "관련 글" 에 묶여 노출됩니다. slug 형식 (영문 소문자/숫자/하이픈). 예: privacy-compliance. 클러스터 정의는 briefs/_topic-clusters.md 참조.
+   */
+  cluster?: string | null;
+  /**
+   * PILLAR 는 관련 글 목록 상단에 우선 정렬됩니다. cluster 가 비어있으면 의미 없음.
+   */
+  clusterRole?: ('pillar' | 'spoke') | null;
   /**
    * AI가 초안을 생성한 경우 체크
    */
@@ -718,9 +740,19 @@ export interface PostsSelect<T extends boolean = true> {
   excerpt?: T;
   thumbnail?: T;
   content?: T;
+  references?:
+    | T
+    | {
+        title?: T;
+        content?: T;
+        link?: T;
+        id?: T;
+      };
   tags?: T;
   publishedDate?: T;
   publishedLocales?: T;
+  cluster?: T;
+  clusterRole?: T;
   aiGenerated?: T;
   translationStatus?: T;
   meta?:

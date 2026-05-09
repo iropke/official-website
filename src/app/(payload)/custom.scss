@@ -232,6 +232,28 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Lexical 에디터 — 본문 입력 영역 기본 높이 (50 lines)
+
+   배경:
+     기본 상태에서 contenteditable 의 min-height 가 1행 수준이라
+     긴 본문(블로그 포스트) 편집 시 마우스/스크롤 동선이 불편함.
+     50 lines 로 늘려 첫 진입 시 충분한 작업 공간 확보.
+
+   단위:
+     `lh` = 1 line-height. 50lh = 정확히 50 라인. (Chrome 99+ / Firefox 110+
+     / Safari 16.4+ 지원 — 모든 admin 사용 환경 충족)
+     fallback `em` 은 1.5 line-height 기준 근사치.
+
+   범위:
+     `.rich-text-lexical` 컨테이너 안의 contenteditable 만. 다른 textarea /
+     일반 입력 필드 / blocks 내부 콘텐츠는 영향 없음.
+   ═══════════════════════════════════════════════════════════════ */
+.rich-text-lexical [contenteditable][data-lexical-editor='true'] {
+  min-height: 75em; /* fallback (lh 미지원 브라우저) */
+  min-height: 50lh;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Lexical 에디터 — Horizontal rule (Phase A 1b 디버깅)
 
    프론트엔드의 `editorialDelimiter` (PostDetail.module.css L279-309)

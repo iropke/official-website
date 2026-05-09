@@ -60,14 +60,28 @@
 
 ## 4. 다국어 SEO 의무 항목 (Phase A 단계 6)
 
-| 구현 항목 | 형태 |
-|----------|------|
-| `app/[locale]/layout.tsx`의 `generateMetadata` | `alternates: { canonical, languages: { 'ko': '/ko/...', 'en': '/en/...', ... } }` 8개 매핑 |
-| `app/sitemap.ts` | 모든 정적 경로 × 8 locale 직곱 출력 |
-| `app/robots.ts` | 전부 Allow + sitemap URL 명시 |
-| `<html lang="..." dir="...">` | `LocaleHtmlAttributes.tsx` 가 처리 (RTL 포함) |
+| 구현 항목 | 형태 | 상태 |
+|----------|------|------|
+| `app/[locale]/layout.tsx`의 `generateMetadata` | `alternates: { canonical, languages: { 'ko-KR': '/ko/...', 'en-US': '/en/...', ... } }` 9개 매핑 + `x-default` → en | ✅ 2026-05-09 |
+| `app/sitemap.ts` | `generateSitemaps` 로 **언어별 sub-sitemap 분리** (`/sitemap/ko.xml` … `/sitemap/ar.xml`). `/sitemap.xml` 은 sitemap-index 자동 생성 | ✅ 2026-05-09 |
+| `app/robots.ts` | 전부 Allow + `/admin`, `/api` 차단 + sitemap URL 명시 | ✅ 2026-05-09 |
+| `<html lang="..." dir="...">` | `LocaleHtmlAttributes.tsx` 가 i18n 모듈의 LOCALE_HTML_LANG / LOCALE_DIRS 매핑으로 처리 (`ar` 만 RTL) | ✅ 2026-05-09 |
 
 ⚠ 누락 시 영문만 색인되고 다른 언어는 고아 페이지가 됨.
+
+### ⚠ 런칭 전 필수 등록 (Vercel UI)
+
+| 환경변수 | 값 | 사유 |
+|---------|----|----|
+| `NEXT_PUBLIC_SERVER_URL` | `https://www.iropke.com` (또는 최종 도메인) | 미등록 시 sitemap / robots / hreflang 의 절대 URL 이 `vercel.app` 도메인으로 발급되어 검색엔진이 잘못된 canonical 을 색인함. **현 운영 사이트의 트래픽 영향 차단을 위해 새 사이트 준비 완료 전까지 등록 보류** → Phase A 단계 6 (SEO/Sitemap/Analytics) 작업 직전 또는 D-7 체크리스트 시점에 등록 |
+
+### 9 locale 단일 소스
+
+| 항목 | 위치 |
+|------|------|
+| 9 locale 상수 (LOCALES, DEFAULT_LOCALE, LOCALE_DIRS, LOCALE_HTML_LANG, LOCALE_HREFLANG) | `src/i18n/locales.ts` |
+| hreflang alternates 헬퍼 (buildAlternates, buildLocaleUrl, SITE_BASE_URL) | `src/i18n/alternates.ts` |
+| DEFAULT_LOCALE | `'en'` (OS 언어 미매칭 시 영문 fallback) |
 
 ## 5. 핵심 정책
 

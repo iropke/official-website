@@ -1,4 +1,14 @@
 import type { GlobalConfig } from 'payload'
+import { LOCALES, LOCALE_LABELS_NATIVE, LOCALE_DIRS, DEFAULT_LOCALE } from '../i18n/locales'
+
+const LOCALE_SELECT_OPTIONS = LOCALES.map((code) => ({
+  label: `${LOCALE_LABELS_NATIVE[code]} (${code})`,
+  value: code,
+}))
+
+const RTL_LOCALE_OPTIONS = LOCALES.filter((code) => LOCALE_DIRS[code] === 'rtl').map(
+  (code) => ({ label: `${LOCALE_LABELS_NATIVE[code]} (${code})`, value: code }),
+)
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
@@ -116,44 +126,24 @@ export const SiteSettings: GlobalConfig = {
               name: 'defaultLocale',
               type: 'select',
               label: '기본 언어',
-              defaultValue: 'ko',
-              options: [
-                { label: '한국어 (ko)', value: 'ko' },
-                { label: 'English (en)', value: 'en' },
-                { label: 'Español (es)', value: 'es' },
-                { label: 'Русский (ru)', value: 'ru' },
-                { label: 'Deutsch (de)', value: 'de' },
-                { label: 'Français (fr)', value: 'fr' },
-                { label: '中文 (zh)', value: 'zh' },
-                { label: 'العربية (ar)', value: 'ar' },
-              ],
+              defaultValue: DEFAULT_LOCALE,
+              options: LOCALE_SELECT_OPTIONS,
             },
             {
               name: 'enabledLocales',
               type: 'select',
               label: '활성화된 언어',
               hasMany: true,
-              defaultValue: ['ko', 'en'],
-              options: [
-                { label: '한국어 (ko)', value: 'ko' },
-                { label: 'English (en)', value: 'en' },
-                { label: 'Español (es)', value: 'es' },
-                { label: 'Русский (ru)', value: 'ru' },
-                { label: 'Deutsch (de)', value: 'de' },
-                { label: 'Français (fr)', value: 'fr' },
-                { label: '中文 (zh)', value: 'zh' },
-                { label: 'العربية (ar)', value: 'ar' },
-              ],
+              defaultValue: [DEFAULT_LOCALE],
+              options: LOCALE_SELECT_OPTIONS,
             },
             {
               name: 'rtlLocales',
               type: 'select',
               label: 'RTL 언어 (우→좌)',
               hasMany: true,
-              defaultValue: ['ar'],
-              options: [
-                { label: 'العربية (ar)', value: 'ar' },
-              ],
+              defaultValue: LOCALES.filter((code) => LOCALE_DIRS[code] === 'rtl'),
+              options: RTL_LOCALE_OPTIONS,
               admin: {
                 description: '아랍어 등 우→좌 방향 언어. HTML dir="rtl" 자동 적용',
               },

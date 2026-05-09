@@ -1,5 +1,11 @@
 import type { Block, CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { LOCALES, LOCALE_LABELS_NATIVE } from '../i18n/locales'
+
+const LOCALE_SELECT_OPTIONS = LOCALES.map((code) => ({
+  label: `${LOCALE_LABELS_NATIVE[code]} (${code})`,
+  value: code,
+}))
 
 // ─── 재사용 가능한 콘텐츠 블록 정의 ──────────────────────────────
 
@@ -118,16 +124,7 @@ export const Pages: CollectionConfig = {
       type: 'select',
       label: '공개 언어',
       hasMany: true,
-      options: [
-        { label: '한국어 (ko)', value: 'ko' },
-        { label: 'English (en)', value: 'en' },
-        { label: 'Español (es)', value: 'es' },
-        { label: 'Русский (ru)', value: 'ru' },
-        { label: 'Deutsch (de)', value: 'de' },
-        { label: 'Français (fr)', value: 'fr' },
-        { label: '中文 (zh)', value: 'zh' },
-        { label: 'العربية (ar)', value: 'ar' },
-      ],
+      options: LOCALE_SELECT_OPTIONS,
       admin: {
         position: 'sidebar',
       },

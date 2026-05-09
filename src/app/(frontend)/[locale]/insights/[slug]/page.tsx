@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Media, Post, Tag } from '@/payload-types'
+import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
 
 import PostDetailClient, {
   type PostDetailData,
@@ -10,24 +11,18 @@ import PostDetailClient, {
   type TagData,
 } from './PostDetailClient'
 
-type SupportedLocale = 'ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar'
-const SUPPORTED_LOCALES: SupportedLocale[] = [
-  'ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar',
-]
 const RELATED_POSTS_LIMIT = 5
 
-function normalizeLocale(raw: string): SupportedLocale {
-  return (SUPPORTED_LOCALES as string[]).includes(raw)
-    ? (raw as SupportedLocale)
-    : 'en'
+function normalizeLocale(raw: string): Locale {
+  return isLocale(raw) ? raw : 'en'
 }
 
-function formatDate(dateString: string | null | undefined, locale: string): { label: string; iso: string } {
+function formatDate(dateString: string | null | undefined, locale: Locale): { label: string; iso: string } {
   if (!dateString) return { label: '', iso: '' }
   try {
     const d = new Date(dateString)
     if (Number.isNaN(d.getTime())) return { label: '', iso: '' }
-    const label = new Intl.DateTimeFormat(locale === 'ko' ? 'ko-KR' : 'en-US', {
+    const label = new Intl.DateTimeFormat(LOCALE_INTL_TAG[locale], {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -53,7 +48,7 @@ function resolveMedia(
 
 function resolveTags(
   refs: Post['tags'],
-  locale: SupportedLocale,
+  locale: Locale,
 ): TagData[] {
   if (!Array.isArray(refs)) return []
   return refs
@@ -65,7 +60,7 @@ function resolveTags(
     .filter((t) => t.label.length > 0)
 }
 
-function toRelatedData(post: Post, locale: SupportedLocale): RelatedPostData {
+function toRelatedData(post: Post, locale: Locale): RelatedPostData {
   const { label, iso } = formatDate(post.publishedDate, locale)
   const thumb = resolveMedia(post.thumbnail, post.title ?? '')
   return {

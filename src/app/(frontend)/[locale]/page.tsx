@@ -10,23 +10,10 @@ import AIOSGrid from '@/components/home/AIOSGrid/AIOSGrid';
 import CoreMessage from '@/components/home/CoreMessage/CoreMessage';
 import Insights from '@/components/home/Insights/Insights';
 import CtaBanner from '@/components/home/CtaBanner/CtaBanner';
+import { isLocale, type Locale } from '@/i18n/locales';
 
-type SupportedLocale = 'ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar';
-const SUPPORTED_LOCALES: SupportedLocale[] = [
-  'ko',
-  'en',
-  'es',
-  'ru',
-  'de',
-  'fr',
-  'zh',
-  'ar',
-];
-
-function normalizeLocale(raw: string): SupportedLocale {
-  return (SUPPORTED_LOCALES as string[]).includes(raw)
-    ? (raw as SupportedLocale)
-    : 'en';
+function normalizeLocale(raw: string): Locale {
+  return isLocale(raw) ? raw : 'en';
 }
 
 interface HomePageProps {

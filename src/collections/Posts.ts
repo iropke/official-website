@@ -153,9 +153,20 @@ const backfillPublishedDate: CollectionAfterChangeHook = async ({
  * 편집 화면 우상단에 "Preview" 버튼이 추가되어 새 탭에서 프리뷰가 열린다.
  * root-level admin.livePreview 는 Edit 탭 회귀 이력이 있어 절대 건드리지 말 것.
  */
-const resolveServerURL = (): string =>
-  process.env.NEXT_PUBLIC_SERVER_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+const resolveServerURL = (): string => {
+  // Vercel preview/development 배포는 자기 자신의 VERCEL_URL 우선.
+  // (그렇지 않으면 NEXT_PUBLIC_SERVER_URL=production 이라 PREVIEW 버튼이
+  //  production 으로 향해 feature branch 의 코드가 적용되지 않은 곳에서 검증됨)
+  const isPreviewEnv =
+    process.env.VERCEL_ENV === 'preview' || process.env.VERCEL_ENV === 'development'
+  if (isPreviewEnv && process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  return (
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  )
+}
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -164,11 +175,13 @@ export const Posts: CollectionConfig = {
     defaultColumns: ['title', 'publishedDate', '_status', 'updatedAt'],
     group: '콘텐츠',
     preview: (doc, { locale }) => {
+      // v2 (2026-04-26): 영문 단일 파이프라인 정책. locale 미지정 시 'en' 기본.
+      // ?preview=true 쿼리 + payload-token 쿠키가 모두 있어야 page.tsx 가 draft 모드로 응답.
       const baseUrl = resolveServerURL()
-      const localeCode = typeof locale === 'string' && locale ? locale : 'ko'
+      const localeCode = typeof locale === 'string' && locale ? locale : 'en'
       const slug = (doc as { slug?: string } | undefined)?.slug ?? ''
       if (!slug) return null
-      return `${baseUrl}/${localeCode}/insights/${slug}`
+      return `${baseUrl}/${localeCode}/insights/${slug}?preview=true`
     },
   },
   access: {

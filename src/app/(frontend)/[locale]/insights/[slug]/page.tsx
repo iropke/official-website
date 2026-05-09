@@ -1,3 +1,4 @@
+import { headers as nextHeaders } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -79,28 +80,46 @@ function toRelatedData(post: Post, locale: SupportedLocale): RelatedPostData {
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string }>
+  searchParams?: Promise<{ preview?: string }>
 }
 
-export default async function PostDetailPage({ params }: PageProps) {
+export default async function PostDetailPage({ params, searchParams }: PageProps) {
   const { locale: rawLocale, slug } = await params
   const locale = normalizeLocale(rawLocale)
+  const search = (await searchParams) ?? {}
 
   const payload = await getPayload({ config })
 
-  // ── 1) Target post 조회 (slug + publishedLocales 필터) ───────
+  // ── PREVIEW 분기: ?preview=true + payload-token 쿠키(admin) 둘 다 충족 시
+  //   draft 도 함께 조회하고 publishedLocales 필터 해제. 그 외는 published 만.
+  const headersList = await nextHeaders()
+  let isPreviewUser = false
+  if (search.preview === 'true') {
+    try {
+      const authResult = await payload.auth({ headers: headersList })
+      isPreviewUser = Boolean(authResult.user)
+    } catch (err) {
+      console.error('[PostDetailPage] Preview auth check failed:', err)
+    }
+  }
+
+  // ── 1) Target post 조회 ──────────────────────────────────────
   let post: Post | undefined
   try {
     const result = await payload.find({
       collection: 'posts',
       locale,
-      depth: 2, // thumbnail + tags (localized name) populate
+      depth: 2, // thumbnail + tags + Lexical block uploads populate
       limit: 1,
-      where: {
-        and: [
-          { slug: { equals: slug } },
-          { publishedLocales: { contains: locale } },
-        ],
-      },
+      draft: isPreviewUser,
+      where: isPreviewUser
+        ? { slug: { equals: slug } }
+        : {
+            and: [
+              { slug: { equals: slug } },
+              { publishedLocales: { contains: locale } },
+            ],
+          },
     })
     post = result.docs[0] as Post | undefined
   } catch (err) {

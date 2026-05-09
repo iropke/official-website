@@ -222,6 +222,68 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
     );
   }
 
+  // ─── BlocksFeature 커스텀 블록 (Phase 3) ───────────────────────
+  // Lexical BlocksFeature 는 { type: 'block', fields: { blockType, ... } } 형태.
+  if (t === 'block') {
+    const fields = (node as { fields?: { blockType?: string } & Record<string, unknown> }).fields;
+    const blockType = fields?.blockType;
+
+    // editorialMedia: 이미지 + 캡션 + alignment(full/wide/center)
+    if (blockType === 'editorialMedia') {
+      type MediaRef = { url?: string; alt?: string; width?: number; height?: number };
+      const imageRaw = fields?.image;
+      const image: MediaRef | null =
+        imageRaw && typeof imageRaw === 'object' ? (imageRaw as MediaRef) : null;
+      const url = image?.url;
+      if (!url) return null;
+      const captionRaw = typeof fields?.caption === 'string' ? fields.caption.trim() : '';
+      const altOverride = typeof fields?.alt === 'string' ? fields.alt.trim() : '';
+      const alt = altOverride || image?.alt || '';
+      const alignmentRaw = typeof fields?.alignment === 'string' ? fields.alignment : 'center';
+      const alignment: 'center' | 'wide' | 'full' =
+        alignmentRaw === 'wide' || alignmentRaw === 'full' ? alignmentRaw : 'center';
+      const width = image?.width ?? 1200;
+      const height = image?.height ?? Math.round(width * (675 / 1200));
+      const alignmentClass =
+        alignment === 'full'
+          ? s.editorialMediaFull
+          : alignment === 'wide'
+          ? s.editorialMediaWide
+          : s.editorialMediaCenter;
+      return (
+        <div
+          key={key}
+          className={`${s.editorialMedia} ${alignmentClass} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          <figure>
+            <div className={s.editorialMediaFrame}>
+              <Image
+                src={url}
+                alt={alt}
+                width={width}
+                height={height}
+                sizes={
+                  alignment === 'full'
+                    ? '100vw'
+                    : alignment === 'wide'
+                    ? '(max-width: 1079px) 100vw, 82vw'
+                    : '(max-width: 1079px) 100vw, 75vw'
+                }
+              />
+            </div>
+            {captionRaw && (
+              <figcaption className={s.editorialMediaCaption}>{captionRaw}</figcaption>
+            )}
+          </figure>
+        </div>
+      );
+    }
+
+    // PR-2 에서 추가 예정: editorialTable / videoEmbed / rawHtml / qnaList / codeBlock
+    return null;
+  }
+
   // 알 수 없는 블록: children 이 있다면 텍스트로 fallback
   if (Array.isArray(node.children) && node.children.length > 0) {
     return (

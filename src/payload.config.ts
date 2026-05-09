@@ -23,14 +23,22 @@ const dirname = path.dirname(filename)
  * serverURL 은 preview/livePreview 에서 절대 URL 을 생성할 때 참조.
  *
  * 우선순위:
- *   NEXT_PUBLIC_SERVER_URL → VERCEL_URL(자동 주입, 도메인만) → localhost
+ *   1) Vercel preview/development 환경 → VERCEL_URL (자기 자신의 deployment URL)
+ *      - feature branch 의 PREVIEW 버튼이 production 으로 잘못 향하는 것을 방지
+ *   2) NEXT_PUBLIC_SERVER_URL (production 고정 도메인)
+ *   3) VERCEL_URL (자동 주입, 도메인만)
+ *   4) localhost
  *
  * root-level admin.livePreview 는 Payload 3.82.1 에서 Edit 탭 회귀(접근 금지
  * 아이콘 표시)를 유발하여 제거. collection-level livePreview 만 유지.
  */
+const isPreviewEnv =
+  process.env.VERCEL_ENV === 'preview' || process.env.VERCEL_ENV === 'development'
 const serverURL =
-  process.env.NEXT_PUBLIC_SERVER_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  isPreviewEnv && process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXT_PUBLIC_SERVER_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
 /**
  * CSRF / CORS 허용 오리진.

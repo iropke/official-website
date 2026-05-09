@@ -84,6 +84,13 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      // Custom locale switcher with search input + filtered list. Replaces
+      // Payload's built-in <Localizer/> for usability at 20 locales (the
+      // default is hidden via global CSS rules co-located with the
+      // component — see components/admin/LocaleSwitcherWithSearch/index.css).
+      actions: ['/components/admin/LocaleSwitcherWithSearch/index#default'],
+    },
   },
   collections: [Users, Media, Tags, Posts, Pages, Inquiries],
   globals: [Navigation, SiteSettings, Homepage],

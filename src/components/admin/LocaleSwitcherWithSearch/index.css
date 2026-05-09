@@ -1,0 +1,164 @@
+/*
+ * Hide Payload's built-in Localizer popup + its label-spacer in the
+ * AppHeader. Our custom LocaleSwitcherWithSearch (registered via
+ * admin.components.actions) renders alongside it; this rule prevents the
+ * two from displaying simultaneously.
+ */
+.app-header__localizer,
+.app-header__localizer-spacing {
+  display: none !important;
+}
+
+/* ── Custom switcher root ──────────────────────────────────────── */
+.iropke-localizer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  border: 1px solid var(--theme-elevation-150, rgba(35, 35, 41, 0.18));
+  border-radius: 4px;
+  background: var(--theme-input-bg, transparent);
+  color: var(--theme-text, #1c1c1f);
+  font-family: inherit;
+}
+
+.iropke-localizer--open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+
+/* ── Trigger button ────────────────────────────────────────────── */
+.iropke-localizer__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.iropke-localizer__icon,
+.iropke-localizer__chevron {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+.iropke-localizer__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* ── Menu ──────────────────────────────────────────────────────── */
+.iropke-localizer__menu {
+  position: absolute;
+  top: 100%;
+  right: -1px;
+  width: 260px;
+  max-width: calc(100vw - 32px);
+  /* Single scroll container — search input stays pinned via sticky. */
+  max-height: 70vh;
+  overflow-y: auto;
+  margin-top: -1px;
+  padding: 8px;
+  border: 1px solid var(--theme-elevation-150, rgba(35, 35, 41, 0.18));
+  border-top: none;
+  border-radius: 4px 0 4px 4px;
+  background: var(--theme-elevation-0, #ffffff);
+  box-shadow: 0 12px 24px rgba(35, 35, 41, 0.12);
+  z-index: 50;
+}
+
+.iropke-localizer__search-row {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 4px 4px 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--theme-elevation-100, rgba(35, 35, 41, 0.08));
+  background: var(--theme-elevation-0, #ffffff);
+}
+
+.iropke-localizer__search-input {
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.82rem;
+  color: inherit;
+  background: var(--theme-input-bg, #ffffff);
+  border: 1px solid var(--theme-elevation-150, rgba(35, 35, 41, 0.18));
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.iropke-localizer__search-input:focus {
+  border-color: var(--theme-success-500, #5eb6b2);
+}
+
+.iropke-localizer__search-input::placeholder {
+  color: var(--theme-elevation-400, rgba(35, 35, 41, 0.4));
+}
+
+.iropke-localizer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.iropke-localizer__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.iropke-localizer__item:hover:not(:disabled),
+.iropke-localizer__item:focus-visible {
+  background: var(--theme-elevation-100, rgba(94, 182, 178, 0.12));
+}
+
+.iropke-localizer__item--active {
+  background: var(--theme-elevation-150, rgba(94, 182, 178, 0.18));
+  color: var(--theme-success-500, #2a8780);
+  font-weight: 600;
+  cursor: default;
+}
+
+.iropke-localizer__item-label {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iropke-localizer__item-code {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  color: var(--theme-elevation-400, rgba(35, 35, 41, 0.55));
+}
+
+.iropke-localizer__empty {
+  padding: 12px 10px;
+  font-size: 0.82rem;
+  color: var(--theme-elevation-400, rgba(35, 35, 41, 0.55));
+  text-align: center;
+}

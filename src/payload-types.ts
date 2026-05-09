@@ -365,6 +365,10 @@ export interface Post {
   tags?: (number | Tag)[] | null;
   publishedDate?: string | null;
   /**
+   * insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례. 라우트와 sitemap 분기 기준입니다.
+   */
+  category: 'insight' | 'story' | 'portfolio';
+  /**
    * 이 게시물을 공개할 언어를 선택하세요. 미선택 언어는 목록에서 숨겨집니다.
    */
   publishedLocales?:
@@ -746,6 +750,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   tags?: T;
   publishedDate?: T;
+  category?: T;
   publishedLocales?: T;
   cluster?: T;
   clusterRole?: T;

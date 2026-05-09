@@ -172,6 +172,33 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
   }
 
   if (t === 'paragraph') {
+    // 첫 단락 TL;DR 라벨 시각 숨김 (DOM 에는 보존 — AI 추출 / 검색엔진 신호 유지).
+    // 컨벤션: 모든 evergreen body.md 의 첫 단락은 "<strong>TL;DR</strong>: <answer>" 형식으로 시작.
+    // <span hidden> = display:none + AT 트리에서 제거 → 시각 사용자 / SR 사용자는
+    // 답 본문만 받고, AI 봇 / 크롤러는 HTML 소스에서 "TL;DR: <answer>" 를 그대로 추출.
+    // 매칭 조건 3종 모두: ① 첫 블록(index 0) ② 첫 child = bold "TL;DR" 정확 매치
+    // ③ 둘째 child = ":" (선택적 공백) 으로 시작하는 텍스트.
+    const kids = (node.children ?? []) as LexicalNode[];
+    if (index === 0 && kids.length >= 2) {
+      const c0 = kids[0];
+      const c1 = kids[1];
+      const c0Bold =
+        c0?.type === 'text' &&
+        typeof c0.format === 'number' &&
+        (c0.format & FORMAT_BOLD) !== 0 &&
+        c0.text === 'TL;DR';
+      const c1Text = c1?.type === 'text' && typeof c1.text === 'string' ? c1.text : null;
+      const colon = c0Bold && c1Text != null ? c1Text.match(/^:\s*/)?.[0] : null;
+      if (c0Bold && c1Text != null && colon != null) {
+        const c1Trim = { ...c1, text: c1Text.slice(colon.length) };
+        return (
+          <p key={key} className={revealClass} style={{ transitionDelay: delay }}>
+            <span hidden>TL;DR{colon}</span>
+            {renderInlineChildren([c1Trim, ...kids.slice(2)])}
+          </p>
+        );
+      }
+    }
     // 빈 paragraph 는 vertical spacing 역할만 하도록 유지
     return (
       <p key={key} className={revealClass} style={{ transitionDelay: delay }}>

@@ -6000,7 +6000,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'ko'"
+          "default": "'en'"
         },
         "ai_api_provider": {
           "name": "ai_api_provider",
@@ -7171,28 +7171,52 @@
       "name": "_locales",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum_posts_published_locales": {
       "name": "enum_posts_published_locales",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum_posts_status": {
@@ -7207,14 +7231,26 @@
       "name": "enum__posts_v_version_published_locales",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum__posts_v_version_status": {
@@ -7229,28 +7265,52 @@
       "name": "enum__posts_v_published_locale",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum_pages_published_locales": {
       "name": "enum_pages_published_locales",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum_pages_status": {
@@ -7265,14 +7325,26 @@
       "name": "enum__pages_v_version_published_locales",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum__pages_v_version_status": {
@@ -7287,14 +7359,26 @@
       "name": "enum__pages_v_published_locale",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum_inquiries_status": {
@@ -7331,14 +7415,26 @@
       "name": "enum_site_settings_enabled_locales",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum_site_settings_rtl_locales": {
@@ -7352,14 +7448,26 @@
       "name": "enum_site_settings_default_locale",
       "schema": "public",
       "values": [
-        "ko",
         "en",
-        "es",
-        "ru",
+        "zh",
+        "ja",
         "de",
         "fr",
-        "zh",
-        "ar"
+        "es",
+        "ko",
+        "pt",
+        "hi",
+        "ru",
+        "nl",
+        "it",
+        "ar",
+        "sv",
+        "th",
+        "pl",
+        "id",
+        "ms",
+        "da",
+        "tr"
       ]
     },
     "public.enum_site_settings_ai_api_provider": {
@@ -7397,6 +7505,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "0ee4a23d-a6b0-47ed-8ea9-fe2835e14e4c",
+  "id": "3d13662f-13b6-453e-a77d-b81bb8498990",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

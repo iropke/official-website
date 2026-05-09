@@ -2,13 +2,8 @@
 
 import React from 'react';
 import { IconLinkedIn, IconInstagram, IconYouTube } from '@/components/icons/SvgIcons';
-import LanguageSelector, { type Language } from '../LanguageSelector/LanguageSelector';
+import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import styles from './Footer.module.css';
-
-const languages: Language[] = [
-  { code: 'en', label: 'English', href: '/en' },
-  { code: 'ko', label: 'Korean', href: '/ko' },
-];
 
 const socialLinks = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/iropke', Icon: IconLinkedIn },
@@ -23,11 +18,7 @@ export default function Footer() {
         <div className={styles.inner}>
           {/* Top Row: Language + Social */}
           <div className={styles.rowTop}>
-            <LanguageSelector
-              currentLabel="English"
-              languages={languages}
-              variant="footer"
-            />
+            <LanguageSelector variant="footer" />
 
             <div className={styles.social} aria-label="Social media links">
               {socialLinks.map(({ label, href, Icon }) => (

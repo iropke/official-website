@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Post, Media } from '@/payload-types';
+import { LOCALE_INTL_TAG, isLocale } from '@/i18n/locales';
 import styles from './Insights.module.css';
 
 export interface InsightsBackgroundImage {
@@ -22,7 +23,8 @@ function formatDate(dateString: string | null | undefined, locale: string) {
   try {
     const d = new Date(dateString);
     if (Number.isNaN(d.getTime())) return '';
-    return new Intl.DateTimeFormat(locale === 'ko' ? 'ko-KR' : 'en-US', {
+    const intlTag = isLocale(locale) ? LOCALE_INTL_TAG[locale] : 'en-US';
+    return new Intl.DateTimeFormat(intlTag, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

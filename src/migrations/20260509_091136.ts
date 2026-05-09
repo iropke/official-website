@@ -2,23 +2,23 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
-   CREATE TYPE "public"."_locales" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
-  CREATE TYPE "public"."enum_posts_published_locales" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
+   CREATE TYPE "public"."_locales" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
+  CREATE TYPE "public"."enum_posts_published_locales" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
   CREATE TYPE "public"."enum_posts_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__posts_v_version_published_locales" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
+  CREATE TYPE "public"."enum__posts_v_version_published_locales" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
   CREATE TYPE "public"."enum__posts_v_version_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__posts_v_published_locale" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
-  CREATE TYPE "public"."enum_pages_published_locales" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
+  CREATE TYPE "public"."enum__posts_v_published_locale" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
+  CREATE TYPE "public"."enum_pages_published_locales" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
   CREATE TYPE "public"."enum_pages_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__pages_v_version_published_locales" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
+  CREATE TYPE "public"."enum__pages_v_version_published_locales" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
   CREATE TYPE "public"."enum__pages_v_version_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum__pages_v_published_locale" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
+  CREATE TYPE "public"."enum__pages_v_published_locale" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
   CREATE TYPE "public"."enum_inquiries_status" AS ENUM('new', 'reviewing', 'replied', 'on_hold', 'closed');
   CREATE TYPE "public"."enum_navigation_items_children_link_type" AS ENUM('internal', 'external');
   CREATE TYPE "public"."enum_site_settings_social_links_platform" AS ENUM('linkedin', 'instagram', 'youtube', 'twitter', 'facebook');
-  CREATE TYPE "public"."enum_site_settings_enabled_locales" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
+  CREATE TYPE "public"."enum_site_settings_enabled_locales" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
   CREATE TYPE "public"."enum_site_settings_rtl_locales" AS ENUM('ar');
-  CREATE TYPE "public"."enum_site_settings_default_locale" AS ENUM('ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar');
+  CREATE TYPE "public"."enum_site_settings_default_locale" AS ENUM('en', 'zh', 'ja', 'de', 'fr', 'es', 'ko', 'pt', 'hi', 'ru', 'nl', 'it', 'ar', 'sv', 'th', 'pl', 'id', 'ms', 'da', 'tr');
   CREATE TYPE "public"."enum_site_settings_ai_api_provider" AS ENUM('claude', 'openai');
   CREATE TYPE "public"."enum_homepage_hero_cta_variant" AS ENUM('primary', 'secondary');
   CREATE TYPE "public"."enum_homepage_carousel_slides_background_type" AS ENUM('gradient', 'image');
@@ -533,7 +533,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"logo_dark_id" integer,
   	"favicon_id" integer,
   	"footer_policy_link" varchar DEFAULT '/privacy-policy',
-  	"default_locale" "enum_site_settings_default_locale" DEFAULT 'ko',
+  	"default_locale" "enum_site_settings_default_locale" DEFAULT 'en',
   	"ai_api_provider" "enum_site_settings_ai_api_provider" DEFAULT 'claude',
   	"contact_email" varchar DEFAULT 'hello@iropke.com',
   	"no_reply_email" varchar DEFAULT 'noreply@iropke.com',

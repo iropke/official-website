@@ -4,6 +4,12 @@ import type {
   CollectionConfig,
 } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { LOCALES, LOCALE_LABELS_NATIVE } from '../i18n/locales'
+
+const LOCALE_SELECT_OPTIONS = LOCALES.map((code) => ({
+  label: `${LOCALE_LABELS_NATIVE[code]} (${code})`,
+  value: code,
+}))
 
 /**
  * Task #1.6: meta.ogImage 자동 복사 hook.
@@ -523,16 +529,7 @@ export const Posts: CollectionConfig = {
       type: 'select',
       label: '공개 언어',
       hasMany: true,
-      options: [
-        { label: '한국어 (ko)', value: 'ko' },
-        { label: 'English (en)', value: 'en' },
-        { label: 'Español (es)', value: 'es' },
-        { label: 'Русский (ru)', value: 'ru' },
-        { label: 'Deutsch (de)', value: 'de' },
-        { label: 'Français (fr)', value: 'fr' },
-        { label: '中文 (zh)', value: 'zh' },
-        { label: 'العربية (ar)', value: 'ar' },
-      ],
+      options: LOCALE_SELECT_OPTIONS,
       admin: {
         position: 'sidebar',
         description: '이 게시물을 공개할 언어를 선택하세요. 미선택 언어는 목록에서 숨겨집니다.',

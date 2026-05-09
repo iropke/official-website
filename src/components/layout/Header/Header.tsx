@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { IconChevron, IconMenu, IconClose } from '@/components/icons/SvgIcons';
 import MegaMenu, { type MegaMenuGroup } from '../MegaMenu/MegaMenu';
 import SearchToggle from '../SearchToggle/SearchToggle';
-import LanguageSelector, { type Language } from '../LanguageSelector/LanguageSelector';
+import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import styles from './Header.module.css';
 
 /** Static navigation data — will be replaced by Payload CMS Navigation Global */
@@ -44,11 +44,6 @@ const navigationData: MegaMenuGroup[] = [
       { title: 'Portfolio', description: 'A concise view of outcome-driven projects across websites, platforms, and commerce experiences.', href: '#', kicker: 'Portfolio', gradient: 'linear-gradient(135deg, #40512e, #151d15)' },
     ],
   },
-];
-
-const languages: Language[] = [
-  { code: 'en', label: 'English', href: '/en' },
-  { code: 'ko', label: 'Korean', href: '/ko' },
 ];
 
 export default function Header() {
@@ -157,11 +152,7 @@ export default function Header() {
           <div className={styles.utilities}>
             <SearchToggle />
 
-            <LanguageSelector
-              currentLabel="English"
-              languages={languages}
-              variant="nav"
-            />
+            <LanguageSelector variant="nav" />
 
             <button
               className={styles.menuToggle}

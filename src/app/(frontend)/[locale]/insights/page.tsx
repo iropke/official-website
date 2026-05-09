@@ -1,27 +1,22 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Post, Media } from '@/payload-types'
+import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
 
 import PostListClient, { type PostCardData } from './PostListClient'
 
-type SupportedLocale = 'ko' | 'en' | 'es' | 'ru' | 'de' | 'fr' | 'zh' | 'ar'
-const SUPPORTED_LOCALES: SupportedLocale[] = [
-  'ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar',
-]
 const POSTS_PER_PAGE = 10
 
-function normalizeLocale(raw: string): SupportedLocale {
-  return (SUPPORTED_LOCALES as string[]).includes(raw)
-    ? (raw as SupportedLocale)
-    : 'en'
+function normalizeLocale(raw: string): Locale {
+  return isLocale(raw) ? raw : 'en'
 }
 
-function formatDate(dateString: string | null | undefined, locale: string): string {
+function formatDate(dateString: string | null | undefined, locale: Locale): string {
   if (!dateString) return ''
   try {
     const d = new Date(dateString)
     if (Number.isNaN(d.getTime())) return ''
-    return new Intl.DateTimeFormat(locale === 'ko' ? 'ko-KR' : 'en-US', {
+    return new Intl.DateTimeFormat(LOCALE_INTL_TAG[locale], {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -31,7 +26,7 @@ function formatDate(dateString: string | null | undefined, locale: string): stri
   }
 }
 
-function toCardData(post: Post, locale: string): PostCardData {
+function toCardData(post: Post, locale: Locale): PostCardData {
   const thumb = post.thumbnail as Media | number | null | undefined
   const thumbnailUrl =
     typeof thumb === 'object' && thumb && thumb.url ? thumb.url : ''

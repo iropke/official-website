@@ -15,6 +15,12 @@ import { Inquiries } from './collections/Inquiries'
 import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
 import { Homepage } from './globals/Homepage'
+import {
+  LOCALES,
+  LOCALE_LABELS_ADMIN,
+  LOCALE_DIRS,
+  DEFAULT_LOCALE,
+} from './i18n/locales'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -122,17 +128,12 @@ export default buildConfig({
     }),
   ],
   localization: {
-    locales: [
-      { label: '한국어', code: 'ko' },
-      { label: 'English', code: 'en' },
-      { label: 'Español', code: 'es' },
-      { label: 'Русский', code: 'ru' },
-      { label: 'Deutsch', code: 'de' },
-      { label: 'Français', code: 'fr' },
-      { label: '中文', code: 'zh' },
-      { label: 'العربية', code: 'ar', rtl: true },
-    ],
-    defaultLocale: 'ko',
+    locales: LOCALES.map((code) => ({
+      code,
+      label: LOCALE_LABELS_ADMIN[code],
+      ...(LOCALE_DIRS[code] === 'rtl' ? { rtl: true } : {}),
+    })),
+    defaultLocale: DEFAULT_LOCALE,
     fallback: true,
   },
 })

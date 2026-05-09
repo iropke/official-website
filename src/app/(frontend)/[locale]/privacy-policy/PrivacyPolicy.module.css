@@ -1,0 +1,206 @@
+/* ── Privacy Policy ──
+   기획서: references/requirements/iropke_privacy_policy.md
+   - 좌측 sticky TOC + 우측 본문
+   - mobile 에서 TOC 는 상단으로 펼쳐짐
+   - scrollspy 로 현재 섹션 강조
+*/
+
+.section {
+  padding: clamp(48px, 7vw, 96px) clamp(20px, 5vw, 64px);
+  background: var(--main-bg-color-light, #f5f5f5);
+  color: var(--primary-2, #43434e);
+  font-family: var(--font-body);
+}
+
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: flex-start;
+}
+
+@media (max-width: 880px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ── Sidebar TOC ── */
+.tocWrap {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+}
+
+@media (max-width: 880px) {
+  .tocWrap {
+    position: static;
+    top: auto;
+  }
+}
+
+.tocLabel {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-2, #43434e);
+  opacity: 0.55;
+  margin: 0 0 16px;
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 1px solid rgba(35, 35, 41, 0.1);
+}
+
+@media (max-width: 880px) {
+  .tocList {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-left: 0;
+    gap: 8px;
+  }
+}
+
+.tocItem {
+  margin: 0;
+}
+
+.tocLink {
+  display: block;
+  padding: 6px 14px;
+  margin-left: -1px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--primary-2, #43434e);
+  opacity: 0.75;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.tocLink:hover,
+.tocLink:focus-visible {
+  color: var(--primary-hover, #22908b);
+  opacity: 1;
+}
+
+.tocLinkActive {
+  color: var(--primary-hover, #22908b);
+  border-left-color: var(--primary, #5eb6b2);
+  opacity: 1;
+  font-weight: 500;
+}
+
+@media (max-width: 880px) {
+  .tocLink {
+    border: 1px solid rgba(35, 35, 41, 0.12);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .tocLinkActive {
+    border-color: var(--primary, #5eb6b2);
+  }
+}
+
+/* ── Content ── */
+.content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.headerBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(35, 35, 41, 0.08);
+}
+
+.title {
+  font-family: var(--font-heading-h1-3, var(--font-body));
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--grayscale-gs-primary, #232329);
+  margin: 0;
+}
+
+.lastUpdated {
+  font-size: 13px;
+  color: var(--primary-2, #43434e);
+  opacity: 0.6;
+  letter-spacing: 0.02em;
+}
+
+.policySection {
+  scroll-margin-top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-family: var(--font-heading-h1-3, var(--font-body));
+  font-size: clamp(20px, 2.6vw, 24px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--grayscale-gs-primary, #232329);
+  margin: 0;
+}
+
+.paragraph {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--primary-2, #43434e);
+  margin: 0;
+}
+
+.bullets {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--primary-2, #43434e);
+}
+
+.bullets li {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.contactEmail {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 20px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--primary, #5eb6b2);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+  align-self: start;
+}
+
+.contactEmail:hover,
+.contactEmail:focus-visible {
+  background: var(--primary-hover, #22908b);
+}

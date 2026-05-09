@@ -51,3 +51,6 @@ node_modules/
 
 # Claude Code per-worktree local settings (개인 권한/세션 메타데이터)
 .claude/
+
+# project planning materials (kept outside the repo at D:/Claude/iropke/references/)
+/references/

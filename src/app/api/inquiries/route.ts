@@ -29,13 +29,17 @@
  *   submittedLocale → 폼이 보낸 locale (헤더 또는 form 필드)
  *   ipAddress       → x-forwarded-for / x-real-ip
  *
- * ⚠ 메일 발송: Resend 연동은 Phase A 단계 2 후속 작업. 현 단계는 미구현.
+ * 메일 발송 (Resend):
+ *   DB 저장 성공 후 fire-and-forget 으로 어드민 알림 + 신청자 확인 메일을
+ *   발송합니다. 발송 실패는 console.error 로만 기록 — 사용자 응답을 차단하지
+ *   않습니다. 자세한 정책은 `src/lib/email/sendInquiryEmails.ts` 참조.
  */
 
 import { NextResponse, type NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { DEFAULT_LOCALE, isLocale, type Locale } from '@/i18n/locales'
+import { sendInquiryEmails } from '@/lib/email/sendInquiryEmails'
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024 // 20MB — 폼 안내 문구와 일치
 const ALLOWED_FILE_EXTS = ['ppt', 'pptx', 'doc', 'docx', 'pdf', 'zip']
@@ -322,11 +326,28 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // ── 6. 메일 발송 (Resend) — 미구현 ──────────────────────────
-    // TODO: Resend integration pending — see CLAUDE.md Phase A 단계 2
-    //   - 신규 접수 알림: hello@iropke.com 으로 요약 발송
-    //   - 신청자 자동 회신: input.email 로 접수 확인 메일
-    //   - 외부 환경변수 RESEND_API_KEY 필요. Phase A 단계 2 진입 시 활성화.
+    // ── 6. 메일 발송 (Resend) ───────────────────────────────────
+    // fire-and-forget. 실패해도 사용자 응답 차단 안 함 — DB 저장은 이미 성공.
+    try {
+      await sendInquiryEmails({
+        inquiryId: inquiry.id,
+        company: input.companyName,
+        contactName: input.contactName,
+        jobTitle: input.jobTitle || undefined,
+        email: input.email,
+        phone: input.phone,
+        projectOverview: input.projectOverview,
+        websiteUrl: input.website || undefined,
+        launchDate: input.launchDate || undefined,
+        submittedLocale,
+        recaptchaScore: score,
+        status: inquiryStatus,
+        hasRfpFile: Boolean(rfpFileId),
+        ipAddress: ip,
+      })
+    } catch (mailErr) {
+      console.error('[api/inquiries] sendInquiryEmails threw:', mailErr)
+    }
 
     return NextResponse.json({ success: true, id: inquiry.id }, { status: 201 })
   } catch (err) {

@@ -1,67 +1,113 @@
-# Payload Blank Template
+# Iropke — Official Website (이로프케 공식 홈페이지)
 
-This template comes configured with the bare minimum to get started on anything you need.
+Headless CMS 기반 다국어 회사 홈페이지. Payload 3.x + Next.js App Router + Supabase
+Postgres + Cloudinary 조합으로 8개 언어를 단일 코드베이스에서 관리합니다.
 
-## Quick start
+| Item | Value |
+|------|-------|
+| Live URL | https://official-website-topaz-gamma.vercel.app |
+| Repository | https://github.com/iropke/official-website |
+| Production branch | `main` (Vercel Production 전용) |
+| Locales (8) | `ko` · `en` · `es` · `ru` · `de` · `fr` · `zh` · `ar` (RTL) |
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+## Tech stack
 
-## Quick Start - local setup
+| Layer | Tool |
+|-------|------|
+| Framework | Next.js 16.2.3 (App Router, React 19) |
+| CMS | Payload CMS 3.83.0 (`payload`, `@payloadcms/next`, `@payloadcms/richtext-lexical`) |
+| Database | Supabase Postgres (us-east-1) — Transaction pooler at runtime, Session pooler for migrations |
+| Media | Cloudinary (`payload-cloudinary` adapter) |
+| Translation | Anthropic Claude Haiku (manual admin trigger only) |
+| Analytics | GA4 via `@next/third-parties/google` |
+| Hosting | Vercel Pro |
+| Language | TypeScript 5.7.3, pnpm 9/10 |
 
-To spin up this template locally, follow these steps:
+## Local setup
 
-### Clone
+```sh
+pnpm install
+cp .env.example .env        # fill in real credentials
+pnpm dev                    # http://localhost:3000
+```
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+Admin panel: `http://localhost:3000/admin`. 첫 실행 시 admin 계정 생성 화면을
+거칩니다.
 
-### Development
+### Required environment variables
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+전체 목록과 카테고리별 설명은 [`.env.example`](./.env.example) 참고.
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+| Group | Variables |
+|-------|-----------|
+| Database | `DATABASE_URL`, `DATABASE_URL_DIRECT` |
+| Payload | `PAYLOAD_SECRET`, `NEXT_PUBLIC_SERVER_URL` |
+| Media | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` |
+| Translation | `ANTHROPIC_API_KEY` *(Phase B 활성화 예정)* |
+| Email | `RESEND_API_KEY` *(Phase A 단계 2 활성화 예정)* |
+| Analytics | `NEXT_PUBLIC_GA_ID` |
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+### Schema 변경 워크플로 (요약)
 
-#### Docker (Optional)
+ad-hoc `ALTER TABLE` 금지. 코드 변경(컬렉션 / 글로벌 / 필드 / Lexical Blocks)
+직후 다음 순서로 migration 파일을 동반 커밋합니다.
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+```sh
+# Session pooler (5432) URL 로 swap (PowerShell 예시)
+$env:DATABASE_URL = ((Get-Content .env | Where-Object { $_ -match '^DATABASE_URL_DIRECT=' }) -replace '^DATABASE_URL_DIRECT=', '').Trim()
 
-To do so, follow these steps:
+pnpm payload migrate:create --name <변경요약>
+# 생성된 src/migrations/<ts>-<name>.ts 검토 → 코드 + migration 동일 commit
+```
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+Vercel 빌드 wrapper(`scripts/build.mjs`) 가 빌드 시 자동으로 migrate 적용
+(idempotent). 로컬 `pnpm build` 는 의도적으로 migration 을 실행하지 않습니다.
 
-## How it works
+## Project structure
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+```
+src/
+├── app/
+│   ├── (frontend)/        # Public site routes (locale-aware)
+│   ├── (payload)/         # Payload admin shell
+│   └── api/translate/     # Manual translation endpoint
+├── collections/           # Users · Media · Tags · Posts · Pages · Inquiries
+├── globals/               # Navigation · SiteSettings · Homepage
+├── components/            # Shared React components
+├── fonts/                 # Per-locale font registration
+├── lexical/               # Custom Lexical blocks (editorialMedia 외)
+├── lib/translation/       # Claude Haiku translator
+├── middleware.ts          # OS 언어 감지 → /<locale> 리디렉션
+├── migrations/            # Payload migration files (Postgres)
+└── payload.config.ts      # Payload root config
+```
 
-### Collections
+## Internationalisation
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+- 진입 경로 `/` 는 `src/middleware.ts` 가 `NEXT_LOCALE` 쿠키 → `Accept-Language`
+  헤더 → `en` 순으로 우선순위 평가 후 `/<locale>` 로 리디렉션합니다.
+- 콘텐츠 원본 locale 은 **영문(en)** 단일 파이프라인 (Phase A). Phase B 에서
+  admin 의 "Translate from EN" 버튼으로 7개 locale 일괄 번역.
+- Arabic(`ar`) 은 `<html dir="rtl">` 자동 전환.
 
-- #### Users (Authentication)
+## Scripts
 
-  Users are auth-enabled collections that have access to the admin panel.
+| Script | 용도 |
+|--------|------|
+| `pnpm dev` | 로컬 개발 서버 |
+| `pnpm build` | 프로덕션 빌드 (`scripts/build.mjs` wrapper, Vercel 에서 migrate 자동 적용) |
+| `pnpm start` | 빌드 산출물 서빙 |
+| `pnpm lint` | ESLint |
+| `pnpm payload <cmd>` | Payload CLI (`migrate`, `migrate:create`, `generate:types`, ...) |
+| `pnpm generate:types` | `src/payload-types.ts` 재생성 |
+| `pnpm test:int` | Vitest 통합 테스트 |
+| `pnpm test:e2e` | Playwright E2E |
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+## 추가 문서
 
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+| 문서 | 용도 |
+|------|------|
+| [`CLAUDE.md`](./CLAUDE.md) | 프로젝트 운영 정책 / 로드맵 / 워크플로 (Claude 자동 로드) |
+| [`AGENTS.md`](./AGENTS.md) | Payload CMS 개발 규칙 (코딩 컨벤션) |
+| [`references/requirements/`](./references/requirements/) | 단계별 요구사항 명세 |
+| [`references/project-direction/`](./references/project-direction/) | Payload 데이터 모델 · 디자인 방향 메모 |

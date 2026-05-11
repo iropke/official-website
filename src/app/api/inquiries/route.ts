@@ -30,8 +30,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-
-const SUPPORTED_LOCALES = new Set(['ko', 'en', 'es', 'ru', 'de', 'fr', 'zh', 'ar'])
+import { DEFAULT_LOCALE, isLocale, type Locale } from '@/i18n/locales'
 const MAX_FILE_BYTES = 20 * 1024 * 1024 // 20MB — 폼 안내 문구와 일치
 const ALLOWED_FILE_EXTS = ['ppt', 'pptx', 'doc', 'docx', 'pdf', 'zip']
 
@@ -172,11 +171,14 @@ export async function POST(req: NextRequest) {
     }
 
     // submittedLocale fallback: Accept-Language 첫 토큰
-    let submittedLocale = input.submittedLocale.trim()
-    if (!submittedLocale || !SUPPORTED_LOCALES.has(submittedLocale)) {
+    const raw = input.submittedLocale.trim()
+    let submittedLocale: Locale
+    if (isLocale(raw)) {
+      submittedLocale = raw
+    } else {
       const accept = req.headers.get('accept-language') ?? ''
       const first = accept.split(',')[0]?.split('-')[0]?.toLowerCase() ?? ''
-      submittedLocale = SUPPORTED_LOCALES.has(first) ? first : 'en'
+      submittedLocale = isLocale(first) ? first : DEFAULT_LOCALE
     }
 
     // ── 3. (선택) 파일 업로드 → media 컬렉션 ────────────────────

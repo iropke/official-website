@@ -573,9 +573,32 @@ export interface Inquiry {
    */
   recaptchaScore?: number | null;
   /**
-   * 폼 제출 시 사용자 언어
+   * 폼 제출 시 사용자 언어 (admin 목록에서 필터 가능)
    */
-  submittedLocale?: string | null;
+  submittedLocale?:
+    | (
+        | 'en'
+        | 'zh'
+        | 'ja'
+        | 'de'
+        | 'fr'
+        | 'es'
+        | 'ko'
+        | 'pt'
+        | 'hi'
+        | 'ru'
+        | 'nl'
+        | 'it'
+        | 'ar'
+        | 'sv'
+        | 'th'
+        | 'pl'
+        | 'id'
+        | 'ms'
+        | 'da'
+        | 'tr'
+      )
+    | null;
   ipAddress?: string | null;
   updatedAt: string;
   createdAt: string;

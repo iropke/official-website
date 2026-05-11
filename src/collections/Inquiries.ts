@@ -1,10 +1,23 @@
 import type { CollectionConfig } from 'payload'
+import { LOCALES, LOCALE_LABELS_ADMIN } from '../i18n/locales'
+
+const LOCALE_OPTIONS = LOCALES.map((code) => ({
+  label: LOCALE_LABELS_ADMIN[code],
+  value: code,
+}))
 
 export const Inquiries: CollectionConfig = {
   slug: 'inquiries',
   admin: {
     useAsTitle: 'company',
-    defaultColumns: ['company', 'contactName', 'email', 'status', 'createdAt'],
+    defaultColumns: [
+      'company',
+      'contactName',
+      'email',
+      'submittedLocale',
+      'status',
+      'createdAt',
+    ],
     group: '운영',
     description: '프로젝트 문의 접수 내역 (읽기 전용)',
   },
@@ -120,12 +133,13 @@ export const Inquiries: CollectionConfig = {
     // ─── 수신 메타 ─────────────────────────────────────────────
     {
       name: 'submittedLocale',
-      type: 'text',
+      type: 'select',
       label: '제출 언어',
+      options: LOCALE_OPTIONS,
       admin: {
         position: 'sidebar',
         readOnly: true,
-        description: '폼 제출 시 사용자 언어',
+        description: '폼 제출 시 사용자 언어 (admin 목록에서 필터 가능)',
       },
     },
     {

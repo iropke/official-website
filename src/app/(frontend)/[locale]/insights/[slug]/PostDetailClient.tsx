@@ -394,7 +394,7 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
                 ? `${s.editorialQnaIcon} ${s.editorialQnaIconAnswer}`
                 : s.editorialQnaIcon;
             return (
-              <div key={ii} className={s.editorialQnaItem}>
+              <div key={ii} className={s.editorialQnaItem} data-role={role}>
                 <span className={iconClass} aria-hidden="true">
                   {role === 'answer' ? <AnswerIcon /> : <QuestionIcon />}
                 </span>

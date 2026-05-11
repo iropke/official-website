@@ -33,7 +33,15 @@ const baseUrl = (
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 ).replace(/\/$/, '')
 
-const STATIC_PATHS = ['', '/insights', '/stories', '/portfolio', '/project-inquiry'] as const
+const STATIC_PATHS = [
+  '',
+  '/insight',
+  '/story',
+  '/portfolio',
+  '/solution',
+  '/service',
+  '/project-inquiry',
+] as const
 
 const buildLocaleUrl = (locale: Locale, path: string): string =>
   `${baseUrl}/${locale}${path}`
@@ -61,7 +69,7 @@ export async function generateSitemaps(): Promise<{ id: Locale }[]> {
 /**
  * 특정 locale 의 sub-sitemap entries.
  *
- * - 정적 페이지 3 종 (홈/insights/project-inquiry)
+ * - 정적 페이지 7 종 (홈/insight/story/portfolio/solution/service/project-inquiry)
  * - Posts 상세: publishedLocales 에 해당 locale 이 포함된 published 글만 노출
  * - 모든 entry 에 9 locale alternates.languages 동시 발행
  */
@@ -84,10 +92,12 @@ export default async function sitemap({
     })
   }
 
-  // ── Posts 상세 (카테고리별 라우트로 분기) ────────────────
-  //   insight   → /insights/[slug]
-  //   story     → /stories/[slug]
+  // ── Posts 상세 (카테고리별 라우트로 분기, 모두 단수 — 2026-05-11) ─
+  //   insight   → /insight/[slug]
+  //   story     → /story/[slug]
   //   portfolio → /portfolio/[slug]
+  //   solution  → /solution/[slug]
+  //   service   → /service/[slug]
   let posts: Post[] = []
   try {
     const payload = await getPayload({ config })

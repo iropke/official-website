@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: rawLocale } = await params
   const locale = normalizeLocale(rawLocale)
   return {
-    alternates: buildAlternates(locale, '/insights'),
+    alternates: buildAlternates(locale, '/insight'),
   }
 }
 
@@ -101,7 +101,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps) 
 
   return (
     <PostList
-      basePath={`/${locale}/insights`}
+      basePath={`/${locale}/insight`}
       locale={locale}
       currentPage={currentPage}
       totalPages={totalPages}

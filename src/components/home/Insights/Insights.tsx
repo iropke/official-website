@@ -41,7 +41,7 @@ function formatDate(dateString: string | null | undefined, locale: string) {
 export default function Insights({
   sectionTitle = 'Latest Insights',
   ctaLabel = 'View All Insights',
-  ctaUrl = '/insights',
+  ctaUrl = '/insight',
   backgroundImage,
   posts,
   locale,
@@ -104,7 +104,7 @@ export default function Insights({
               typeof thumb === 'object' && thumb ? thumb.url ?? null : null;
             const thumbAlt =
               typeof thumb === 'object' && thumb ? thumb.alt ?? post.title : post.title;
-            const href = `/${locale}/insights/${post.slug}`;
+            const href = `/${locale}/insight/${post.slug}`;
             const date = formatDate(post.publishedDate, locale);
 
             return (

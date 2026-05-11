@@ -206,7 +206,7 @@ export const Homepage: GlobalConfig = {
               name: 'insightsCtaUrl',
               type: 'text',
               label: '"View All" 링크',
-              defaultValue: '/insights',
+              defaultValue: '/insight',
             },
             {
               name: 'insightsBackgroundImage',

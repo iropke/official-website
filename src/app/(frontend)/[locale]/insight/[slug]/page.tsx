@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: rawLocale, slug } = await params
   const locale = normalizeLocale(rawLocale)
   return {
-    alternates: buildAlternates(locale, `/insights/${slug}`),
+    alternates: buildAlternates(locale, `/insight/${slug}`),
   }
 }
 
@@ -105,9 +105,9 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
   const locale = normalizeLocale(rawLocale)
   const search = (await searchParams) ?? {}
 
-  // 라우트 = insights 카테고리 전용. 쿼리 필터 + basePath 모두 이 상수에 묶임.
+  // 라우트 = insight 카테고리 전용. 쿼리 필터 + basePath 모두 이 상수에 묶임.
   const CATEGORY = 'insight' as const
-  const basePath = `/${locale}/insights`
+  const basePath = `/${locale}/insight`
 
   const payload = await getPayload({ config })
 

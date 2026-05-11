@@ -189,7 +189,8 @@ export const Posts: CollectionConfig = {
     preview: (doc, { locale }) => {
       // v2 (2026-04-26): 영문 단일 파이프라인 정책. locale 미지정 시 'en' 기본.
       // ?preview=true 쿼리 + payload-token 쿠키가 모두 있어야 page.tsx 가 draft 모드로 응답.
-      // 카테고리별 라우트 (insight → /insights, story → /stories, portfolio → /portfolio) 로 분기.
+      // 카테고리별 라우트 (insight → /insight, story → /story, portfolio → /portfolio,
+      // solution → /solution, service → /service) 로 분기. URL 은 모두 단수 (2026-05-11).
       const baseUrl = resolveServerURL()
       const localeCode = typeof locale === 'string' && locale ? locale : 'en'
       const d = doc as { slug?: string; category?: string } | undefined
@@ -592,10 +593,11 @@ export const Posts: CollectionConfig = {
      // 별도 `isArchived: checkbox` 필드로 향후 추가.
 
     // ─── 분류 (카테고리) ──────────────────────────────────────
-    // category: 'insight' | 'story' | 'portfolio'. 라우트 분기
-    //   (/insights · /stories · /portfolio) + sitemap + 관련 글 query 의 기준.
+    // category: 'insight' | 'story' | 'portfolio' | 'solution' | 'service'. 라우트 분기
+    //   (/insight · /story · /portfolio · /solution · /service — 모두 단수, 2026-05-11)
+    //   + sitemap + 관련 글 query 의 기준.
     //   content-generation 의 meta.json 에서 import 시 그대로 바인딩됨.
-    //   모든 운영 글은 이 셋 중 하나에 속함. defaultValue 'insight' 라
+    //   모든 운영 글은 이 다섯 중 하나에 속함. defaultValue 'insight' 라
     //   기존 데이터 / 미지정 import 는 자동으로 'insight' 로 분류.
     // 비-localized — 카테고리 분류는 콘텐츠 언어와 무관한 글 자체의 속성.
     {
@@ -608,11 +610,13 @@ export const Posts: CollectionConfig = {
         { label: 'Insight (인사이트)', value: 'insight' },
         { label: 'Story (스토리)', value: 'story' },
         { label: 'Portfolio (포트폴리오)', value: 'portfolio' },
+        { label: 'Solution (솔루션)', value: 'solution' },
+        { label: 'Service (서비스)', value: 'service' },
       ],
       admin: {
         position: 'sidebar',
         description:
-          'insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례. 라우트와 sitemap 분기 기준입니다.',
+          'insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례 / solution = 자체 솔루션 (Corpis 등) / service = 업무 영역. 라우트와 sitemap 분기 기준입니다.',
       },
     },
 

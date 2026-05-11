@@ -224,7 +224,7 @@ function useRevealObserver(
 /* ── Client component ── */
 interface PostListProps {
   /**
-   * 카드/페이지네이션 링크의 prefix. 예: `/en/insights`, `/en/stories`.
+   * 카드/페이지네이션 링크의 prefix. 예: `/en/insight`, `/en/story`, `/en/portfolio`, `/en/solution`, `/en/service`.
    * 카드 링크는 `${basePath}/${slug}`, 페이지네이션은 `${basePath}?page=N` 형태로 사용.
    */
   basePath: string;

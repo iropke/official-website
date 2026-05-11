@@ -23,14 +23,25 @@ interface FormData {
   projectOverview: string;
   website: string;
   launchDate: string;
-  notRobot: boolean;
   rfpFile: File | null;
 }
+
+/* reCAPTCHA v3 — global runtime injected by Google's api.js */
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, options: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? '';
 
 /* ═══════════════════════════════════════════════════════════════
    Validators
    ═══════════════════════════════════════════════════════════════ */
-const validators: Record<string, (value: string, extra?: boolean) => boolean> = {
+const validators: Record<string, (value: string) => boolean> = {
   companyName: (v) => v.trim().length > 0,
   contactName: (v) => v.trim().length > 0,
   jobTitle: (v) => v.trim().length === 0 || v.trim().length >= 2,
@@ -58,7 +69,6 @@ const validators: Record<string, (value: string, extra?: boolean) => boolean> = 
     if (!trimmed) return true;
     return /^\d{4}-\d{2}-\d{2}$/.test(trimmed);
   },
-  notRobot: (_v, checked) => checked === true,
   rfpFile: () => true,
 };
 
@@ -72,7 +82,6 @@ const fieldConfigs: FieldConfig[] = [
   { name: 'rfpFile', required: false },
   { name: 'website', required: true },
   { name: 'launchDate', required: false },
-  { name: 'notRobot', required: true },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -92,7 +101,6 @@ export default function ProjectInquiryClient() {
     projectOverview: '',
     website: '',
     launchDate: '',
-    notRobot: false,
     rfpFile: null,
   });
 
@@ -102,6 +110,7 @@ export default function ProjectInquiryClient() {
   const [uploadFileName, setUploadFileName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
   const modalCloseRef = useRef<HTMLButtonElement>(null);
@@ -112,10 +121,9 @@ export default function ProjectInquiryClient() {
   const validateField = useCallback(
     (name: string, forceSubmit = false): boolean => {
       if (name === 'rfpFile') return true; // File field — skip string validation
-      const value = name === 'notRobot' ? '' : (formData as unknown as Record<string, string>)[name] ?? '';
-      const isChecked = name === 'notRobot' ? formData.notRobot : false;
-      const isEmpty = name === 'notRobot' ? !isChecked : value.trim() === '';
-      const isValid = validators[name] ? validators[name](value, isChecked) : true;
+      const value = (formData as unknown as Record<string, string>)[name] ?? '';
+      const isEmpty = value.trim() === '';
+      const isValid = validators[name] ? validators[name](value) : true;
 
       if (!forceSubmit && isEmpty && !touched[name]) {
         setFieldStates((prev) => ({ ...prev, [name]: '' }));
@@ -148,6 +156,54 @@ export default function ProjectInquiryClient() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
+
+  /* ── Load reCAPTCHA v3 script once on mount ── */
+  useEffect(() => {
+    if (!RECAPTCHA_SITE_KEY) {
+      console.warn('[ProjectInquiry] NEXT_PUBLIC_RECAPTCHA_SITE_KEY not configured');
+      return;
+    }
+    if (typeof window === 'undefined') return;
+
+    if (window.grecaptcha) {
+      window.grecaptcha.ready(() => setRecaptchaReady(true));
+      return;
+    }
+
+    const scriptId = 'recaptcha-v3-script';
+    if (document.getElementById(scriptId)) {
+      const tryReady = () => {
+        if (window.grecaptcha) {
+          window.grecaptcha.ready(() => setRecaptchaReady(true));
+        } else {
+          setTimeout(tryReady, 100);
+        }
+      };
+      tryReady();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      window.grecaptcha?.ready(() => setRecaptchaReady(true));
+    };
+    document.head.appendChild(script);
+  }, []);
+
+  /* ── Acquire a reCAPTCHA token for this submission ── */
+  const getRecaptchaToken = useCallback(async (): Promise<string | null> => {
+    if (!RECAPTCHA_SITE_KEY || !window.grecaptcha) return null;
+    try {
+      return await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'inquiry' });
+    } catch (err) {
+      console.error('[ProjectInquiry] grecaptcha.execute failed', err);
+      return null;
+    }
+  }, []);
 
   /* ── Blur handler ── */
   const handleBlur = useCallback(
@@ -214,9 +270,8 @@ export default function ProjectInquiryClient() {
         /* Focus first invalid field */
         const firstInvalid = fieldConfigs.find(({ name }) => {
           if (name === 'rfpFile') return false; // File field is always valid
-          const value = name === 'notRobot' ? '' : (formData as unknown as Record<string, string>)[name] ?? '';
-          const isChecked = name === 'notRobot' ? formData.notRobot : false;
-          return !(validators[name] ? validators[name](value, isChecked) : true);
+          const value = (formData as unknown as Record<string, string>)[name] ?? '';
+          return !(validators[name] ? validators[name](value) : true);
         });
         if (firstInvalid) {
           const el = formRef.current?.querySelector(`[name="${firstInvalid.name}"]`) as HTMLElement;
@@ -230,6 +285,16 @@ export default function ProjectInquiryClient() {
       setSubmitError(null);
       setSubmitting(true);
       try {
+        /* Acquire reCAPTCHA token (v3 — invisible) */
+        const recaptchaToken = await getRecaptchaToken();
+        if (!recaptchaToken) {
+          setSubmitError(
+            'Spam protection failed to initialize. Please reload the page and try again.',
+          );
+          setSubmitting(false);
+          return;
+        }
+
         const fd = new globalThis.FormData();
         fd.append('companyName', formData.companyName);
         fd.append('contactName', formData.contactName);
@@ -239,7 +304,7 @@ export default function ProjectInquiryClient() {
         fd.append('projectOverview', formData.projectOverview);
         fd.append('website', formData.website);
         fd.append('launchDate', formData.launchDate);
-        fd.append('notRobot', String(formData.notRobot));
+        fd.append('recaptchaToken', recaptchaToken);
         fd.append('submittedLocale', locale);
         if (formData.rfpFile) fd.append('rfpFile', formData.rfpFile);
 
@@ -274,7 +339,6 @@ export default function ProjectInquiryClient() {
           projectOverview: '',
           website: '',
           launchDate: '',
-          notRobot: false,
           rfpFile: null,
         });
         setUploadFileName('');
@@ -287,7 +351,7 @@ export default function ProjectInquiryClient() {
         setSubmitting(false);
       }
     },
-    [formData, locale, submitting, validateField],
+    [formData, locale, submitting, validateField, getRecaptchaToken],
   );
 
   /* ── Modal close ── */
@@ -567,35 +631,6 @@ export default function ProjectInquiryClient() {
                   <p className={styles.fieldError}>Please enter a valid date.</p>
                 </div>
 
-                {/* Spam checkbox */}
-                <div className={fieldClass('notRobot')}>
-                  <label className={styles.fieldLabel}>
-                    <span>Spam filter is active</span>
-                    <span className={`${styles.fieldMeta} ${styles.fieldMetaRequired}`}>Required</span>
-                  </label>
-                  <div className={styles.fieldControl}>
-                    <div className={styles.consentBox}>
-                      <div className={styles.consentMain}>
-                        <label>
-                          <span className="sr-only">Spam protection checkbox</span>
-                          <input
-                            className={styles.consentHiddenInput}
-                            name="notRobot"
-                            type="checkbox"
-                            checked={formData.notRobot}
-                            onChange={(e) => handleChange('notRobot', e.target.checked)}
-                          />
-                          <span className={styles.consentCheck} aria-hidden="true" />
-                        </label>
-                        <span className={styles.consentText}>I&apos;m not bot</span>
-                      </div>
-                      {/* CAPTCHA badge — will be replaced with real CAPTCHA integration */}
-                    </div>
-                  </div>
-                  <span className={`${styles.fieldStatus} ${styles.fieldConsentStatus}`} aria-hidden="true">&#10003;</span>
-                  <p className={styles.fieldError}>Required field is missing.</p>
-                </div>
-
                 {/* Submit */}
                 <div className={styles.actions}>
                   {submitError && (
@@ -606,11 +641,30 @@ export default function ProjectInquiryClient() {
                   <button
                     className={styles.submitButton}
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || !recaptchaReady}
                     aria-busy={submitting}
                   >
                     {submitting ? 'Submitting…' : 'Submit Project Inquiry'}
                   </button>
+                  <p className={styles.recaptchaNotice}>
+                    This site is protected by reCAPTCHA and the Google{' '}
+                    <a
+                      href="https://policies.google.com/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Privacy Policy
+                    </a>{' '}
+                    and{' '}
+                    <a
+                      href="https://policies.google.com/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Terms of Service
+                    </a>{' '}
+                    apply.
+                  </p>
                 </div>
               </form>
             </section>

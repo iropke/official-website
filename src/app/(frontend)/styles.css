@@ -162,11 +162,3 @@ svg {
     }
   }
 }
-
-/* reCAPTCHA v3 — hide the floating badge (collides with the chat widget).
-   Google ToS-compliant as long as the inquiry form shows the reCAPTCHA notice
-   linking to Privacy Policy / Terms of Service.
-   https://developers.google.com/recaptcha/docs/faq#id-like-to-hide-the-recaptcha-badge */
-.grecaptcha-badge {
-  visibility: hidden !important;
-}

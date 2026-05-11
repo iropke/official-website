@@ -182,11 +182,14 @@
   max-width: 95%;
 }
 
-/* ── Lists ── */
+/* ── Lists ──
+   padding-left 은 본문 paragraph 좌측 라인 안쪽에서 marker 가 시작되도록 명시.
+   .postTagsList (line 664) 는 별도 셀렉터로 독립적으로 reset 됨 — 한 쪽을 수정해도
+   다른 쪽이 영향받지 않도록 양쪽 모두 명시적 padding 부여. */
 .editorial ol,
 .editorial ul {
   margin: 0 0 24px 0;
-  padding-left: 0rem;
+  padding-left: 1.25rem;
   line-height: 1.4;
 }
 
@@ -541,7 +544,7 @@
 .editorialQna {
   margin: 44px 0;
   display: grid;
-  gap: 18px;
+  gap: 12px;
 }
 
 .editorialQnaItem {
@@ -553,6 +556,13 @@
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 14px 34px rgba(20, 33, 38, 0.05);
   border-radius: 0;
+}
+
+/* Q-A 쌍 시각화: answer 직후 question 사이에만 추가 여백.
+   (이전 쌍 A)↔(다음 쌍 Q) 간격 = grid gap 12px + margin-top 20px = 32px.
+   같은 쌍 안 Q↔A 간격은 grid gap 12px 만 유지 → 쌍 단위로 묶여 보임. */
+.editorialQnaItem[data-role="answer"] + .editorialQnaItem[data-role="question"] {
+  margin-top: 20px;
 }
 
 .editorialQnaIcon {

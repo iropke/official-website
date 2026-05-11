@@ -728,5 +728,20 @@ export const Posts: CollectionConfig = {
         description: '영문 소문자, 숫자, 하이픈만 사용 (예: ai-search-strategy)',
       },
     },
+
+    // ─── 번역 액션 (UI only — 데이터 저장 없음) ─────────────────
+    // slug 박스 바로 하위에 "Translate" 버튼이 배치되어, source locale 기준
+    // 으로 선택한 target locale 들로 일괄 번역을 트리거합니다 (Phase B-1 ②).
+    // 백엔드: /api/translate · 컴포넌트: src/components/admin/TranslateButton.
+    {
+      name: 'translateAction',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '/components/admin/TranslateButton/index#default',
+        },
+      },
+    },
   ],
 }

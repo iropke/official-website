@@ -7,8 +7,8 @@ import styles from './PostList.module.css';
 
 /* ── Types ── */
 /**
- * Post card shape — denormalized on the server (page.tsx) from payload Post,
- * so this client component stays presentational.
+ * Post card shape — denormalized on the server (e.g. insights/page.tsx) from
+ * payload Post, so this client component stays presentational.
  */
 export interface PostCardData {
   slug: string;
@@ -76,16 +76,16 @@ function ChevronRight(props: React.SVGAttributes<SVGSVGElement>) {
 /* ── PostCard component ── */
 interface PostCardProps {
   post: PostCardData;
-  locale: string;
+  basePath: string;
   index: number;
 }
 
-function PostCard({ post, locale, index }: PostCardProps) {
+function PostCard({ post, basePath, index }: PostCardProps) {
   const hasThumb = Boolean(post.thumbnailUrl);
 
   return (
     <Link
-      href={`/${locale}/insights/${post.slug}`}
+      href={`${basePath}/${post.slug}`}
       className={`${styles.card} ${styles.reveal}`}
       style={{ transitionDelay: `${Math.min(index * 24, 180)}ms` }}
     >
@@ -186,7 +186,12 @@ function Pagination({ pagination, basePath }: PaginationProps) {
 }
 
 /* ── Reveal animation hook ── */
-function useRevealObserver(containerRef: React.RefObject<HTMLElement | null>) {
+// resetKey 는 페이지네이션 등으로 컨테이너 내부가 교체될 때 effect 재실행을
+// 트리거하기 위함. 미지정 시 새 카드들이 .reveal(opacity:0) 상태로 남아 보이지 않음.
+function useRevealObserver(
+  containerRef: React.RefObject<HTMLElement | null>,
+  resetKey: unknown,
+) {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -213,28 +218,33 @@ function useRevealObserver(containerRef: React.RefObject<HTMLElement | null>) {
     items.forEach((item) => observer.observe(item));
 
     return () => observer.disconnect();
-  }, [containerRef]);
+  }, [containerRef, resetKey]);
 }
 
 /* ── Client component ── */
-interface PostListClientProps {
+interface PostListProps {
+  /**
+   * 카드/페이지네이션 링크의 prefix. 예: `/en/insights`, `/en/stories`.
+   * 카드 링크는 `${basePath}/${slug}`, 페이지네이션은 `${basePath}?page=N` 형태로 사용.
+   */
+  basePath: string;
+  /** 빈 상태 메시지 ko/en 분기용. 다국어 확장은 추후 별도 PR 에서 i18n 처리. */
   locale: string;
   currentPage: number;
   totalPages: number;
   posts: PostCardData[];
 }
 
-export default function PostListClient({
+export default function PostList({
+  basePath,
   locale,
   currentPage,
   totalPages,
   posts,
-}: PostListClientProps) {
+}: PostListProps) {
   const sectionRef = useRef<HTMLElement>(null);
 
-  useRevealObserver(sectionRef);
-
-  const basePath = `/${locale}/insights`;
+  useRevealObserver(sectionRef, currentPage);
 
   return (
     <section ref={sectionRef} className={styles.section}>
@@ -251,7 +261,7 @@ export default function PostListClient({
               <PostCard
                 key={post.slug}
                 post={post}
-                locale={locale}
+                basePath={basePath}
                 index={index}
               />
             ))}

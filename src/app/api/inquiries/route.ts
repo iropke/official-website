@@ -18,7 +18,12 @@
  *   website         → websiteUrl
  *   launchDate      → launchDate
  *   rfpFile (File)  → media collection 업로드 후 ID 를 rfpFile 에 저장
- *   notRobot        → 검증만, DB 저장 안 함 (스팸 방지 — Phase A 단계 2 추후 reCAPTCHA)
+ *   recaptchaToken  → Google siteverify 검증 후 score 를 recaptchaScore 에 저장
+ *
+ * 스팸 정책 (reCAPTCHA v3):
+ *   score < 0.3   → 거절 (HTTP 400)
+ *   0.3 ≤ s < 0.5 → 접수하되 status='on_hold' 로 보류 (admin 수동 검토)
+ *   score ≥ 0.5   → 정상 접수 (status='new')
  *
  * 메타 필드:
  *   submittedLocale → 폼이 보낸 locale (헤더 또는 form 필드)
@@ -31,6 +36,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { DEFAULT_LOCALE, isLocale, type Locale } from '@/i18n/locales'
+
 const MAX_FILE_BYTES = 20 * 1024 * 1024 // 20MB — 폼 안내 문구와 일치
 const ALLOWED_FILE_EXTS = ['ppt', 'pptx', 'doc', 'docx', 'pdf', 'zip']
 
@@ -43,7 +49,7 @@ interface InquiryInput {
   projectOverview: string
   website: string
   launchDate: string
-  notRobot: boolean
+  recaptchaToken: string
   submittedLocale: string
 }
 
@@ -91,11 +97,71 @@ function validate(input: InquiryInput): ValidationError[] {
     errors.push({ field: 'launchDate', message: 'Invalid date format (YYYY-MM-DD).' })
   }
 
-  if (!input.notRobot) {
-    errors.push({ field: 'notRobot', message: 'Spam check is required.' })
+  if (!input.recaptchaToken.trim()) {
+    errors.push({ field: 'recaptchaToken', message: 'Spam check token is missing.' })
   }
 
   return errors
+}
+
+interface RecaptchaVerifyResult {
+  success: boolean
+  score: number | null
+  errorCodes?: string[]
+}
+
+const RECAPTCHA_REJECT_THRESHOLD = 0.3
+const RECAPTCHA_REVIEW_THRESHOLD = 0.5
+const RECAPTCHA_EXPECTED_ACTION = 'inquiry'
+
+async function verifyRecaptcha(token: string, ip?: string): Promise<RecaptchaVerifyResult> {
+  const secret = process.env.RECAPTCHA_SECRET_KEY
+  if (!secret) {
+    console.error('[api/inquiries] RECAPTCHA_SECRET_KEY not configured')
+    return { success: false, score: null, errorCodes: ['missing-secret'] }
+  }
+
+  const params = new URLSearchParams({ secret, response: token })
+  if (ip) params.append('remoteip', ip)
+
+  try {
+    const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    })
+
+    if (!res.ok) {
+      return { success: false, score: null, errorCodes: [`http-${res.status}`] }
+    }
+
+    const data = (await res.json()) as {
+      success: boolean
+      score?: number
+      action?: string
+      'error-codes'?: string[]
+    }
+
+    if (!data.success) {
+      return { success: false, score: null, errorCodes: data['error-codes'] }
+    }
+
+    if (data.action && data.action !== RECAPTCHA_EXPECTED_ACTION) {
+      return {
+        success: false,
+        score: typeof data.score === 'number' ? data.score : null,
+        errorCodes: [`action-mismatch:${data.action}`],
+      }
+    }
+
+    return {
+      success: true,
+      score: typeof data.score === 'number' ? data.score : null,
+    }
+  } catch (err) {
+    console.error('[api/inquiries] siteverify network error:', err)
+    return { success: false, score: null, errorCodes: ['network-error'] }
+  }
 }
 
 function getClientIp(req: NextRequest): string | undefined {
@@ -107,11 +173,6 @@ function getClientIp(req: NextRequest): string | undefined {
 function asString(v: FormDataEntryValue | null | undefined): string {
   if (typeof v === 'string') return v
   return ''
-}
-
-function asBool(v: FormDataEntryValue | null | undefined): boolean {
-  const s = asString(v).toLowerCase()
-  return s === 'true' || s === '1' || s === 'on'
 }
 
 export async function POST(req: NextRequest) {
@@ -134,7 +195,7 @@ export async function POST(req: NextRequest) {
         projectOverview: asString(fd.get('projectOverview')),
         website: asString(fd.get('website')),
         launchDate: asString(fd.get('launchDate')),
-        notRobot: asBool(fd.get('notRobot')),
+        recaptchaToken: asString(fd.get('recaptchaToken')),
         submittedLocale: asString(fd.get('submittedLocale')),
       }
       const f = fd.get('rfpFile')
@@ -156,7 +217,7 @@ export async function POST(req: NextRequest) {
         projectOverview: asString(json.projectOverview),
         website: asString(json.website),
         launchDate: asString(json.launchDate),
-        notRobot: Boolean(json.notRobot),
+        recaptchaToken: asString(json.recaptchaToken),
         submittedLocale: asString(json.submittedLocale),
       }
     }
@@ -181,7 +242,32 @@ export async function POST(req: NextRequest) {
       submittedLocale = isLocale(first) ? first : DEFAULT_LOCALE
     }
 
-    // ── 3. (선택) 파일 업로드 → media 컬렉션 ────────────────────
+    // ── 3. reCAPTCHA v3 검증 ────────────────────────────────────
+    const ip = getClientIp(req)
+    const verify = await verifyRecaptcha(input.recaptchaToken, ip)
+
+    if (!verify.success || verify.score === null) {
+      console.warn('[api/inquiries] reCAPTCHA verify failed:', verify.errorCodes)
+      return NextResponse.json(
+        { success: false, error: 'Spam check failed. Please reload the page and try again.' },
+        { status: 400 },
+      )
+    }
+
+    const score = verify.score
+    if (score < RECAPTCHA_REJECT_THRESHOLD) {
+      console.warn(
+        `[api/inquiries] rejected by reCAPTCHA score=${score} ip=${ip ?? 'unknown'}`,
+      )
+      return NextResponse.json(
+        { success: false, error: 'Submission blocked by spam filter.' },
+        { status: 400 },
+      )
+    }
+
+    const inquiryStatus: 'new' | 'on_hold' = score < RECAPTCHA_REVIEW_THRESHOLD ? 'on_hold' : 'new'
+
+    // ── 4. (선택) 파일 업로드 → media 컬렉션 ────────────────────
     let rfpFileId: number | undefined
     if (file) {
       // 파일 검증
@@ -216,9 +302,7 @@ export async function POST(req: NextRequest) {
       rfpFileId = created.id
     }
 
-    // ── 4. inquiries 레코드 생성 ─────────────────────────────────
-    const ip = getClientIp(req)
-
+    // ── 5. inquiries 레코드 생성 ─────────────────────────────────
     const inquiry = await payload.create({
       collection: 'inquiries',
       data: {
@@ -231,13 +315,14 @@ export async function POST(req: NextRequest) {
         websiteUrl: input.website || undefined,
         launchDate: input.launchDate || undefined,
         rfpFile: rfpFileId,
-        status: 'new',
+        status: inquiryStatus,
+        recaptchaScore: score,
         submittedLocale,
         ipAddress: ip,
       },
     })
 
-    // ── 5. 메일 발송 (Resend) — 미구현 ──────────────────────────
+    // ── 6. 메일 발송 (Resend) — 미구현 ──────────────────────────
     // TODO: Resend integration pending — see CLAUDE.md Phase A 단계 2
     //   - 신규 접수 알림: hello@iropke.com 으로 요약 발송
     //   - 신청자 자동 회신: input.email 로 접수 확인 메일

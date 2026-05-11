@@ -5,7 +5,7 @@ import type { Post, Media } from '@/payload-types'
 import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
 import { buildAlternates } from '@/i18n/alternates'
 
-import PostListClient, { type PostCardData } from './PostListClient'
+import PostList, { type PostCardData } from '@/components/posts/PostList/PostList'
 
 const POSTS_PER_PAGE = 10
 
@@ -97,7 +97,8 @@ export default async function InsightsPage({ params, searchParams }: PageProps) 
   const totalPages = Math.max(1, Math.ceil(totalDocs / POSTS_PER_PAGE))
 
   return (
-    <PostListClient
+    <PostList
+      basePath={`/${locale}/insights`}
       locale={locale}
       currentPage={currentPage}
       totalPages={totalPages}

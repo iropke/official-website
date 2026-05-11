@@ -82,7 +82,13 @@ function normalizeReferenceLink(raw: string): string {
   return `https://${trimmed}`;
 }
 
-interface PostDetailClientProps {
+interface PostDetailProps {
+  /**
+   * 관련글 카드 / "더 보기" 링크의 prefix.
+   * 예: `/en/insights`, `/en/stories`, `/en/portfolio`. (locale prefix 포함)
+   */
+  basePath: string;
+  /** 빈 메시지 / "더 보기" 라벨 ko/en 분기용. */
   locale: string;
   post: PostDetailData;
   relatedPosts: RelatedPostData[];
@@ -575,7 +581,13 @@ function AnswerIcon(props: React.SVGAttributes<SVGSVGElement>) {
 /* ═══════════════════════════════════════════════════════════════
    Reveal animation hook
    ═══════════════════════════════════════════════════════════════ */
-function useRevealObserver(containerRef: React.RefObject<HTMLElement | null>) {
+// resetKey 는 soft navigation 으로 같은 라우트 안에서 다른 글로 이동했을 때
+// 새 요소들을 다시 관찰하도록 effect 재실행을 트리거. 미지정 시 `.reveal`
+// (opacity:0) 상태로 새 요소들이 남아 안 보이게 됨.
+function useRevealObserver(
+  containerRef: React.RefObject<HTMLElement | null>,
+  resetKey: unknown,
+) {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -602,19 +614,22 @@ function useRevealObserver(containerRef: React.RefObject<HTMLElement | null>) {
     items.forEach((item) => observer.observe(item));
 
     return () => observer.disconnect();
-  }, [containerRef]);
+  }, [containerRef, resetKey]);
 }
 
 /* ═══════════════════════════════════════════════════════════════
    Page Component
    ═══════════════════════════════════════════════════════════════ */
-export default function PostDetailClient({
+export default function PostDetail({
+  basePath,
   locale,
   post,
   relatedPosts,
-}: PostDetailClientProps) {
+}: PostDetailProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  useRevealObserver(sectionRef);
+  // post.title 을 resetKey 로 — 같은 라우트 segment 안에서 slug 만 바뀌어
+  // 컴포넌트 인스턴스가 재사용될 때 reveal observer 가 새 요소들을 다시 관찰하도록.
+  useRevealObserver(sectionRef, post.title);
 
   const hasHeroImage = Boolean(post.heroImageUrl);
 
@@ -714,7 +729,7 @@ export default function PostDetailClient({
                 <ul className={styles.relatedList}>
                   {relatedPosts.map((rp) => (
                     <li key={rp.slug} className={styles.relatedItem}>
-                      <Link href={`/${locale}/insights/${rp.slug}`} className={styles.relatedLink}>
+                      <Link href={`${basePath}/${rp.slug}`} className={styles.relatedLink}>
                         <span className={styles.relatedThumb}>
                           {rp.thumbnailUrl ? (
                             <Image
@@ -748,7 +763,7 @@ export default function PostDetailClient({
               )}
 
               <div className={styles.relatedMore}>
-                <Link href={`/${locale}/insights`}>
+                <Link href={basePath}>
                   {locale === 'ko' ? '더 보기 →' : 'View more →'}
                 </Link>
               </div>

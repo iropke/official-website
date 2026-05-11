@@ -15,6 +15,8 @@ import PostDetail, {
 } from '@/components/posts/PostDetail/PostDetail'
 
 const RELATED_POSTS_LIMIT = 5
+const CATEGORY = 'portfolio' as const
+const CATEGORY_PATH = '/portfolio'
 
 function normalizeLocale(raw: string): Locale {
   return isLocale(raw) ? raw : 'en'
@@ -96,23 +98,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: rawLocale, slug } = await params
   const locale = normalizeLocale(rawLocale)
   return {
-    alternates: buildAlternates(locale, `/insights/${slug}`),
+    alternates: buildAlternates(locale, `${CATEGORY_PATH}/${slug}`),
   }
 }
 
-export default async function PostDetailPage({ params, searchParams }: PageProps) {
+export default async function PortfolioDetailPage({ params, searchParams }: PageProps) {
   const { locale: rawLocale, slug } = await params
   const locale = normalizeLocale(rawLocale)
   const search = (await searchParams) ?? {}
 
-  // 라우트 = insights 카테고리 전용. 쿼리 필터 + basePath 모두 이 상수에 묶임.
-  const CATEGORY = 'insight' as const
-  const basePath = `/${locale}/insights`
+  const basePath = `/${locale}${CATEGORY_PATH}`
 
   const payload = await getPayload({ config })
 
-  // ── PREVIEW 분기: ?preview=true + payload-token 쿠키(admin) 둘 다 충족 시
-  //   draft 도 함께 조회하고 publishedLocales 필터 해제. 그 외는 published 만.
   const headersList = await nextHeaders()
   let isPreviewUser = false
   if (search.preview === 'true') {
@@ -120,17 +118,16 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
       const authResult = await payload.auth({ headers: headersList })
       isPreviewUser = Boolean(authResult.user)
     } catch (err) {
-      console.error('[PostDetailPage] Preview auth check failed:', err)
+      console.error('[PortfolioDetailPage] Preview auth check failed:', err)
     }
   }
 
-  // ── 1) Target post 조회 ──────────────────────────────────────
   let post: Post | undefined
   try {
     const result = await payload.find({
       collection: 'posts',
       locale,
-      depth: 2, // thumbnail + tags + Lexical block uploads populate
+      depth: 2,
       limit: 1,
       draft: isPreviewUser,
       where: isPreviewUser
@@ -150,18 +147,13 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
     })
     post = result.docs[0] as Post | undefined
   } catch (err) {
-    console.error('[PostDetailPage] Failed to load post:', err)
+    console.error('[PortfolioDetailPage] Failed to load post:', err)
   }
 
   if (!post) {
     notFound()
   }
 
-  // ── 2) 관련글 조회 ─────────────────────────────────────────
-  //   클러스터 우선:
-  //     - post.cluster 가 있으면 같은 cluster 의 형제 글만 (pillar 우선 정렬)
-  //     - cluster 가 비어있는 legacy 글은 fallback 으로 같은 locale 의 최근 글
-  //   둘 다 publishedLocales 필터(F8) + 현 slug 제외 공통 적용.
   const postCluster = typeof post.cluster === 'string' ? post.cluster.trim() : ''
   let relatedDocs: Post[] = []
   try {
@@ -170,7 +162,7 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
         collection: 'posts',
         locale,
         depth: 1,
-        limit: RELATED_POSTS_LIMIT * 2, // pillar 우선 재정렬 여지 확보
+        limit: RELATED_POSTS_LIMIT * 2,
         sort: '-publishedDate',
         where: {
           and: [
@@ -182,7 +174,6 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
         },
       })
       const docs = relatedResult.docs as Post[]
-      // PILLAR 가 목록 최상단에 오도록 안정 정렬 (sort 는 동일 cluster 내에서만 의미).
       const pillars = docs.filter((d) => d.clusterRole === 'pillar')
       const others = docs.filter((d) => d.clusterRole !== 'pillar')
       relatedDocs = [...pillars, ...others].slice(0, RELATED_POSTS_LIMIT)
@@ -204,10 +195,9 @@ export default async function PostDetailPage({ params, searchParams }: PageProps
       relatedDocs = relatedResult.docs as Post[]
     }
   } catch (err) {
-    console.error('[PostDetailPage] Failed to load related posts:', err)
+    console.error('[PortfolioDetailPage] Failed to load related posts:', err)
   }
 
-  // ── 3) Client props 로 변환 ────────────────────────────────
   const heroThumb = resolveMedia(post.thumbnail, post.title ?? '')
   const postData: PostDetailData = {
     title: post.title ?? '',

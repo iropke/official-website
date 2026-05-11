@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Post } from '@/payload-types'
 import { LOCALES, type Locale } from '@/i18n/locales'
+import { getCategoryPostPath } from '@/lib/posts/urls'
 
 /**
  * 언어별 sub-sitemap 분리 + sitemap-index 자동 생성.
@@ -32,7 +33,7 @@ const baseUrl = (
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 ).replace(/\/$/, '')
 
-const STATIC_PATHS = ['', '/insights', '/project-inquiry'] as const
+const STATIC_PATHS = ['', '/insights', '/stories', '/portfolio', '/project-inquiry'] as const
 
 const buildLocaleUrl = (locale: Locale, path: string): string =>
   `${baseUrl}/${locale}${path}`
@@ -83,7 +84,10 @@ export default async function sitemap({
     })
   }
 
-  // ── Insights 상세 ──────────────────────────────────────────
+  // ── Posts 상세 (카테고리별 라우트로 분기) ────────────────
+  //   insight   → /insights/[slug]
+  //   story     → /stories/[slug]
+  //   portfolio → /portfolio/[slug]
   let posts: Post[] = []
   try {
     const payload = await getPayload({ config })
@@ -108,7 +112,7 @@ export default async function sitemap({
     if (!slug) continue
 
     const lastModified = post.updatedAt ? new Date(post.updatedAt) : now
-    const path = `/insights/${slug}`
+    const path = getCategoryPostPath(post.category, slug)
 
     // alternates 는 본 글이 공개된 locale 집합으로 제한 (sitemap.ts 단위와 별도)
     const publishedLocales = (post.publishedLocales ?? []) as string[]

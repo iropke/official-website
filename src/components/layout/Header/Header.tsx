@@ -40,8 +40,8 @@ const navigationData: MegaMenuGroup[] = [
     label: 'Archive',
     items: [
       { title: 'Insight', description: 'Perspectives on search, AI answers, structured websites, and calm digital strategy.', href: '/en/insights', kicker: 'Insight', gradient: 'linear-gradient(135deg, #1d4a45, #12191b)' },
-      { title: 'Story', description: 'Selected narratives around brand evolution, collaboration, and behind-the-scenes decisions.', href: '#', kicker: 'Story', gradient: 'linear-gradient(135deg, #335565, #131d24)' },
-      { title: 'Portfolio', description: 'A concise view of outcome-driven projects across websites, platforms, and commerce experiences.', href: '#', kicker: 'Portfolio', gradient: 'linear-gradient(135deg, #40512e, #151d15)' },
+      { title: 'Story', description: 'Selected narratives around brand evolution, collaboration, and behind-the-scenes decisions.', href: '/en/stories', kicker: 'Story', gradient: 'linear-gradient(135deg, #335565, #131d24)' },
+      { title: 'Portfolio', description: 'A concise view of outcome-driven projects across websites, platforms, and commerce experiences.', href: '/en/portfolio', kicker: 'Portfolio', gradient: 'linear-gradient(135deg, #40512e, #151d15)' },
     ],
   },
 ];

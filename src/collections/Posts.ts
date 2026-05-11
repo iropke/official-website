@@ -6,6 +6,7 @@ import type {
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { WordTablePasteFeature } from '@/lexical/features/wordTablePaste/feature.server'
 import { LOCALES, LOCALE_LABELS_NATIVE } from '../i18n/locales'
+import { getCategoryBasePath } from '../lib/posts/urls'
 
 const LOCALE_SELECT_OPTIONS = LOCALES.map((code) => ({
   label: `${LOCALE_LABELS_NATIVE[code]} (${code})`,
@@ -188,11 +189,14 @@ export const Posts: CollectionConfig = {
     preview: (doc, { locale }) => {
       // v2 (2026-04-26): 영문 단일 파이프라인 정책. locale 미지정 시 'en' 기본.
       // ?preview=true 쿼리 + payload-token 쿠키가 모두 있어야 page.tsx 가 draft 모드로 응답.
+      // 카테고리별 라우트 (insight → /insights, story → /stories, portfolio → /portfolio) 로 분기.
       const baseUrl = resolveServerURL()
       const localeCode = typeof locale === 'string' && locale ? locale : 'en'
-      const slug = (doc as { slug?: string } | undefined)?.slug ?? ''
+      const d = doc as { slug?: string; category?: string } | undefined
+      const slug = d?.slug ?? ''
       if (!slug) return null
-      return `${baseUrl}/${localeCode}/insights/${slug}?preview=true`
+      const categoryPath = getCategoryBasePath(d?.category)
+      return `${baseUrl}/${localeCode}${categoryPath}/${slug}?preview=true`
     },
   },
   access: {
@@ -253,7 +257,7 @@ export const Posts: CollectionConfig = {
        *   - editorialTable / qnaList / codeBlock / rawHtml / videoEmbed
        *   - 부모 richText 가 localized:true 이므로 block 내부 필드에는
        *     localized 를 별도 지정하지 않음 (locale 별 JSON 이 자동 분리됨).
-       *   - 실제 렌더는 PostDetailClient.tsx 의 renderBlockNode switch 에서
+       *   - 실제 렌더는 PostDetail.tsx 의 renderBlockNode switch 에서
        *     Phase 3 에 추가 예정. 현재는 기본 fallback(<p> flatten)으로 동작.
        */
       editor: lexicalEditor({
@@ -450,7 +454,7 @@ export const Posts: CollectionConfig = {
               //   - caption:  textarea (rows: 2). 비어있으면 figcaption 미렌더.
               //   - alt:      text. 비어있으면 Media 의 기본 alt 사용.
               //   - alignment: select (full/center/wide). 기본값 center.
-              // 렌더는 Phase 3 (PostDetailClient.tsx renderBlockNode) 에서 별도 추가.
+              // 렌더는 Phase 3 (PostDetail.tsx renderBlockNode) 에서 별도 추가.
               {
                 slug: 'editorialMedia',
                 labels: { singular: '이미지 + 캡션', plural: '이미지 + 캡션' },

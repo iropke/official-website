@@ -6,6 +6,7 @@ import config from '@payload-config'
 import type { Post, Page } from '@/payload-types'
 
 import { normalizeLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
+import { getPostUrl } from '@/lib/posts/urls'
 import { getSearchCopy } from './messages'
 import styles from './Search.module.css'
 
@@ -108,7 +109,8 @@ async function searchPosts(
       type: 'post' as const,
       title: p.title ?? '',
       excerpt: p.excerpt ?? '',
-      url: `/${locale}/insights/${(p as { slug?: string }).slug ?? p.id}`,
+      // 글의 category 에 따라 /insights/[slug] / /stories/[slug] / /portfolio/[slug] 로 분기.
+      url: getPostUrl(locale, p.category, (p as { slug?: string }).slug ?? String(p.id)),
       date: formatDate(p.publishedDate, locale),
     }))
   } catch (err) {

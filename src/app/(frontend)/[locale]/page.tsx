@@ -91,8 +91,13 @@ export default async function HomePage({ params }: HomePageProps) {
       sort: '-publishedDate',
       // Payload drafts: 기본 draft:false 이므로 _status=published 만 반환 →
       // 별도 status 조건 불필요. publishedLocales 로 언어별 공개 여부만 필터.
+      // "Latest Insights" 섹션은 insight 카테고리만 노출 (story / portfolio 는
+      // 별도 라우트에 자체 카드 그리드를 둘 예정).
       where: {
-        publishedLocales: { equals: locale },
+        and: [
+          { publishedLocales: { equals: locale } },
+          { category: { equals: 'insight' } },
+        ],
       },
     });
     latestPosts = postsResult.docs as Post[];

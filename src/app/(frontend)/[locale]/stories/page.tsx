@@ -8,6 +8,8 @@ import { buildAlternates } from '@/i18n/alternates'
 import PostList, { type PostCardData } from '@/components/posts/PostList/PostList'
 
 const POSTS_PER_PAGE = 10
+const CATEGORY = 'story' as const
+const CATEGORY_PATH = '/stories'
 
 function normalizeLocale(raw: string): Locale {
   return isLocale(raw) ? raw : 'en'
@@ -56,11 +58,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: rawLocale } = await params
   const locale = normalizeLocale(rawLocale)
   return {
-    alternates: buildAlternates(locale, '/insights'),
+    alternates: buildAlternates(locale, CATEGORY_PATH),
   }
 }
 
-export default async function InsightsPage({ params, searchParams }: PageProps) {
+export default async function StoriesPage({ params, searchParams }: PageProps) {
   const { locale: rawLocale } = await params
   const { page } = await searchParams
   const locale = normalizeLocale(rawLocale)
@@ -78,20 +80,17 @@ export default async function InsightsPage({ params, searchParams }: PageProps) 
       limit: POSTS_PER_PAGE,
       page: currentPage,
       sort: '-publishedDate',
-      // Payload drafts: `payload.find` 는 draft:false(기본값) 에서 _status=published
-      // 버전만 반환하므로 별도 status 조건 불필요. publishedLocales 로 언어별
-      // 공개 여부만 필터링.
       where: {
         and: [
           { publishedLocales: { equals: locale } },
-          { category: { equals: 'insight' } },
+          { category: { equals: CATEGORY } },
         ],
       },
     })
     docs = result.docs as Post[]
     totalDocs = result.totalDocs ?? docs.length
   } catch (err) {
-    console.error('[InsightsPage] Failed to load posts:', err)
+    console.error('[StoriesPage] Failed to load posts:', err)
     docs = []
     totalDocs = 0
   }
@@ -101,7 +100,7 @@ export default async function InsightsPage({ params, searchParams }: PageProps) 
 
   return (
     <PostList
-      basePath={`/${locale}/insights`}
+      basePath={`/${locale}${CATEGORY_PATH}`}
       locale={locale}
       currentPage={currentPage}
       totalPages={totalPages}

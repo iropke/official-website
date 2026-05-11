@@ -8,8 +8,8 @@ import { buildAlternates } from '@/i18n/alternates'
 import PostList, { type PostCardData } from '@/components/posts/PostList/PostList'
 
 const POSTS_PER_PAGE = 10
-const CATEGORY = 'story' as const
-const CATEGORY_PATH = '/stories'
+const CATEGORY = 'service' as const
+const CATEGORY_PATH = '/service'
 
 function normalizeLocale(raw: string): Locale {
   return isLocale(raw) ? raw : 'en'
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function StoriesPage({ params, searchParams }: PageProps) {
+export default async function ServicePage({ params, searchParams }: PageProps) {
   const { locale: rawLocale } = await params
   const { page } = await searchParams
   const locale = normalizeLocale(rawLocale)
@@ -90,7 +90,7 @@ export default async function StoriesPage({ params, searchParams }: PageProps) {
     docs = result.docs as Post[]
     totalDocs = result.totalDocs ?? docs.length
   } catch (err) {
-    console.error('[StoriesPage] Failed to load posts:', err)
+    console.error('[ServicePage] Failed to load posts:', err)
     docs = []
     totalDocs = 0
   }

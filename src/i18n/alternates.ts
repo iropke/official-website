@@ -10,8 +10,8 @@ import { LOCALES, LOCALE_HREFLANG, type Locale } from './locales'
  *
  * 사용 예:
  *   const path = ''            // 홈
- *   const path = '/insights'   // 리스트
- *   const path = `/insights/${slug}`  // 상세
+ *   const path = '/insight'    // 리스트
+ *   const path = `/insight/${slug}`   // 상세
  */
 
 export const SITE_BASE_URL = (
@@ -28,7 +28,7 @@ export const buildLocaleUrl = (locale: Locale, path: string): string => {
  * Next.js Metadata 의 alternates 객체를 생성한다.
  *
  * @param currentLocale 현재 페이지의 locale (canonical 산출용)
- * @param path          locale 이후의 경로 (`''`, `'/insights'`, `'/insights/foo'`)
+ * @param path          locale 이후의 경로 (`''`, `'/insight'`, `'/insight/foo'`)
  */
 export function buildAlternates(
   currentLocale: Locale,

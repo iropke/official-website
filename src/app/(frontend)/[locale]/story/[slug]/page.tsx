@@ -16,7 +16,7 @@ import PostDetail, {
 
 const RELATED_POSTS_LIMIT = 5
 const CATEGORY = 'story' as const
-const CATEGORY_PATH = '/stories'
+const CATEGORY_PATH = '/story'
 
 function normalizeLocale(raw: string): Locale {
   return isLocale(raw) ? raw : 'en'

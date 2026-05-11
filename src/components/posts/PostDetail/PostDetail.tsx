@@ -85,7 +85,7 @@ function normalizeReferenceLink(raw: string): string {
 interface PostDetailProps {
   /**
    * 관련글 카드 / "더 보기" 링크의 prefix.
-   * 예: `/en/insights`, `/en/stories`, `/en/portfolio`. (locale prefix 포함)
+   * 예: `/en/insight`, `/en/story`, `/en/portfolio`, `/en/solution`, `/en/service`. (locale prefix 포함)
    */
   basePath: string;
   /** 빈 메시지 / "더 보기" 라벨 ko/en 분기용. */

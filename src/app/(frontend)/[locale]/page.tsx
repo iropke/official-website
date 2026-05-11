@@ -171,7 +171,7 @@ export default async function HomePage({ params }: HomePageProps) {
     homepage?.insightsSectionTitle ?? 'Latest Insights';
   const insightsCtaLabel =
     homepage?.insightsCtaLabel ?? 'View All Insights';
-  const insightsCtaUrl = homepage?.insightsCtaUrl ?? '/insights';
+  const insightsCtaUrl = homepage?.insightsCtaUrl ?? '/insight';
 
   const ctaBannerMessage =
     homepage?.ctaBannerMessage ??

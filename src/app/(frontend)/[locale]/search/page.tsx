@@ -109,7 +109,7 @@ async function searchPosts(
       type: 'post' as const,
       title: p.title ?? '',
       excerpt: p.excerpt ?? '',
-      // 글의 category 에 따라 /insights/[slug] / /stories/[slug] / /portfolio/[slug] 로 분기.
+      // 글의 category 에 따라 /insight/[slug] / /story/[slug] / /portfolio/[slug] / /solution/[slug] / /service/[slug] 로 분기.
       url: getPostUrl(locale, p.category, (p as { slug?: string }).slug ?? String(p.id)),
       date: formatDate(p.publishedDate, locale),
     }))
@@ -263,7 +263,7 @@ export default async function SearchPage({
               {copy.emptyHelpSuggestionsTitle}
             </p>
             <div className={styles.emptySuggest}>
-              <Link href={`/${locale}/insights`} className={styles.emptySuggestLink}>
+              <Link href={`/${locale}/insight`} className={styles.emptySuggestLink}>
                 {copy.suggestInsights}
               </Link>
               <Link

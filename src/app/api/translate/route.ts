@@ -50,6 +50,14 @@ import { translateLexicalRoot, type LexicalRoot } from '@/lib/translation/lexica
 import type { Post } from '@/payload-types'
 import { LOCALES, type Locale } from '@/i18n/locales'
 
+/**
+ * Vercel function timeout — extended to 300s (Pro plan max) so a single
+ * Post translation across all selected locales has headroom for both
+ * Anthropic latency (~1–3s per call) AND in-process rate-limiter pacing.
+ * A worst-case 25-paragraph Post × 5 locales × ~2.5s per call ≈ 5 minutes.
+ */
+export const maxDuration = 300
+
 const DEFAULT_SOURCE_LOCALE: Locale = 'en'
 const DEFAULT_FIELDS: FieldType[] = [
   'title',

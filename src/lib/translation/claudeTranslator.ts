@@ -65,63 +65,150 @@ export interface TranslationResult {
   }
 }
 
-function buildPrompt(req: TranslationRequest): string {
+const FIELD_HINTS: Record<FieldType, string> = {
+  title:
+    'This is a BLOG POST TITLE. Keep it concise, punchy, and editorial — do NOT add a period at the end, and never include line breaks or quote marks.',
+  excerpt:
+    'This is a 2–3 sentence article SUMMARY. Keep the tone calm and clear. Preserve sentence count when natural.',
+  metaTitle:
+    'This is an SEO meta title (under ~60 characters). Keep the key nouns and brand terms, no quotation marks.',
+  metaDescription:
+    'This is an SEO meta description (under ~155 characters). Make it informative and neutral.',
+  content:
+    'This is a body text passage from a Lexical rich-text node — typically a full paragraph, heading, list item, or quote. ' +
+    'The passage MAY contain PLACEHOLDER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
+    'Each placeholder represents an inline element (inline code, a symbol-only run, etc.) that exists in the source between text spans and MUST be preserved as-is so the system can re-insert the original element. ' +
+    'CRITICAL RULES for placeholders: ' +
+    '(a) every ⟪N⟫ in the source MUST appear in your output VERBATIM — exact same digits, exact same opening "⟪" and closing "⟫" characters, exact same count. Do not translate, transliterate, omit, duplicate, or renumber placeholders. ' +
+    '(b) You MAY move a placeholder to a different position within the sentence if target-language word order requires it (e.g. Korean / Japanese / Chinese SOV may place an inline-code reference at a different position than English SVO). The system splits your output on the placeholders to redistribute fragments, so word order around them is your choice. ' +
+    '(c) Do NOT insert spaces immediately adjacent to a placeholder unless the source had them there. ' +
+    'Translate the natural-language text around the placeholders into a fluent, complete passage per the style guide. ' +
+    'Preserve leading and trailing whitespace of the WHOLE passage exactly (if the source starts or ends with a space, your output must too). ' +
+    'Do NOT add line breaks or quotation marks. ' +
+    'If the passage is a markdown table separator (e.g. "|---|---|"), a label-only line, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. ' +
+    'Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
+}
+
+const DEFAULT_BRAND_RULE =
+  'Brand rule: keep the brand name "Iropke" / "이롭게" unchanged. Preserve product names (NOVA, SAGE, LUMI, NIX) verbatim.'
+
+const DOMAIN_CONTEXT =
+  'Domain context: iropke is a software / product / design studio. Most source text refers to software development, web products, releases, and tools — interpret ambiguous vocabulary in that frame first.'
+
+/**
+ * Build the prompt as a (system, user) pair.
+ *
+ * The `system` block contains all stable per-locale × per-field content:
+ * domain context, field hint, style guide, glossary, examples, brand rule,
+ * closing instruction. It is identical across every call within a batch
+ * operation (same source / target / field), which makes it eligible for
+ * Anthropic prompt caching (cache_control: ephemeral). First call writes
+ * the cache; subsequent calls within the 5-minute TTL hit the cache and
+ * pay a fraction of the input-token cost.
+ *
+ * The `user` block contains only the variable source text — small, never
+ * cached.
+ */
+function buildPrompts(req: TranslationRequest): { system: string; user: string } {
   const source = LOCALE_NAMES[req.sourceLocale]
   const target = LOCALE_NAMES[req.targetLocale]
 
-  const fieldHints: Record<FieldType, string> = {
-    title:
-      'This is a BLOG POST TITLE. Keep it concise, punchy, and editorial — do NOT add a period at the end, and never include line breaks or quote marks.',
-    excerpt:
-      'This is a 2–3 sentence article SUMMARY. Keep the tone calm and clear. Preserve sentence count when natural.',
-    metaTitle:
-      'This is an SEO meta title (under ~60 characters). Keep the key nouns and brand terms, no quotation marks.',
-    metaDescription:
-      'This is an SEO meta description (under ~155 characters). Make it informative and neutral.',
-    content:
-      'This is a body text passage from a Lexical rich-text node — typically a full paragraph, heading, list item, or quote. ' +
-      'The passage MAY contain PLACEHOLDER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
-      'Each placeholder represents an inline element (inline code, a symbol-only run, etc.) that exists in the source between text spans and MUST be preserved as-is so the system can re-insert the original element. ' +
-      'CRITICAL RULES for placeholders: ' +
-      '(a) every ⟪N⟫ in the source MUST appear in your output VERBATIM — exact same digits, exact same opening "⟪" and closing "⟫" characters, exact same count. Do not translate, transliterate, omit, duplicate, or renumber placeholders. ' +
-      '(b) You MAY move a placeholder to a different position within the sentence if target-language word order requires it (e.g. Korean / Japanese / Chinese SOV may place an inline-code reference at a different position than English SVO). The system splits your output on the placeholders to redistribute fragments, so word order around them is your choice. ' +
-      '(c) Do NOT insert spaces immediately adjacent to a placeholder unless the source had them there. ' +
-      'Translate the natural-language text around the placeholders into a fluent, complete passage per the style guide. ' +
-      'Preserve leading and trailing whitespace of the WHOLE passage exactly (if the source starts or ends with a space, your output must too). ' +
-      'Do NOT add line breaks or quotation marks. ' +
-      'If the passage is a markdown table separator (e.g. "|---|---|"), a label-only line, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. ' +
-      'Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
-  }
-
-  const hint = req.fieldType ? fieldHints[req.fieldType] : ''
-  const brand = req.brandGuideline
-    ? `Brand rule: ${req.brandGuideline}`
-    : 'Brand rule: keep the brand name "Iropke" / "이롭게" unchanged. Preserve product names (NOVA, SAGE, LUMI, NIX) verbatim.'
-
-  // Locale-scoped enrichment. Each section is omitted entirely when the
-  // target locale has no entries — keeps prompts compact for locales we
-  // haven't curated yet (currently EN→EN no-op only).
-  const domainContext =
-    'Domain context: iropke is a software / product / design studio. Most source text refers to software development, web products, releases, and tools — interpret ambiguous vocabulary in that frame first.'
+  const hint = req.fieldType ? FIELD_HINTS[req.fieldType] : null
+  const brand = req.brandGuideline ? `Brand rule: ${req.brandGuideline}` : DEFAULT_BRAND_RULE
   const styleBlock = renderStyleGuide(req.targetLocale)
   const glossaryBlock = renderGlossary(req.targetLocale)
   const examplesBlock = renderExamples(req.targetLocale)
 
-  const sections: (string | null)[] = [
-    `Translate the following ${source} text into ${target}.`,
-    domainContext,
-    hint || null,
+  const systemSections: (string | null)[] = [
+    `You are a professional editorial translator. Translate from ${source} into ${target}.`,
+    DOMAIN_CONTEXT,
+    hint,
     styleBlock,
     glossaryBlock,
     examplesBlock,
     brand,
     'Return ONLY the translated text. Do not include explanations, quotes, or any prefix like "Translation:".',
-    '--- SOURCE ---',
-    req.text,
-    '--- END ---',
   ]
+  const system = systemSections.filter((s): s is string => Boolean(s)).join('\n\n')
 
-  return sections.filter((s): s is string => Boolean(s)).join('\n\n')
+  const user = ['--- SOURCE ---', req.text, '--- END ---'].join('\n')
+
+  return { system, user }
+}
+
+// ── Rate limiter ────────────────────────────────────────────────────────
+//
+// In-process sliding-window token bucket. Each translateWithClaude call
+// reserves an estimated number of input tokens against a 60-second window;
+// if the reservation would exceed the limit, the call sleeps until the
+// oldest reservation in the window expires. After the API call returns,
+// the reservation is corrected to actual usage (uncached + cache_read +
+// cache_creation, all of which count toward Anthropic's TPM limit).
+//
+// Threshold: 45,000 tokens/min — 10% safety margin below the documented
+// Tier 1 Haiku 4.5 limit of 50,000 input tokens/min.
+//
+// Caveat: state is per Node.js process. Serverless cold starts reset it.
+// For iropke's single-operator admin Translate flow this is fine (one
+// long-running request processes all paragraphs in sequence within one
+// process). Concurrent requests across processes can still race against
+// the Anthropic side limit; if that becomes common, replace with a
+// Redis-backed counter or upgrade tier.
+
+const RATE_LIMIT_TPM = 45_000
+const RATE_LIMIT_WINDOW_MS = 60_000
+
+interface CallReservation {
+  /** Wall-clock at reservation time (ms). */
+  at: number
+  /** Tokens reserved or actual tokens used (after correction). */
+  tokens: number
+}
+
+const callHistory: CallReservation[] = []
+
+function pruneExpired(now: number): void {
+  while (callHistory.length > 0 && now - callHistory[0].at >= RATE_LIMIT_WINDOW_MS) {
+    callHistory.shift()
+  }
+}
+
+function tokensInWindow(): number {
+  return callHistory.reduce((sum, c) => sum + c.tokens, 0)
+}
+
+async function reserveTokensAndWait(estimated: number): Promise<CallReservation> {
+  // Cap a single reservation to the full window if the prompt is bigger
+  // than the window — we still proceed but log a warning (an over-limit
+  // single prompt can't be paced away).
+  if (estimated > RATE_LIMIT_TPM) {
+    console.warn(
+      `[translate] single prompt estimated at ${estimated} tokens exceeds window limit ${RATE_LIMIT_TPM} — likely 429`,
+    )
+  }
+  while (true) {
+    const now = Date.now()
+    pruneExpired(now)
+    const used = tokensInWindow()
+    if (used + estimated <= RATE_LIMIT_TPM) {
+      const reservation: CallReservation = { at: now, tokens: estimated }
+      callHistory.push(reservation)
+      return reservation
+    }
+    // Wait until the oldest reservation expires.
+    const oldest = callHistory[0]
+    const waitMs = RATE_LIMIT_WINDOW_MS - (now - oldest.at) + 100
+    if (waitMs <= 0) continue
+    console.info(
+      `[translate] TPM pacing — window ${used}/${RATE_LIMIT_TPM} tokens, sleeping ${waitMs}ms before next call (estimated ${estimated} tokens)`,
+    )
+    await new Promise((r) => setTimeout(r, waitMs))
+  }
+}
+
+/** Rough token estimate from raw character count. ~3 chars/token covers a mix of ASCII and CJK. */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 3) + 50 // +50 for response overhead / instruction tokens
 }
 
 /**
@@ -154,7 +241,12 @@ export async function translateWithClaude(
     }
   }
 
-  const prompt = buildPrompt(req)
+  const { system, user } = buildPrompts(req)
+
+  // Reserve tokens against the in-process rate limit before issuing the
+  // call. The estimate is conservative; we correct to actual after.
+  const estimated = estimateTokens(system) + estimateTokens(user)
+  const reservation = await reserveTokensAndWait(estimated)
 
   const response = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
@@ -166,7 +258,18 @@ export async function translateWithClaude(
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
+      // System block is marked for ephemeral caching. Anthropic caches the
+      // tokens for 5 minutes; within an admin Translate batch all calls to
+      // the same locale × field combination hit the cache (~10x cheaper
+      // and ~85% faster). Below-threshold prompts are silently uncached.
+      system: [
+        {
+          type: 'text',
+          text: system,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      messages: [{ role: 'user', content: user }],
     }),
   })
 
@@ -179,8 +282,22 @@ export async function translateWithClaude(
 
   const data = (await response.json()) as {
     content?: Array<{ type: string; text?: string }>
-    usage?: { input_tokens?: number; output_tokens?: number }
+    usage?: {
+      input_tokens?: number
+      output_tokens?: number
+      cache_creation_input_tokens?: number
+      cache_read_input_tokens?: number
+    }
   }
+
+  // Correct the reservation to actual usage. All three input-token
+  // variants count toward Anthropic's TPM rate limit (cache reads at a
+  // discounted internal rate, but conservatively we record the full sum).
+  const uncachedInput = data.usage?.input_tokens ?? 0
+  const cacheCreation = data.usage?.cache_creation_input_tokens ?? 0
+  const cacheRead = data.usage?.cache_read_input_tokens ?? 0
+  const totalInput = uncachedInput + cacheCreation + cacheRead
+  reservation.tokens = totalInput || estimated
 
   const text = data.content?.find((c) => c.type === 'text')?.text ?? ''
   const translated = text.trim()
@@ -201,7 +318,7 @@ export async function translateWithClaude(
       translated: req.text,
       model: MODEL,
       usage: {
-        inputTokens: data.usage?.input_tokens ?? 0,
+        inputTokens: totalInput,
         outputTokens: data.usage?.output_tokens ?? 0,
       },
     }
@@ -211,7 +328,7 @@ export async function translateWithClaude(
     translated,
     model: MODEL,
     usage: {
-      inputTokens: data.usage?.input_tokens ?? 0,
+      inputTokens: totalInput,
       outputTokens: data.usage?.output_tokens ?? 0,
     },
   }

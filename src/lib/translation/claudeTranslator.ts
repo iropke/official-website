@@ -79,7 +79,15 @@ function buildPrompt(req: TranslationRequest): string {
     metaDescription:
       'This is an SEO meta description (under ~155 characters). Make it informative and neutral.',
     content:
-      'This is a fragment of body text from a Lexical rich-text node. Translate it naturally; preserve any inline markup-like characters verbatim. Do NOT add line breaks or quotes. If the fragment is a markdown table separator (e.g. "|---|---|"), a label or column header with no full-sentence content, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
+      'This is a fragment of body text from a Lexical rich-text node. ' +
+      'CRITICAL: the fragment may be only PART of a sentence — typically text immediately before or after inline code, links, or formatted spans that live in sibling nodes. ' +
+      'Detect completeness: a COMPLETE sentence starts with a capital letter / sentence opener AND ends with terminal punctuation (".", "?", "!"). ' +
+      'If the fragment is INCOMPLETE, translate it as a continuation: do NOT add sentence-ending particles or completers (no "~입니다" / "~합니다" / "。" / "です" / "。") — leave it grammatically open so it joins naturally with adjacent translated fragments. ' +
+      'If the fragment IS complete, translate naturally with proper sentence endings per the style guide. ' +
+      'Preserve leading and trailing whitespace from the source exactly (a leading or trailing space in source MUST appear in the output). ' +
+      'Preserve any inline markup-like characters verbatim. Do NOT add line breaks or quotes. ' +
+      'If the fragment is a markdown table separator (e.g. "|---|---|"), a label or column header with no full-sentence content, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. ' +
+      'Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
   }
 
   const hint = req.fieldType ? fieldHints[req.fieldType] : ''

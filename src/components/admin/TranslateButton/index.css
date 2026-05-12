@@ -1,0 +1,274 @@
+/*
+ * TranslateButton — sidebar trigger + modal styles.
+ *
+ * Uses Payload CSS variables (defined in @payloadcms/ui/scss/colors.scss
+ * etc.) for theme-aware colors so the modal stays consistent in light/dark.
+ */
+
+.iropke-translate {
+  display: block;
+  width: 100%;
+  margin-top: calc(var(--base, 0.25rem) * 2);
+}
+
+.iropke-translate__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  justify-content: center;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--theme-elevation-1000, #111);
+  background: var(--theme-elevation-50, #f5f5f5);
+  border: 1px solid var(--theme-elevation-150, #d8d8d8);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.iropke-translate__trigger:hover:not(:disabled) {
+  background: var(--theme-elevation-100, #ececec);
+  border-color: var(--theme-elevation-200, #c8c8c8);
+}
+
+.iropke-translate__trigger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.iropke-translate__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* ─── Modal ───────────────────────────────────────────────── */
+
+.iropke-translate__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.iropke-translate__dialog {
+  background: var(--theme-bg, #fff);
+  color: var(--theme-text, #111);
+  border: 1px solid var(--theme-elevation-150, #d8d8d8);
+  border-radius: 6px;
+  width: min(560px, 100%);
+  max-height: min(720px, 90vh);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.iropke-translate__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--theme-elevation-100, #ececec);
+}
+
+.iropke-translate__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.iropke-translate__close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--theme-elevation-600, #666);
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.iropke-translate__close:hover:not(:disabled) {
+  color: var(--theme-elevation-1000, #111);
+}
+
+.iropke-translate__body {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.iropke-translate__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.iropke-translate__field-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--theme-elevation-700, #555);
+}
+
+.iropke-translate__select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--theme-input-bg, #fff);
+  color: var(--theme-text, #111);
+  border: 1px solid var(--theme-elevation-200, #c8c8c8);
+  border-radius: 4px;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.iropke-translate__targets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.iropke-translate__targets-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.iropke-translate__targets-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.iropke-translate__link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--theme-elevation-700, #555);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.iropke-translate__link:hover:not(:disabled) {
+  color: var(--theme-elevation-1000, #111);
+}
+
+.iropke-translate__sep {
+  color: var(--theme-elevation-400, #aaa);
+}
+
+.iropke-translate__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.4rem;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--theme-elevation-100, #ececec);
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.iropke-translate__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 120ms ease;
+}
+
+.iropke-translate__item:hover {
+  background: var(--theme-elevation-50, #f5f5f5);
+}
+
+.iropke-translate__item--checked {
+  background: var(--theme-elevation-100, #ececec);
+}
+
+.iropke-translate__item input[type='checkbox'] {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.iropke-translate__item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iropke-translate__item-code {
+  color: var(--theme-elevation-500, #888);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.iropke-translate__note {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--theme-elevation-700, #555);
+}
+
+.iropke-translate__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--theme-elevation-100, #ececec);
+}
+
+.iropke-translate__btn {
+  appearance: none;
+  border: 1px solid transparent;
+  padding: 0.55rem 1rem;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.iropke-translate__btn--ghost {
+  background: transparent;
+  color: var(--theme-elevation-800, #444);
+  border-color: var(--theme-elevation-200, #c8c8c8);
+}
+
+.iropke-translate__btn--ghost:hover:not(:disabled) {
+  background: var(--theme-elevation-50, #f5f5f5);
+}
+
+.iropke-translate__btn--primary {
+  background: var(--theme-success-500, #1f8a3a);
+  color: #fff;
+  border-color: var(--theme-success-500, #1f8a3a);
+}
+
+.iropke-translate__btn--primary:hover:not(:disabled) {
+  background: var(--theme-success-600, #176a2c);
+  border-color: var(--theme-success-600, #176a2c);
+}
+
+.iropke-translate__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

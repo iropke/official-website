@@ -51,7 +51,13 @@ import type { Post } from '@/payload-types'
 import { LOCALES, type Locale } from '@/i18n/locales'
 
 const DEFAULT_SOURCE_LOCALE: Locale = 'en'
-const DEFAULT_FIELDS: FieldType[] = ['title', 'excerpt', 'metaTitle', 'metaDescription']
+const DEFAULT_FIELDS: FieldType[] = [
+  'title',
+  'excerpt',
+  'metaTitle',
+  'metaDescription',
+  'content',
+]
 
 // 20 locale 모두 번역 대상. EN/KO 만 source 허용 (한국어 운영자가 ko 원본
 // 으로 작성한 글을 EN 외 다른 언어로 번역해야 하는 케이스 보존).
@@ -211,11 +217,23 @@ export async function POST(req: NextRequest) {
 
     const source = sourceDoc as unknown as Record<string, unknown>
 
+    // publishedLocales 는 비-localized 단일 array. 번역 성공 시 target locale
+    // 을 자동으로 추가하여 프론트 라우트가 즉시 노출되도록 합니다 (Phase B-1 ②
+    // 정책 A). 운영자가 별도로 admin 에서 토글하지 않아도 번역 + 공개가 한
+    // 흐름으로 처리됩니다. source locale 은 건드리지 않습니다.
+    const rawPublished = source.publishedLocales
+    const currentPublished = new Set<Locale>(
+      Array.isArray(rawPublished)
+        ? rawPublished.filter((l): l is Locale => typeof l === 'string' && isAllowedLocale(l))
+        : [],
+    )
+
     // ── 5. 각 locale 별 번역 + 저장 ───────────────────────────────
     const results: Record<string, Record<string, unknown>> = {}
     let totalInput = 0
     let totalOutput = 0
     let totalContentNodes = 0
+    const publishedAdded: Locale[] = []
 
     for (const locale of targetLocales) {
       const perLocale = new Map<FieldType, string | LexicalRoot>()
@@ -266,12 +284,20 @@ export async function POST(req: NextRequest) {
       }
 
       if (perLocale.size > 0) {
-        const update = buildPostUpdate(perLocale)
+        const update = buildPostUpdate(perLocale) as Record<string, unknown>
+
+        // publishedLocales 에 target locale 누적 추가 (LOCALES 순서로 정렬).
+        if (!currentPublished.has(locale)) {
+          currentPublished.add(locale)
+          publishedAdded.push(locale)
+        }
+        update.publishedLocales = LOCALES.filter((l) => currentPublished.has(l))
+
         await payload.update({
           collection: 'posts',
           id: body.postId,
           locale,
-          data: update,
+          data: update as Partial<Post>,
         })
 
         // 응답에는 평탄화된 형태로 (meta.metaTitle 등) 노출
@@ -285,6 +311,8 @@ export async function POST(req: NextRequest) {
       success: true,
       sourceLocale,
       results,
+      publishedLocales: LOCALES.filter((l) => currentPublished.has(l)),
+      publishedAdded,
       usage: {
         inputTokens: totalInput,
         outputTokens: totalOutput,

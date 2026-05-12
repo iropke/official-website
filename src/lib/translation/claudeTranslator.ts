@@ -74,7 +74,7 @@ function buildPrompt(req: TranslationRequest): string {
     metaDescription:
       'This is an SEO meta description (under ~155 characters). Make it informative and neutral.',
     content:
-      'This is a fragment of body text from a Lexical rich-text node. Translate it naturally; preserve any inline markup-like characters verbatim. Do NOT add line breaks or quotes.',
+      'This is a fragment of body text from a Lexical rich-text node. Translate it naturally; preserve any inline markup-like characters verbatim. Do NOT add line breaks or quotes. If the fragment is a markdown table separator (e.g. "|---|---|"), a label or column header with no full-sentence content, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
   }
 
   const hint = req.fieldType ? fieldHints[req.fieldType] : ''
@@ -162,6 +162,24 @@ export async function translateWithClaude(
     throw new Error('Anthropic API 가 빈 번역 결과를 반환했습니다.')
   }
 
+  // Safety net: when the model refuses to translate (asks for clarification,
+  // explains that the input is empty / table-only, etc.) it leaks meta text
+  // into the field. Heuristic detection on the response → fall back to the
+  // original source verbatim so the post body stays coherent.
+  if (isRefusalResponse(translated, req.text)) {
+    console.warn(
+      `[translate] refusal detected for ${req.fieldType ?? 'unknown'} field — falling back to source verbatim. source="${req.text.slice(0, 60)}…" got="${translated.slice(0, 60)}…"`,
+    )
+    return {
+      translated: req.text,
+      model: MODEL,
+      usage: {
+        inputTokens: data.usage?.input_tokens ?? 0,
+        outputTokens: data.usage?.output_tokens ?? 0,
+      },
+    }
+  }
+
   return {
     translated,
     model: MODEL,
@@ -170,4 +188,29 @@ export async function translateWithClaude(
       outputTokens: data.usage?.output_tokens ?? 0,
     },
   }
+}
+
+const REFUSAL_PATTERNS: readonly RegExp[] = [
+  /I notice/i,
+  /Could you (please )?provide/i,
+  /please provide the (actual|english|source)/i,
+  /I'?m ready to translate/i,
+  /appears to be (empty|a table|a markdown)/i,
+  /no (translatable|actual) (content|text)/i,
+  /I cannot translate/i,
+  /there is nothing to translate/i,
+]
+
+/**
+ * Heuristic: detect when the model's response is a refusal/meta reply rather
+ * than a translation. Triggers when (a) any known refusal phrase is present
+ * AND (b) the response is meaningfully longer than the source (refusals are
+ * typically 5–20× the source length).
+ */
+function isRefusalResponse(response: string, source: string): boolean {
+  const hasMarker = REFUSAL_PATTERNS.some((p) => p.test(response))
+  if (!hasMarker) return false
+  // Don't false-positive when the source itself contains one of these phrases
+  // (e.g. a doc that legitimately discusses refusals).
+  return response.length > Math.max(60, source.length * 2)
 }

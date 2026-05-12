@@ -64,6 +64,31 @@ export async function translateLexicalRoot(
   return { translated: cloned, usage }
 }
 
+/**
+ * Returns true when the input text has no natural-language content worth
+ * sending to a translation model. The model is observed to derail on such
+ * inputs (markdown table separators, symbol-only runs, very short tokens)
+ * and reply with meta/refusal text. Skipping them locally avoids both the
+ * API spend and the contamination risk.
+ *
+ * Cases handled:
+ *   - markdown table separator rows, e.g. `|---|:---:|---|`
+ *   - punctuation/symbol-only runs, e.g. `***`, `→`, `—`
+ *   - numeric-only / whitespace-only
+ *   - very short (≤ 3 chars) ASCII tokens with no letters
+ */
+function isUntranslatable(raw: string): boolean {
+  const trimmed = raw.trim()
+  if (trimmed.length === 0) return true
+  // markdown table separator: `| --- | :---: |` etc.
+  if (/^\|[\s\-:|]+\|?\s*$/.test(trimmed)) return true
+  // punctuation / symbol only — no letters or numbers in any script
+  if (/^[^\p{L}\p{N}]+$/u.test(trimmed)) return true
+  // very short with no Unicode letters
+  if (trimmed.length <= 3 && !/\p{L}/u.test(trimmed)) return true
+  return false
+}
+
 async function walkNode(
   node: LexicalNode,
   translate: TranslateText,
@@ -71,7 +96,7 @@ async function walkNode(
 ): Promise<void> {
   if (node.type === 'text' && typeof node.text === 'string') {
     const raw = node.text
-    if (raw.trim().length > 0) {
+    if (raw.trim().length > 0 && !isUntranslatable(raw)) {
       const result = await translate(raw)
       node.text = result.translated
       usage.inputTokens += result.inputTokens

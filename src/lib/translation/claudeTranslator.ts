@@ -79,7 +79,18 @@ function buildPrompt(req: TranslationRequest): string {
     metaDescription:
       'This is an SEO meta description (under ~155 characters). Make it informative and neutral.',
     content:
-      'This is a fragment of body text from a Lexical rich-text node. Translate it naturally; preserve any inline markup-like characters verbatim. Do NOT add line breaks or quotes. If the fragment is a markdown table separator (e.g. "|---|---|"), a label or column header with no full-sentence content, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
+      'This is a body text passage from a Lexical rich-text node — typically a full paragraph, heading, list item, or quote. ' +
+      'The passage MAY contain PLACEHOLDER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
+      'Each placeholder represents an inline element (inline code, a symbol-only run, etc.) that exists in the source between text spans and MUST be preserved as-is so the system can re-insert the original element. ' +
+      'CRITICAL RULES for placeholders: ' +
+      '(a) every ⟪N⟫ in the source MUST appear in your output VERBATIM — exact same digits, exact same opening "⟪" and closing "⟫" characters, exact same count. Do not translate, transliterate, omit, duplicate, or renumber placeholders. ' +
+      '(b) You MAY move a placeholder to a different position within the sentence if target-language word order requires it (e.g. Korean / Japanese / Chinese SOV may place an inline-code reference at a different position than English SVO). The system splits your output on the placeholders to redistribute fragments, so word order around them is your choice. ' +
+      '(c) Do NOT insert spaces immediately adjacent to a placeholder unless the source had them there. ' +
+      'Translate the natural-language text around the placeholders into a fluent, complete passage per the style guide. ' +
+      'Preserve leading and trailing whitespace of the WHOLE passage exactly (if the source starts or ends with a space, your output must too). ' +
+      'Do NOT add line breaks or quotation marks. ' +
+      'If the passage is a markdown table separator (e.g. "|---|---|"), a label-only line, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. ' +
+      'Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
   }
 
   const hint = req.fieldType ? fieldHints[req.fieldType] : ''

@@ -50,9 +50,9 @@ export interface FewShotExample {
 // ─────────────────────────────────────────────────────────────────────────
 
 export const STYLE_GUIDE: Partial<Record<Locale, string>> = {
-  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다 / ~합니다.). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives.',
-  ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width).',
-  zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」.',
+  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English.',
+  ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Japanese tech readers expect these terms in English.',
+  zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Chinese tech readers expect these terms in English in editorial prose.',
   de: 'Use the formal Sie-Form when addressing the reader. Tone: editorial and professional, similar to c\'t or heise.de. Avoid Du-Form, marketing exclamations, and over-translation of established English tech terms.',
   fr: 'Use vouvoiement (vous). Tone: editorial and professional, similar to Le Monde tech section. Avoid tutoiement, marketing exclamations, and over-translation of established English tech terms.',
   es: 'Use the formal "usted" (or impersonal/passive constructions where natural). Tone: neutral, editorial, professional — readable across Spain and Latin America. Avoid regional slang and marketing exclamations.',
@@ -98,9 +98,35 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     },
     { source: 'shipping', target: '출시 중 / 적용 중', note: SOFTWARE_CONTEXT_NOTE },
     { source: 'shipped', target: '출시한 / 적용한', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'silent failure', target: '조용한 실패', note: 'UI / error context — NOT 무음' },
+    {
+      source: 'silent failure / silent failure mode',
+      target: 'silent failure (영문 보존)',
+      note:
+        'KEEP IN ENGLISH VERBATIM — "silent failure" is established SW jargon with no idiomatic Korean equivalent. ' +
+        'Korean tech readers expect these terms in English. Same policy for "race condition", "flaky test", ' +
+        '"deadlock", "busy loop" — preserve as-is. If the sentence is conceptual and needs a Korean rendering, ' +
+        'describe the behavior ("겉으론 동작하지만 실제로는 잘못된 케이스"). ' +
+        'NEVER 조용한 실패 / 무음 실패 (literal translations that read as foreign).',
+    },
     { source: 'sticky', target: '고정 / 스티키', note: 'UI positioning (sticky CTA / sticky header) — NOT 끈기 있는 / 끈적한' },
     { source: 'busy loop', target: 'busy loop / 분주 루프', note: 'CS jargon — keep English when reader is technical' },
+    {
+      source: 'mental model',
+      target: '사고 모델 / 사고방식 / 멘탈 모델',
+      note: 'NOT 정신 모델 (직역, 어색함). 한국어 IT 글에서는 "사고 모델" 또는 "사고방식" 이 자연스러움.',
+    },
+    {
+      source: 'defense / defensive (design / code context)',
+      target: '대응 / 해결 방법 / 방어책',
+      note:
+        'When the sentence is about how to mitigate a UX/code problem ' +
+        '("the cleanest defense is to ..."), render as 대응 / 해결 방법 / 방어책 — NOT literal 방어.',
+    },
+    {
+      source: 'gains compound',
+      target: '효과가 누적됩니다 / 이점이 쌓입니다',
+      note: 'Idiom: gains accumulate over time. NOT 이득이 누적됩니다 (financial-leaning).',
+    },
     { source: 'release', target: '릴리스 / 배포' },
     { source: 'deploy', target: '배포', note: 'NOT 전개' },
     { source: 'deployment', target: '배포' },
@@ -135,9 +161,35 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     },
     { source: 'shipping', target: 'リリース中 / 適用中', note: SOFTWARE_CONTEXT_NOTE },
     { source: 'shipped', target: 'リリース済み / 適用済み', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'silent failure', target: 'サイレント障害 / 静かな失敗', note: 'UI / error context — NOT 無音' },
-    { source: 'sticky', target: '固定 / スティッキー', note: 'UI positioning (sticky CTA / sticky header) — NOT 粘着' },
+    {
+      source: 'silent failure / silent failure mode',
+      target: 'silent failure (英語のまま)',
+      note:
+        'KEEP IN ENGLISH VERBATIM — "silent failure" is established SW jargon with no idiomatic Japanese equivalent. ' +
+        'Japanese tech readers expect these terms in English. Same policy for "race condition", "flaky test", ' +
+        '"deadlock", "busy loop" — preserve as-is. If the sentence is conceptual and needs a Japanese rendering, ' +
+        'describe the behavior ("見た目は動いているが実際は失敗しているケース"). ' +
+        'NEVER 静かな失敗 / サイレント障害.',
+    },
+    { source: 'sticky', target: '固定 / スティッキー', note: 'UI positioning — NOT 粘着' },
     { source: 'busy loop', target: 'ビジーループ / busy loop', note: 'CS jargon' },
+    {
+      source: 'mental model',
+      target: '思考モデル / メンタルモデル',
+      note: 'NOT 精神モデル (直訳、不自然). Japanese tech writing prefers 思考モデル or transliteration メンタルモデル.',
+    },
+    {
+      source: 'defense / defensive (design / code context)',
+      target: '対策 / 解決策 / 防御策',
+      note:
+        'When the sentence is about mitigating a UX/code problem ("the cleanest defense is to..."), ' +
+        'render as 対策 / 解決策 — NOT literal 防御.',
+    },
+    {
+      source: 'gains compound',
+      target: '効果が積み上がります / メリットが蓄積します',
+      note: 'Idiom: gains accumulate over time. NOT 利得が複合 (literal).',
+    },
     { source: 'release', target: 'リリース' },
     { source: 'deploy', target: 'デプロイ' },
     { source: 'deployment', target: 'デプロイ' },
@@ -170,9 +222,35 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     },
     { source: 'shipping', target: '发布中 / 落地中', note: SOFTWARE_CONTEXT_NOTE },
     { source: 'shipped', target: '已发布 / 已落地', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'silent failure', target: '静默失败', note: 'UI / error context — NOT 无声' },
-    { source: 'sticky', target: '固定 / 吸顶', note: 'UI positioning (sticky CTA / sticky header) — NOT 粘性' },
+    {
+      source: 'silent failure / silent failure mode',
+      target: 'silent failure (保留英文)',
+      note:
+        'KEEP IN ENGLISH VERBATIM — "silent failure" is established SW jargon. ' +
+        'Chinese tech writing increasingly preserves such terms (race condition, flaky test, deadlock, busy loop). ' +
+        'If the sentence is conceptual and needs a Chinese rendering, describe the behavior ' +
+        '("看似正常但实际失败的情况"). 静默失败 is acceptable but less natural in long-form editorial. ' +
+        'NEVER 无声失败.',
+    },
+    { source: 'sticky', target: '固定 / 吸顶', note: 'UI positioning — NOT 粘性' },
     { source: 'busy loop', target: '忙循环 / busy loop', note: 'CS jargon' },
+    {
+      source: 'mental model',
+      target: '思维模型 / 心智模型',
+      note: 'NOT 精神模型 (literal, awkward). Chinese tech writing prefers 思维模型 or 心智模型.',
+    },
+    {
+      source: 'defense / defensive (design / code context)',
+      target: '应对方法 / 解决方法 / 防御策略',
+      note:
+        'When the sentence is about mitigating a UX/code problem ("the cleanest defense is to..."), ' +
+        'render as 应对方法 / 解决方法 — NOT literal 防御.',
+    },
+    {
+      source: 'gains compound',
+      target: '收益累积 / 收益叠加',
+      note: 'Idiom: gains accumulate over time. NOT 收益复合 (financial-only sense).',
+    },
     { source: 'release', target: '发布 / 版本' },
     { source: 'deploy', target: '部署' },
     { source: 'deployment', target: '部署' },
@@ -353,12 +431,32 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
       en: 'We are shipping the new editor next week.',
       target: '다음 주에 새 에디터를 출시합니다.',
     },
-    // "ship" sense (b): engineer checklist — code to apply this week
-    { en: 'What to ship this week', target: '이번 주 적용 항목' },
-    { en: 'We deploy on Fridays.', target: '매주 금요일에 배포합니다.' },
+    // "ship" sense (b): engineer how-to checklist (split-view article heading)
+    { en: 'What to ship this week', target: '이번 주에 시도해볼 체크리스트들' },
+    // "silent failure" — keep English verbatim (established SW idiom)
     {
-      en: 'A small but powerful feature for power users.',
-      target: '파워 유저를 위한 작지만 강력한 기능입니다.',
+      en: 'The most common silent failure mode is X.',
+      target: '가장 흔히 발생하는 silent failure 케이스는 X 입니다.',
+    },
+    // "defense" + "reading X" + fragment around inline code preserved as English
+    {
+      en: 'The cleanest defense is to stop reading window.innerWidth for layout decisions.',
+      target: '가장 깔끔한 해결방법은 레이아웃 결정에 window.innerWidth 를 읽지 않는 것입니다.',
+    },
+    // Recommendation mood — "Avoid X" should use ~피해야 합니다, not ~합니다
+    {
+      en: 'Avoid polling window.innerWidth inside setInterval.',
+      target: 'setInterval 안에서 window.innerWidth 를 폴링하는 방식은 피해야 합니다.',
+    },
+    // "mental model" — drop literal "정신 모델"
+    {
+      en: 'This mental model helps you debug responsive issues.',
+      target: '이러한 사고방식은 반응형 이슈를 디버깅할 때 도움이 됩니다.',
+    },
+    // "gains compound" idiom
+    {
+      en: 'The migration is incremental and the gains compound.',
+      target: '마이그레이션은 점진적이며 실행에 따른 이점이 누적됩니다.',
     },
   ],
   ja: [
@@ -367,12 +465,27 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
       en: 'We are shipping the new editor next week.',
       target: '来週、新しいエディターをリリースします。',
     },
-    // "ship" sense (b): engineer checklist
-    { en: 'What to ship this week', target: '今週反映する項目' },
-    { en: 'We deploy on Fridays.', target: '毎週金曜日にデプロイします。' },
+    // "ship" sense (b): engineer how-to checklist
+    { en: 'What to ship this week', target: '今週試してみる項目' },
     {
-      en: 'A small but powerful feature for power users.',
-      target: 'パワーユーザー向けの、小さくも強力な機能です。',
+      en: 'The most common silent failure mode is X.',
+      target: '最もよくある silent failure ケースは X です。',
+    },
+    {
+      en: 'The cleanest defense is to stop reading window.innerWidth for layout decisions.',
+      target: '最も簡潔な対策は、レイアウト判定で window.innerWidth を読まないことです。',
+    },
+    {
+      en: 'Avoid polling window.innerWidth inside setInterval.',
+      target: 'setInterval 内で window.innerWidth をポーリングする方法は避けるべきです。',
+    },
+    {
+      en: 'This mental model helps you debug responsive issues.',
+      target: 'この思考モデルがレスポンシブの問題のデバッグに役立ちます。',
+    },
+    {
+      en: 'The migration is incremental and the gains compound.',
+      target: '移行は段階的に進み、効果が積み上がっていきます。',
     },
   ],
   zh: [
@@ -381,12 +494,27 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
       en: 'We are shipping the new editor next week.',
       target: '我们下周发布新的编辑器。',
     },
-    // "ship" sense (b): engineer checklist
-    { en: 'What to ship this week', target: '本周可落地的改进' },
-    { en: 'We deploy on Fridays.', target: '我们每周五进行部署。' },
+    // "ship" sense (b): engineer how-to checklist
+    { en: 'What to ship this week', target: '本周可以尝试的清单' },
     {
-      en: 'A small but powerful feature for power users.',
-      target: '一项面向高级用户的小巧而强大的功能。',
+      en: 'The most common silent failure mode is X.',
+      target: '最常见的 silent failure 模式是 X。',
+    },
+    {
+      en: 'The cleanest defense is to stop reading window.innerWidth for layout decisions.',
+      target: '最简洁的解决方法是不再读取 window.innerWidth 来做布局判断。',
+    },
+    {
+      en: 'Avoid polling window.innerWidth inside setInterval.',
+      target: '应避免在 setInterval 内对 window.innerWidth 进行轮询。',
+    },
+    {
+      en: 'This mental model helps you debug responsive issues.',
+      target: '这种思维模型有助于调试响应式问题。',
+    },
+    {
+      en: 'The migration is incremental and the gains compound.',
+      target: '迁移过程是渐进式的,而收益会持续累积。',
     },
   ],
   ru: [

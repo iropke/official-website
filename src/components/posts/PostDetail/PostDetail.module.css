@@ -42,19 +42,13 @@
   align-self: start;
 }
 
-/* ── Full-width variant (Solution / Service 카테고리 — aside 없이 본문만) ──
-   디자인 의도: 원래 9-col main 폭은 그대로 유지 + 사라진 aside 3-col 을
-   좌우로 1.5fr 씩 균등 분배하여 본문이 가독성 좋게 가운데로 정렬.
-   column-gap 은 0 으로 변경 — 좌우 여백 fr 칸은 시각적 여백 자체라
-   원래 12-col 의 24px gap 을 흉내낼 필요가 없음. 결과적으로 본문 폭은
-   원래 .main(9/12 + padding-right 20px) 과 거의 동일 (±수십 px). */
+/* ── Full-width variant (Solution / Service 카테고리 — aside 없이 본문만) ── */
 .shellFullWidth {
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 9fr) minmax(0, 1.5fr);
-  column-gap: 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .mainFullWidth {
-  grid-column: 2 / 3;
+  grid-column: 1 / -1;
   padding-right: 0;
 }
 
@@ -881,14 +875,12 @@
     padding: 108px 0 88px;
   }
 
-  .shell,
-  .shellFullWidth {
+  .shell {
     grid-template-columns: 1fr;
     gap: 52px;
   }
 
   .main,
-  .mainFullWidth,
   .aside {
     grid-column: auto;
     padding-right: 0;

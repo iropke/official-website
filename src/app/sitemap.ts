@@ -72,19 +72,28 @@ export async function generateSitemaps(): Promise<{ id: Locale }[]> {
  * - 정적 페이지 7 종 (홈/insight/story/portfolio/solution/service/project-inquiry)
  * - Posts 상세: publishedLocales 에 해당 locale 이 포함된 published 글만 노출
  * - 모든 entry 에 9 locale alternates.languages 동시 발행
+ *
+ * Next.js 15+ 호환 (2026-05-12 hotfix):
+ *   generateSitemaps 가 반환한 식별자는 빌드 시 Promise 로 wrapping 되어
+ *   sitemap 함수에 전달됩니다. `Promise.resolve(id)` 로 Locale | Promise<Locale>
+ *   양쪽을 안전하게 unwrap 해야 Postgres bind 파라미터가 enum 값으로 정상
+ *   변환됩니다. 미대응 시 SQL bind 가 `Promise { 'it' }` 인 채로 들어가
+ *   enum_posts_published_locales: "{}" 입력 오류가 발생하고 sitemap.xml 이
+ *   비어 발행됩니다 (PR #43 빌드 로그 24건 에러의 원인).
  */
 export default async function sitemap({
   id,
 }: {
-  id: Locale
+  id: Locale | Promise<Locale>
 }): Promise<MetadataRoute.Sitemap> {
+  const localeId = await Promise.resolve(id)
   const now = new Date()
   const entries: MetadataRoute.Sitemap = []
 
   // ── 정적 페이지 ──────────────────────────────────────────────
   for (const path of STATIC_PATHS) {
     entries.push({
-      url: buildLocaleUrl(id, path),
+      url: buildLocaleUrl(localeId, path),
       lastModified: now,
       changeFrequency: path === '' ? 'weekly' : 'monthly',
       priority: path === '' ? 1.0 : 0.7,
@@ -108,12 +117,12 @@ export default async function sitemap({
       pagination: false,
       // 본 locale 에서 공개된 글만
       where: {
-        publishedLocales: { contains: id },
+        publishedLocales: { contains: localeId },
       },
     })
     posts = result.docs as Post[]
   } catch (err) {
-    console.error(`[sitemap:${id}] Failed to load posts:`, err)
+    console.error(`[sitemap:${localeId}] Failed to load posts:`, err)
     posts = []
   }
 
@@ -137,7 +146,7 @@ export default async function sitemap({
     }
 
     entries.push({
-      url: buildLocaleUrl(id, path),
+      url: buildLocaleUrl(localeId, path),
       lastModified,
       changeFrequency: 'monthly',
       priority: 0.6,

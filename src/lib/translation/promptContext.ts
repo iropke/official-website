@@ -50,9 +50,9 @@ export interface FewShotExample {
 // ─────────────────────────────────────────────────────────────────────────
 
 export const STYLE_GUIDE: Partial<Record<Locale, string>> = {
-  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다).',
-  ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width).',
-  zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」.',
+  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English.',
+  ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Japanese tech readers expect these terms in English.',
+  zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Chinese tech readers expect these terms in English in editorial prose.',
   de: 'Use the formal Sie-Form when addressing the reader. Tone: editorial and professional, similar to c\'t or heise.de. Avoid Du-Form, marketing exclamations, and over-translation of established English tech terms.',
   fr: 'Use vouvoiement (vous). Tone: editorial and professional, similar to Le Monde tech section. Avoid tutoiement, marketing exclamations, and over-translation of established English tech terms.',
   es: 'Use the formal "usted" (or impersonal/passive constructions where natural). Tone: neutral, editorial, professional — readable across Spain and Latin America. Avoid regional slang and marketing exclamations.',
@@ -100,10 +100,12 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     { source: 'shipped', target: '출시한 / 적용한', note: SOFTWARE_CONTEXT_NOTE },
     {
       source: 'silent failure / silent failure mode',
-      target: '오류 / 드러나지 않는 오류 / 잘 보이지 않는 오류',
+      target: 'silent failure (영문 보존)',
       note:
-        '"silent failure" is an English-only idiom. Korean has no idiomatic equivalent — ' +
-        'render as 오류 / 버그, or describe the behavior (e.g. "겉보기엔 동작하지만 실제로는 잘못된 케이스"). ' +
+        'KEEP IN ENGLISH VERBATIM — "silent failure" is established SW jargon with no idiomatic Korean equivalent. ' +
+        'Korean tech readers expect these terms in English. Same policy for "race condition", "flaky test", ' +
+        '"deadlock", "busy loop" — preserve as-is. If the sentence is conceptual and needs a Korean rendering, ' +
+        'describe the behavior ("겉으론 동작하지만 실제로는 잘못된 케이스"). ' +
         'NEVER 조용한 실패 / 무음 실패 (literal translations that read as foreign).',
     },
     { source: 'sticky', target: '고정 / 스티키', note: 'UI positioning (sticky CTA / sticky header) — NOT 끈기 있는 / 끈적한' },
@@ -161,11 +163,13 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     { source: 'shipped', target: 'リリース済み / 適用済み', note: SOFTWARE_CONTEXT_NOTE },
     {
       source: 'silent failure / silent failure mode',
-      target: 'エラー / 検出しづらいエラー / 気づきにくい不具合',
+      target: 'silent failure (英語のまま)',
       note:
-        '"silent failure" is an English-only idiom. Japanese has no idiomatic equivalent — ' +
-        'render as エラー / 不具合, or describe ("見た目は動いているが実際は失敗しているケース"). ' +
-        'NEVER 静かな失敗 / サイレント障害 (literal renderings read as foreign in editorial Japanese).',
+        'KEEP IN ENGLISH VERBATIM — "silent failure" is established SW jargon with no idiomatic Japanese equivalent. ' +
+        'Japanese tech readers expect these terms in English. Same policy for "race condition", "flaky test", ' +
+        '"deadlock", "busy loop" — preserve as-is. If the sentence is conceptual and needs a Japanese rendering, ' +
+        'describe the behavior ("見た目は動いているが実際は失敗しているケース"). ' +
+        'NEVER 静かな失敗 / サイレント障害.',
     },
     { source: 'sticky', target: '固定 / スティッキー', note: 'UI positioning — NOT 粘着' },
     { source: 'busy loop', target: 'ビジーループ / busy loop', note: 'CS jargon' },
@@ -220,11 +224,13 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     { source: 'shipped', target: '已发布 / 已落地', note: SOFTWARE_CONTEXT_NOTE },
     {
       source: 'silent failure / silent failure mode',
-      target: '静默失败 / 难以察觉的错误 / 看似正常但实际失败的情况',
+      target: 'silent failure (保留英文)',
       note:
-        '"silent failure" — 静默失败 is acceptable but feels foreign in long-form editorial. ' +
-        'Prefer describing the behavior ("看似正常但实际失败的情况") when the sentence is conceptual. ' +
-        'NEVER 无声失败 (literal sound-domain translation).',
+        'KEEP IN ENGLISH VERBATIM — "silent failure" is established SW jargon. ' +
+        'Chinese tech writing increasingly preserves such terms (race condition, flaky test, deadlock, busy loop). ' +
+        'If the sentence is conceptual and needs a Chinese rendering, describe the behavior ' +
+        '("看似正常但实际失败的情况"). 静默失败 is acceptable but less natural in long-form editorial. ' +
+        'NEVER 无声失败.',
     },
     { source: 'sticky', target: '固定 / 吸顶', note: 'UI positioning — NOT 粘性' },
     { source: 'busy loop', target: '忙循环 / busy loop', note: 'CS jargon' },
@@ -427,10 +433,10 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     },
     // "ship" sense (b): engineer how-to checklist (split-view article heading)
     { en: 'What to ship this week', target: '이번 주에 시도해볼 체크리스트들' },
-    // "silent failure" — drop literal "조용한 실패", use 오류
+    // "silent failure" — keep English verbatim (established SW idiom)
     {
       en: 'The most common silent failure mode is X.',
-      target: '가장 흔히 발생하는 오류 케이스는 X 입니다.',
+      target: '가장 흔히 발생하는 silent failure 케이스는 X 입니다.',
     },
     // "defense" + "reading X" + fragment around inline code preserved as English
     {
@@ -463,7 +469,7 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     { en: 'What to ship this week', target: '今週試してみる項目' },
     {
       en: 'The most common silent failure mode is X.',
-      target: '最もよくあるエラーケースは X です。',
+      target: '最もよくある silent failure ケースは X です。',
     },
     {
       en: 'The cleanest defense is to stop reading window.innerWidth for layout decisions.',
@@ -492,7 +498,7 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     { en: 'What to ship this week', target: '本周可以尝试的清单' },
     {
       en: 'The most common silent failure mode is X.',
-      target: '最常见的错误情况是 X。',
+      target: '最常见的 silent failure 模式是 X。',
     },
     {
       en: 'The cleanest defense is to stop reading window.innerWidth for layout decisions.',

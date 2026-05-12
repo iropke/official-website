@@ -6,7 +6,7 @@
 */
 
 .section {
-  padding: clamp(48px, 7vw, 96px) clamp(20px, 5vw, 64px);
+  padding: var(--iropke-page-top) clamp(20px, 5vw, 64px) clamp(48px, 7vw, 96px);
   background: var(--main-bg-color-light, #f5f5f5);
   color: var(--primary-2, #43434e);
   font-family: var(--font-body);

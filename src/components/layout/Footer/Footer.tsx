@@ -11,7 +11,11 @@ const socialLinks = [
   { label: 'YouTube', href: 'https://www.youtube.com/@iropke', Icon: IconYouTube },
 ];
 
-export default function Footer() {
+interface FooterProps {
+  privacyHref: string;
+}
+
+export default function Footer({ privacyHref }: FooterProps) {
   return (
     <footer className={styles.footer}>
       <div className={styles.shell}>
@@ -40,7 +44,7 @@ export default function Footer() {
           <div className={styles.rowBottom}>
             <div className={styles.left}>
               <p className={styles.copy}>&copy; Iropke All Rights Reserved.</p>
-              <a className={styles.policy} href="/privacy-policy">Privacy Policy</a>
+              <a className={styles.policy} href={privacyHref}>Privacy Policy</a>
             </div>
           </div>
         </div>

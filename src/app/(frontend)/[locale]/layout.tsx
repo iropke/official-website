@@ -51,7 +51,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <main className="layout-main">
           {children}
         </main>
-        <Footer />
+        <Footer privacyHref={`/${locale}/privacy-policy`} />
       </div>
       <FloatingActions inquiryHref={`/${locale}/project-inquiry`} />
       <CookieConsent />

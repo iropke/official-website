@@ -42,6 +42,16 @@
   align-self: start;
 }
 
+/* ── Full-width variant (Solution / Service 카테고리 — aside 없이 본문만) ── */
+.shellFullWidth {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mainFullWidth {
+  grid-column: 1 / -1;
+  padding-right: 0;
+}
+
 .asideInner {
   position: sticky;
   top: var(--iropke-page-top);

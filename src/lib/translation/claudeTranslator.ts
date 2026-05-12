@@ -15,6 +15,11 @@
  */
 
 import { LOCALE_LABELS_EN, type Locale } from '@/i18n/locales'
+import {
+  renderExamples,
+  renderGlossary,
+  renderStyleGuide,
+} from './promptContext'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = 'claude-haiku-4-5-20251001'
@@ -79,22 +84,33 @@ function buildPrompt(req: TranslationRequest): string {
 
   const hint = req.fieldType ? fieldHints[req.fieldType] : ''
   const brand = req.brandGuideline
-    ? `\nBrand rule: ${req.brandGuideline}`
-    : '\nBrand rule: keep the brand name "Iropke" / "이롭게" unchanged. Preserve product names (NOVA, SAGE, LUMI, NIX) verbatim.'
+    ? `Brand rule: ${req.brandGuideline}`
+    : 'Brand rule: keep the brand name "Iropke" / "이롭게" unchanged. Preserve product names (NOVA, SAGE, LUMI, NIX) verbatim.'
 
-  return [
+  // Locale-scoped enrichment. Each section is omitted entirely when the
+  // target locale has no entries — keeps prompts compact for locales we
+  // haven't curated yet (currently EN→EN no-op only).
+  const domainContext =
+    'Domain context: iropke is a software / product / design studio. Most source text refers to software development, web products, releases, and tools — interpret ambiguous vocabulary in that frame first.'
+  const styleBlock = renderStyleGuide(req.targetLocale)
+  const glossaryBlock = renderGlossary(req.targetLocale)
+  const examplesBlock = renderExamples(req.targetLocale)
+
+  const sections: (string | null)[] = [
     `Translate the following ${source} text into ${target}.`,
-    hint,
+    domainContext,
+    hint || null,
+    styleBlock,
+    glossaryBlock,
+    examplesBlock,
     brand,
-    '',
     'Return ONLY the translated text. Do not include explanations, quotes, or any prefix like "Translation:".',
-    '',
     '--- SOURCE ---',
     req.text,
     '--- END ---',
   ]
-    .filter(Boolean)
-    .join('\n')
+
+  return sections.filter((s): s is string => Boolean(s)).join('\n\n')
 }
 
 /**

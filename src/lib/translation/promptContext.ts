@@ -88,9 +88,19 @@ const SOFTWARE_CONTEXT_NOTE =
 export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
   // ── CJK ────────────────────────────────────────────────────────────────
   ko: [
-    { source: 'ship', target: '출시', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'shipping', target: '출시 중', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'shipped', target: '출시한', note: SOFTWARE_CONTEXT_NOTE },
+    {
+      source: 'ship',
+      target: '출시 (런칭 의미) / 적용 / 반영 (엔지니어 코드 적용 의미)',
+      note:
+        'SW context — TWO senses. (a) launching a new feature/product → 출시 / 릴리스 (e.g. "ship a feature"). ' +
+        '(b) engineer how-to checklist "ship code" / "what to ship this week" → 적용 / 반영 / 배포. ' +
+        'Pick by sentence context. NEVER 배송 (logistics).',
+    },
+    { source: 'shipping', target: '출시 중 / 적용 중', note: SOFTWARE_CONTEXT_NOTE },
+    { source: 'shipped', target: '출시한 / 적용한', note: SOFTWARE_CONTEXT_NOTE },
+    { source: 'silent failure', target: '조용한 실패', note: 'UI / error context — NOT 무음' },
+    { source: 'sticky', target: '고정 / 스티키', note: 'UI positioning (sticky CTA / sticky header) — NOT 끈기 있는 / 끈적한' },
+    { source: 'busy loop', target: 'busy loop / 분주 루프', note: 'CS jargon — keep English when reader is technical' },
     { source: 'release', target: '릴리스 / 배포' },
     { source: 'deploy', target: '배포', note: 'NOT 전개' },
     { source: 'deployment', target: '배포' },
@@ -115,9 +125,19 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     { source: 'next week', target: '다음 주' },
   ],
   ja: [
-    { source: 'ship', target: 'リリース', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'shipping', target: 'リリース中', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'shipped', target: 'リリース済み', note: SOFTWARE_CONTEXT_NOTE },
+    {
+      source: 'ship',
+      target: 'リリース (公開リリース) / 反映 / 適用 (コード適用)',
+      note:
+        'SW context — TWO senses. (a) launching a new feature/product → リリース. ' +
+        '(b) engineer how-to checklist "ship code" / "what to ship this week" → 反映 / 適用. ' +
+        'Pick by sentence context. NEVER 配送 (logistics).',
+    },
+    { source: 'shipping', target: 'リリース中 / 適用中', note: SOFTWARE_CONTEXT_NOTE },
+    { source: 'shipped', target: 'リリース済み / 適用済み', note: SOFTWARE_CONTEXT_NOTE },
+    { source: 'silent failure', target: 'サイレント障害 / 静かな失敗', note: 'UI / error context — NOT 無音' },
+    { source: 'sticky', target: '固定 / スティッキー', note: 'UI positioning (sticky CTA / sticky header) — NOT 粘着' },
+    { source: 'busy loop', target: 'ビジーループ / busy loop', note: 'CS jargon' },
     { source: 'release', target: 'リリース' },
     { source: 'deploy', target: 'デプロイ' },
     { source: 'deployment', target: 'デプロイ' },
@@ -140,9 +160,19 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     { source: 'SDK', target: 'SDK', note: 'keep verbatim' },
   ],
   zh: [
-    { source: 'ship', target: '发布', note: SOFTWARE_CONTEXT_NOTE + '（不是“运输 / 装运”）' },
-    { source: 'shipping', target: '发布中', note: SOFTWARE_CONTEXT_NOTE },
-    { source: 'shipped', target: '已发布', note: SOFTWARE_CONTEXT_NOTE },
+    {
+      source: 'ship',
+      target: '发布 (产品 / 功能发布) / 落地 / 应用 (工程师代码应用)',
+      note:
+        'SW context — TWO senses. (a) launching a new feature/product → 发布. ' +
+        '(b) engineer how-to checklist "ship code" / "what to ship this week" → 落地 / 应用 / 部署. ' +
+        'Pick by sentence context. NEVER 运输 / 装运 (logistics).',
+    },
+    { source: 'shipping', target: '发布中 / 落地中', note: SOFTWARE_CONTEXT_NOTE },
+    { source: 'shipped', target: '已发布 / 已落地', note: SOFTWARE_CONTEXT_NOTE },
+    { source: 'silent failure', target: '静默失败', note: 'UI / error context — NOT 无声' },
+    { source: 'sticky', target: '固定 / 吸顶', note: 'UI positioning (sticky CTA / sticky header) — NOT 粘性' },
+    { source: 'busy loop', target: '忙循环 / busy loop', note: 'CS jargon' },
     { source: 'release', target: '发布 / 版本' },
     { source: 'deploy', target: '部署' },
     { source: 'deployment', target: '部署' },
@@ -318,7 +348,13 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
 
 export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
   ko: [
-    { en: 'What to ship this week', target: '이번 주 출시 예정' },
+    // "ship" sense (a): public release of a new feature/product
+    {
+      en: 'We are shipping the new editor next week.',
+      target: '다음 주에 새 에디터를 출시합니다.',
+    },
+    // "ship" sense (b): engineer checklist — code to apply this week
+    { en: 'What to ship this week', target: '이번 주 적용 항목' },
     { en: 'We deploy on Fridays.', target: '매주 금요일에 배포합니다.' },
     {
       en: 'A small but powerful feature for power users.',
@@ -326,7 +362,13 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     },
   ],
   ja: [
-    { en: 'What to ship this week', target: '今週リリース予定' },
+    // "ship" sense (a): public release
+    {
+      en: 'We are shipping the new editor next week.',
+      target: '来週、新しいエディターをリリースします。',
+    },
+    // "ship" sense (b): engineer checklist
+    { en: 'What to ship this week', target: '今週反映する項目' },
     { en: 'We deploy on Fridays.', target: '毎週金曜日にデプロイします。' },
     {
       en: 'A small but powerful feature for power users.',
@@ -334,7 +376,13 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     },
   ],
   zh: [
-    { en: 'What to ship this week', target: '本周发布计划' },
+    // "ship" sense (a): public release
+    {
+      en: 'We are shipping the new editor next week.',
+      target: '我们下周发布新的编辑器。',
+    },
+    // "ship" sense (b): engineer checklist
+    { en: 'What to ship this week', target: '本周可落地的改进' },
     { en: 'We deploy on Fridays.', target: '我们每周五进行部署。' },
     {
       en: 'A small but powerful feature for power users.',

@@ -116,52 +116,29 @@
   min-width: 0;
 }
 
-/* ── Narrow body + breakout (Solution / Service — hideAside=true) ──
-   .editorial 컨테이너 자체가 .main 의 전체 폭(12-col)을 차지하므로
-   본문 텍스트는 ~68ch 의 readable column 으로 좁히고, 특정 block 만 wide 폭으로 break out.
-   Joshua Comeau 의 "Full-Bleed Layout" grid 패턴 — named lines 로
-   `content` (narrow) / `full` (wide) 두 단을 정의하고 child 별로 column 지정.
-   Insight / Story / Portfolio (hideAside=false) 는 9-col main 안에서 이미 narrow 라
-   이 modifier 미적용. */
+/* ── Unified-width body (Solution / Service — hideAside=true) ──
+   2026-05-13 v2: 직전 narrow(68ch) + breakout(1080px) 두 단 grid 패턴은 wide screen 에서
+   본문이 너무 좁아 시각적 불일치 (사용자 피드백). 단순화: 본문 + 모든 block 을 동일한
+   max-width (--editorial-unified-max) centered. 단락 line length 는 80-90ch 로 길어지지만
+   pricing card / table 과의 시각 일관성을 우선. Insight / Story / Portfolio (hideAside=false)
+   는 9-col main 안에서 자연스럽게 narrow 라 이 modifier 미적용. */
 .editorialNarrow {
-  display: grid;
-  grid-template-columns:
-    [full-start] minmax(0, 1fr)
-    [content-start] min(68ch, 100%)
-    [content-end] minmax(0, 1fr) [full-end];
-  row-gap: 0;
+  --editorial-unified-max: 920px;
+  max-width: var(--editorial-unified-max);
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.editorialNarrow > * {
-  grid-column: content;
-  min-width: 0;
-}
-
-/* breakout: 새 block 2종 + 기존 wide/full 이미지 + 큰 비교표 — main 전체 폭 사용
-   (page-shell-max 안에서, 최대 1080px 까지 centered) */
-.editorialNarrow > .pricingCards,
-.editorialNarrow > .featureCards,
-.editorialNarrow > .editorialTable,
-.editorialNarrow > .editorialMediaWide,
+/* editorialMediaFull 만 예외 — viewport 전체 폭으로 break out (negative margin 트릭).
+   wide / center 는 unified-max 안에서 자연스럽게 흐름. */
 .editorialNarrow > .editorialMediaFull {
-  grid-column: full;
-  width: 100%;
-  max-width: 1080px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
-/* 9-col 컨텍스트에서 쓰던 negative-margin 트릭은 grid 컨텍스트에서 reset */
-.editorialNarrow > .editorialMediaWide {
-  margin-left: auto;
-  margin-right: auto;
-}
-.editorialNarrow > .editorialMediaFull {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* narrow grid 안에서는 max-width: 95% (text reveal rule) 무력화 — content 단 자체가 ~68ch 로 이미 좁음 */
+/* 95% max-width text reveal rule 무력화 — unified-max 자체가 이미 적절한 폭 */
 .editorialNarrow > h1.reveal,
 .editorialNarrow > h2.reveal,
 .editorialNarrow > h3.reveal,
@@ -176,15 +153,8 @@
 
 @media (max-width: 1079px) {
   .editorialNarrow {
-    grid-template-columns: minmax(0, 1fr);
+    max-width: 100%;
   }
-  .editorialNarrow > * {
-    grid-column: auto;
-  }
-  .editorialNarrow > .pricingCards,
-  .editorialNarrow > .featureCards,
-  .editorialNarrow > .editorialTable,
-  .editorialNarrow > .editorialMediaWide,
   .editorialNarrow > .editorialMediaFull {
     max-width: 100%;
   }

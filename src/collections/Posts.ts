@@ -505,6 +505,210 @@ export const Posts: CollectionConfig = {
                   },
                 ],
               },
+
+              // ─── 가격 카드 (pricingCards) ───
+              // Solution / Service 카테고리 (제품 페이지) 의 가격 정보를 markdown 표 대신
+              // 카드 그리드로 렌더. 2-4 등급 카드, mobile 세로 stack.
+              // 본문 내 다른 곳에서도 사용 가능 (Insight 의 비교 글 등).
+              // v1 정책 (2026-05-13 사용자 결정):
+              //   - CTA per tier omit (schema 에 ctaLabel/ctaUrl 보존, v1 렌더 X)
+              //   - highlight=true 한 등급 border 강조 + optional badge
+              //   - features 는 ✓ 체크 아이콘 + 텍스트
+              //   - mobile (<=1079px) 세로 stack
+              //   - plain white card + subtle border (글래스 모피즘 톤 X)
+              {
+                slug: 'pricingCards',
+                labels: { singular: '가격 카드', plural: '가격 카드' },
+                fields: [
+                  {
+                    name: 'heading',
+                    type: 'text',
+                    label: '섹션 제목 (선택)',
+                    admin: {
+                      description: '예: "Pricing", "Plans". 비어 있으면 미렌더.',
+                    },
+                  },
+                  {
+                    name: 'intro',
+                    type: 'textarea',
+                    label: '섹션 소개 (선택)',
+                    admin: {
+                      rows: 2,
+                      description: '카드 그리드 위에 표시되는 한 단락.',
+                    },
+                  },
+                  {
+                    name: 'tiers',
+                    type: 'array',
+                    label: '가격 등급',
+                    minRows: 2,
+                    maxRows: 4,
+                    labels: { singular: 'Tier', plural: 'Tiers' },
+                    admin: {
+                      description: '2-4개 등급 카드. 데스크탑 가로 그리드, 모바일 세로 stack.',
+                    },
+                    fields: [
+                      {
+                        name: 'name',
+                        type: 'text',
+                        label: '등급 이름',
+                        required: true,
+                        admin: {
+                          description: '예: Basic / Pro / Business / Enterprise',
+                        },
+                      },
+                      {
+                        name: 'price',
+                        type: 'text',
+                        label: '가격',
+                        required: true,
+                        admin: {
+                          description: '예: "$203.88", "Custom". 통화 / 단위 그대로 표기.',
+                        },
+                      },
+                      {
+                        name: 'period',
+                        type: 'text',
+                        label: '기간 (선택)',
+                        admin: {
+                          description: '예: "/year", "/month". 비어 있으면 가격 옆에 미표시.',
+                        },
+                      },
+                      {
+                        name: 'description',
+                        type: 'textarea',
+                        label: '한 줄 설명 (선택)',
+                        admin: {
+                          rows: 2,
+                          description: '등급 이름 아래 짧은 설명.',
+                        },
+                      },
+                      {
+                        name: 'features',
+                        type: 'array',
+                        label: '포함 기능',
+                        minRows: 1,
+                        labels: { singular: '기능', plural: '기능' },
+                        fields: [
+                          {
+                            name: 'text',
+                            type: 'text',
+                            label: '기능 텍스트',
+                            required: true,
+                          },
+                        ],
+                      },
+                      {
+                        name: 'highlight',
+                        type: 'checkbox',
+                        label: '시각 강조 (highlight)',
+                        defaultValue: false,
+                        admin: {
+                          description:
+                            '한 등급을 시각적으로 강조 (border + badge). 클러스터 안에서 1개만 권장.',
+                        },
+                      },
+                      {
+                        name: 'badge',
+                        type: 'text',
+                        label: '배지 라벨 (선택)',
+                        admin: {
+                          description:
+                            'highlight=true 일 때 카드 상단에 표시되는 짧은 문구. 예: "Most Popular", "Recommended".',
+                        },
+                      },
+                      {
+                        name: 'ctaLabel',
+                        type: 'text',
+                        label: 'CTA 라벨 (v1 미사용)',
+                        admin: {
+                          description:
+                            'v1 에서는 렌더되지 않습니다. v2 확장용 schema 보존.',
+                        },
+                      },
+                      {
+                        name: 'ctaUrl',
+                        type: 'text',
+                        label: 'CTA URL (v1 미사용)',
+                        admin: {
+                          description: 'v1 에서는 렌더되지 않습니다.',
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+
+              // ─── 기능 카드 그리드 (featureCards) ───
+              // "What you get" / "How it works" 같은 3-col (또는 2/4) 카드 grid.
+              // 본문 wall-of-text 해소 + 제품 페이지의 정보 hierarchy 향상.
+              // narrow body + breakout 패턴 안에서 wide 폭으로 렌더 (Solution / Service 컨텍스트).
+              {
+                slug: 'featureCards',
+                labels: { singular: '기능 카드', plural: '기능 카드' },
+                fields: [
+                  {
+                    name: 'heading',
+                    type: 'text',
+                    label: '섹션 제목 (선택)',
+                    admin: {
+                      description: '예: "What you get", "How it works". 비어 있으면 미렌더.',
+                    },
+                  },
+                  {
+                    name: 'intro',
+                    type: 'textarea',
+                    label: '섹션 소개 (선택)',
+                    admin: { rows: 2 },
+                  },
+                  {
+                    name: 'columns',
+                    type: 'select',
+                    label: '데스크탑 열 수',
+                    defaultValue: '3',
+                    options: [
+                      { label: '2 columns', value: '2' },
+                      { label: '3 columns', value: '3' },
+                      { label: '4 columns', value: '4' },
+                    ],
+                    admin: {
+                      description: '모바일 (<=1079px) 에서는 세로 stack.',
+                    },
+                  },
+                  {
+                    name: 'cards',
+                    type: 'array',
+                    label: '카드',
+                    minRows: 2,
+                    maxRows: 8,
+                    labels: { singular: 'Card', plural: 'Cards' },
+                    fields: [
+                      {
+                        name: 'title',
+                        type: 'text',
+                        label: '제목',
+                        required: true,
+                      },
+                      {
+                        name: 'description',
+                        type: 'textarea',
+                        label: '설명',
+                        required: true,
+                        admin: { rows: 3 },
+                      },
+                      {
+                        name: 'label',
+                        type: 'text',
+                        label: '라벨/번호 (선택)',
+                        admin: {
+                          description:
+                            '카드 좌상단 작은 라벨. 예: "01", "Step 1", "→". 비어 있으면 미표시.',
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           }),
         ],

@@ -10,11 +10,9 @@ import { buildAlternates } from '@/i18n/alternates'
 import PostDetail, {
   type PostDetailData,
   type ReferenceData,
-  type RelatedPostData,
   type TagData,
 } from '@/components/posts/PostDetail/PostDetail'
 
-const RELATED_POSTS_LIMIT = 5
 const CATEGORY = 'solution' as const
 const CATEGORY_PATH = '/solution'
 
@@ -74,19 +72,6 @@ function resolveReferences(rows: Post['references']): ReferenceData[] {
       link: typeof row?.link === 'string' ? row.link.trim() : '',
     }))
     .filter((r) => r.title || r.content || r.link)
-}
-
-function toRelatedData(post: Post, locale: Locale): RelatedPostData {
-  const { label, iso } = formatDate(post.publishedDate, locale)
-  const thumb = resolveMedia(post.thumbnail, post.title ?? '')
-  return {
-    slug: post.slug ?? String(post.id),
-    title: post.title ?? '',
-    date: label,
-    dateISO: iso,
-    thumbnailUrl: thumb.url,
-    thumbnailAlt: thumb.alt,
-  }
 }
 
 interface PageProps {
@@ -154,50 +139,8 @@ export default async function SolutionDetailPage({ params, searchParams }: PageP
     notFound()
   }
 
-  const postCluster = typeof post.cluster === 'string' ? post.cluster.trim() : ''
-  let relatedDocs: Post[] = []
-  try {
-    if (postCluster) {
-      const relatedResult = await payload.find({
-        collection: 'posts',
-        locale,
-        depth: 1,
-        limit: RELATED_POSTS_LIMIT * 2,
-        sort: '-publishedDate',
-        where: {
-          and: [
-            { publishedLocales: { contains: locale } },
-            { slug: { not_equals: slug } },
-            { cluster: { equals: postCluster } },
-            { category: { equals: CATEGORY } },
-          ],
-        },
-      })
-      const docs = relatedResult.docs as Post[]
-      const pillars = docs.filter((d) => d.clusterRole === 'pillar')
-      const others = docs.filter((d) => d.clusterRole !== 'pillar')
-      relatedDocs = [...pillars, ...others].slice(0, RELATED_POSTS_LIMIT)
-    } else {
-      const relatedResult = await payload.find({
-        collection: 'posts',
-        locale,
-        depth: 1,
-        limit: RELATED_POSTS_LIMIT,
-        sort: '-publishedDate',
-        where: {
-          and: [
-            { publishedLocales: { contains: locale } },
-            { slug: { not_equals: slug } },
-            { category: { equals: CATEGORY } },
-          ],
-        },
-      })
-      relatedDocs = relatedResult.docs as Post[]
-    }
-  } catch (err) {
-    console.error('[SolutionDetailPage] Failed to load related posts:', err)
-  }
-
+  // Solution 카테고리는 제품 페이지 성격이라 우측 관련글 sidebar 없이 full-width 로 렌더.
+  // PostDetail 에 hideAside={true} 로 전달하여 본문이 12-col 전체를 사용. relatedPosts 쿼리도 skip.
   const heroThumb = resolveMedia(post.thumbnail, post.title ?? '')
   const postData: PostDetailData = {
     title: post.title ?? '',
@@ -208,14 +151,14 @@ export default async function SolutionDetailPage({ params, searchParams }: PageP
     tags: resolveTags(post.tags, basePath),
     references: resolveReferences(post.references),
   }
-  const relatedPosts: RelatedPostData[] = relatedDocs.map((p) => toRelatedData(p, locale))
 
   return (
     <PostDetail
       basePath={basePath}
       locale={locale}
       post={postData}
-      relatedPosts={relatedPosts}
+      relatedPosts={[]}
+      hideAside
     />
   )
 }

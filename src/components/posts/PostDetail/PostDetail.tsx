@@ -92,6 +92,12 @@ interface PostDetailProps {
   locale: string;
   post: PostDetailData;
   relatedPosts: RelatedPostData[];
+  /**
+   * 우측 `<aside>` (관련글 + "더 보기") 렌더 skip + 본문을 12-col 전체 폭으로 확장.
+   * Solution / Service 카테고리는 제품 페이지 성격이라 관련글 sidebar 없이 full-width 로 표현.
+   * 미지정(기본 false) 시 기존 9+3 두 컬럼 구조 유지 — Insight / Story / Portfolio.
+   */
+  hideAside?: boolean;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -625,6 +631,7 @@ export default function PostDetail({
   locale,
   post,
   relatedPosts,
+  hideAside = false,
 }: PostDetailProps) {
   const sectionRef = useRef<HTMLElement>(null);
   // post.title 을 resetKey 로 — 같은 라우트 segment 안에서 slug 만 바뀌어
@@ -636,9 +643,9 @@ export default function PostDetail({
   return (
     <section ref={sectionRef} className={styles.section}>
       <div className={styles.container}>
-        <div className={styles.shell}>
+        <div className={`${styles.shell} ${hideAside ? styles.shellFullWidth : ''}`}>
           {/* ── Main article ── */}
-          <article className={styles.main}>
+          <article className={`${styles.main} ${hideAside ? styles.mainFullWidth : ''}`}>
             <header className={`${styles.hero} ${styles.reveal}`}>
               {hasHeroImage && (
                 <figure className={styles.heroMedia}>
@@ -722,7 +729,8 @@ export default function PostDetail({
             </div>
           </article>
 
-          {/* ── Aside: related posts ── */}
+          {/* ── Aside: related posts (Solution / Service 카테고리는 hideAside=true 로 skip) ── */}
+          {!hideAside && (
           <aside className={styles.aside}>
             <div className={`${styles.asideInner} ${styles.reveal}`}>
               {relatedPosts.length > 0 ? (
@@ -769,6 +777,7 @@ export default function PostDetail({
               </div>
             </div>
           </aside>
+          )}
         </div>
       </div>
     </section>

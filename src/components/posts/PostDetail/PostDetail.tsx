@@ -462,6 +462,115 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
       );
     }
 
+    // pricingCards: 가격 등급 카드 그리드 (Solution / Service 제품 페이지용)
+    //   heading + intro + tiers[] (name, price, period, description, features[], highlight, badge, ctaLabel?, ctaUrl?)
+    //   v1: CTA per tier omit (schema 보존, 렌더 X), highlight border + badge, ✓ checkmark features, mobile vertical stack.
+    if (blockType === 'pricingCards') {
+      type PricingFeature = { text?: unknown };
+      type PricingTier = {
+        name?: unknown;
+        price?: unknown;
+        period?: unknown;
+        description?: unknown;
+        features?: PricingFeature[];
+        highlight?: unknown;
+        badge?: unknown;
+      };
+      const heading = typeof fields?.heading === 'string' ? fields.heading.trim() : '';
+      const intro = typeof fields?.intro === 'string' ? fields.intro.trim() : '';
+      const tiersRaw = Array.isArray(fields?.tiers) ? (fields.tiers as PricingTier[]) : [];
+      const tiers = tiersRaw.filter((t) => typeof t?.name === 'string' && typeof t?.price === 'string');
+      if (!tiers.length) return null;
+      return (
+        <div
+          key={key}
+          className={`${s.pricingCards} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          {heading && <h3 className={s.pricingCardsHeading}>{heading}</h3>}
+          {intro && <p className={s.pricingCardsIntro}>{intro}</p>}
+          <div className={s.pricingCardsGrid} data-count={String(tiers.length)}>
+            {tiers.map((tier, ti) => {
+              const isHighlight = Boolean(tier.highlight);
+              const badge = typeof tier.badge === 'string' ? tier.badge.trim() : '';
+              const description = typeof tier.description === 'string' ? tier.description.trim() : '';
+              const period = typeof tier.period === 'string' ? tier.period.trim() : '';
+              const features = Array.isArray(tier.features)
+                ? tier.features
+                    .map((f) => (typeof f?.text === 'string' ? f.text.trim() : ''))
+                    .filter((t) => t.length > 0)
+                : [];
+              return (
+                <div
+                  key={ti}
+                  className={`${s.pricingCard} ${isHighlight ? s.pricingCardHighlight : ''}`}
+                >
+                  {isHighlight && badge && (
+                    <span className={s.pricingCardBadge}>{badge}</span>
+                  )}
+                  <h4 className={s.pricingCardName}>{tier.name as string}</h4>
+                  <div className={s.pricingCardPrice}>
+                    <span className={s.pricingCardPriceValue}>{tier.price as string}</span>
+                    {period && <span className={s.pricingCardPricePeriod}>{period}</span>}
+                  </div>
+                  {description && (
+                    <p className={s.pricingCardDescription}>{description}</p>
+                  )}
+                  {features.length > 0 && (
+                    <ul className={s.pricingCardFeatures}>
+                      {features.map((f, fi) => (
+                        <li key={fi} className={s.pricingCardFeature}>
+                          <CheckIcon className={s.pricingCardFeatureCheck} />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // featureCards: 기능 카드 그리드 ("What you get" / "How it works")
+    //   heading + intro + columns (2/3/4) + cards[] (title, description, label?)
+    if (blockType === 'featureCards') {
+      type FeatureCard = { title?: unknown; description?: unknown; label?: unknown };
+      const heading = typeof fields?.heading === 'string' ? fields.heading.trim() : '';
+      const intro = typeof fields?.intro === 'string' ? fields.intro.trim() : '';
+      const columnsRaw = typeof fields?.columns === 'string' ? fields.columns : '3';
+      const cols = columnsRaw === '2' || columnsRaw === '4' ? columnsRaw : '3';
+      const cardsRaw = Array.isArray(fields?.cards) ? (fields.cards as FeatureCard[]) : [];
+      const cards = cardsRaw.filter(
+        (c) => typeof c?.title === 'string' && typeof c?.description === 'string',
+      );
+      if (!cards.length) return null;
+      return (
+        <div
+          key={key}
+          className={`${s.featureCards} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          {heading && <h3 className={s.featureCardsHeading}>{heading}</h3>}
+          {intro && <p className={s.featureCardsIntro}>{intro}</p>}
+          <div className={s.featureCardsGrid} data-cols={cols}>
+            {cards.map((card, ci) => {
+              const label = typeof card.label === 'string' ? card.label.trim() : '';
+              return (
+                <div key={ci} className={s.featureCard}>
+                  {label && <span className={s.featureCardLabel}>{label}</span>}
+                  <h4 className={s.featureCardTitle}>{card.title as string}</h4>
+                  <p className={s.featureCardDescription}>{card.description as string}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
     // videoEmbed: YouTube URL → youtube-nocookie embed (editorial-media 프레임 재사용)
     if (blockType === 'videoEmbed') {
       const url = typeof fields?.url === 'string' ? fields.url.trim() : '';
@@ -584,6 +693,14 @@ function AnswerIcon(props: React.SVGAttributes<SVGSVGElement>) {
   );
 }
 
+function CheckIcon(props: React.SVGAttributes<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 18 18" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {...props}>
+      <path d="M4 9.5l3.2 3.2L14 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Reveal animation hook
    ═══════════════════════════════════════════════════════════════ */
@@ -665,7 +782,7 @@ export default function PostDetail({
               {post.intro && <p className={styles.heroIntro}>{post.intro}</p>}
             </header>
 
-            <div className={styles.editorial}>
+            <div className={`${styles.editorial} ${hideAside ? styles.editorialNarrow : ''}`}>
               <LexicalRenderer content={post.content} />
 
               {post.references.length > 0 && (

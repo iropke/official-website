@@ -25,13 +25,9 @@ const COLORS = {
   primary: '#5eb6b2',
   primaryHover: '#22908b',
   ink: '#232329',
-  inkSoft: '#43434e',
   mutedSoft: '#68687b',
-  mutedLine: 'rgba(35, 35, 41, 0.08)',
   surface: 'rgba(255, 255, 255, 0.72)',
   surfaceBorder: 'rgba(35, 35, 41, 0.12)',
-  chipBorder: 'rgba(94, 182, 178, 0.28)',
-  chipBg: 'rgba(255, 255, 255, 0.62)',
 }
 
 const BACKGROUND = [
@@ -44,8 +40,6 @@ const SERIF_STACK =
   '"Noto Serif Display", "Noto Serif", Georgia, "Times New Roman", serif'
 const SANS_STACK =
   '"Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
-const MONO_STACK =
-  'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace'
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
@@ -71,7 +65,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       >
         <div
           style={{
-            maxWidth: 640,
+            maxWidth: 720,
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
@@ -79,36 +73,6 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             gap: 18,
           }}
         >
-          <p
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '8px 16px',
-              border: `1px solid ${COLORS.chipBorder}`,
-              background: COLORS.chipBg,
-              borderRadius: 999,
-              fontSize: 12,
-              fontWeight: 500,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: COLORS.primaryHover,
-              margin: 0,
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 999,
-                background: COLORS.primary,
-                boxShadow: '0 0 0 4px rgba(94, 182, 178, 0.18)',
-              }}
-            />
-            Error Code · 500
-          </p>
-
           <p
             aria-hidden="true"
             style={{
@@ -150,7 +114,9 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               maxWidth: '38ch',
             }}
           >
-            &ldquo;Something behind the curtain seems to be having a moment.&rdquo;
+            &ldquo;Something behind the curtain
+            <br />
+            seems to be having a moment.&rdquo;
           </p>
 
           <p
@@ -232,42 +198,6 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             >
               Try Again
             </button>
-          </div>
-
-          <div
-            aria-hidden="true"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 16,
-              marginTop: 36,
-              paddingTop: 20,
-              width: '100%',
-              maxWidth: 480,
-              borderTop: `1px solid ${COLORS.mutedLine}`,
-              color: '#a1a1af',
-              fontFamily: MONO_STACK,
-              fontSize: 12,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-            }}
-          >
-            <span style={{ whiteSpace: 'nowrap' }}>Error Code: 500</span>
-            {error.digest && (
-              <>
-                <span
-                  style={{
-                    flex: 1,
-                    height: 1,
-                    maxWidth: 120,
-                    background:
-                      'linear-gradient(90deg, rgba(35, 35, 41, 0), rgba(35, 35, 41, 0.18) 50%, rgba(35, 35, 41, 0) 100%)',
-                  }}
-                />
-                <span style={{ whiteSpace: 'nowrap' }}>{error.digest}</span>
-              </>
-            )}
           </div>
         </div>
       </body>

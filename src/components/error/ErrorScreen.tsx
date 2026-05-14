@@ -16,23 +16,27 @@ interface ErrorScreenProps {
 /**
  * Hero-style error screen.
  *
- * 디자인 토큰 / 시각 언어는 globals.css + Hero.module.css 와 동일하게 맞춤:
+ * 디자인 토큰은 globals.css + Hero.module.css 와 동일:
  *   - section shell (grid + orbs + radial gradient)
- *   - eyebrow chip with status dot
  *   - serif error code (--font-accent-serif) at hero scale
  *   - primary CTA dark + secondary glass
- *   - meta line (mono, uppercase) with error code + digest
+ *
+ * witty 카피는 errorMessages.ts 에서 줄바꿈을 `\n` 으로 명시할 수 있으며,
+ * 본 컴포넌트가 줄 단위로 분리해 렌더한다 (locale 별 자연스러운 분기점
+ * 사용을 위해).
  */
 export default function ErrorScreen({
   locale: rawLocale,
   kind,
   onReset,
-  digest,
+  digest: _digest,
 }: ErrorScreenProps) {
   const locale = normalizeLocale(rawLocale)
   const copy = getErrorCopy(locale, kind)
   const homeHref = `/${locale}`
   const contactHref = `/${locale}/project-inquiry`
+
+  const wittyLines = copy.witty.split(/\r?\n/).filter((line) => line.length > 0)
 
   return (
     <section className={styles.shell} aria-label={`Error ${kind}`} lang={locale}>
@@ -44,18 +48,20 @@ export default function ErrorScreen({
 
       <div className={`page-shell ${styles.shellInner}`}>
         <div className={styles.content}>
-          <p className={styles.eyebrow}>
-            <span className={styles.eyebrowDot} aria-hidden="true" />
-            {copy.hintPrefix} · {kind}
-          </p>
-
           <p className={styles.code} aria-hidden="true">
             {kind}
           </p>
 
           <h1 className={styles.title}>{copy.title}</h1>
 
-          <p className={styles.witty}>&ldquo;{copy.witty}&rdquo;</p>
+          <p className={styles.witty}>
+            {wittyLines.map((line, i) => (
+              <React.Fragment key={i}>
+                {i === 0 ? `“${line}` : line}
+                {i < wittyLines.length - 1 ? <br /> : '”'}
+              </React.Fragment>
+            ))}
+          </p>
 
           <p className={styles.description}>{copy.description}</p>
 
@@ -99,18 +105,6 @@ export default function ErrorScreen({
             >
               {copy.contactLabel}
             </Link>
-          </div>
-
-          <div className={styles.meta} aria-hidden="true">
-            <span className={styles.metaLabel}>
-              {copy.hintPrefix}: {kind}
-            </span>
-            {digest && (
-              <>
-                <span className={styles.metaRule} />
-                <span className={styles.metaLabel}>{digest}</span>
-              </>
-            )}
           </div>
         </div>
       </div>

@@ -89,12 +89,13 @@ export default async function HomePage({ params }: HomePageProps) {
       depth: 1,
       limit: insightsCount,
       sort: '-publishedDate',
-      // Payload drafts: 기본 draft:false 이므로 _status=published 만 반환 →
-      // 별도 status 조건 불필요. publishedLocales 로 언어별 공개 여부만 필터.
+      // `_status: published` 명시 필수 (PR fix/posts-draft-status-filter 2026-05-15) —
+      // Payload draft:false 기본값은 main row 의 _status='draft' 를 자동 제외하지 못함.
       // "Latest Insights" 섹션은 insight 카테고리만 노출 (story / portfolio 는
       // 별도 라우트에 자체 카드 그리드를 둘 예정).
       where: {
         and: [
+          { _status: { equals: 'published' } },
           { publishedLocales: { equals: locale } },
           { category: { equals: 'insight' } },
         ],

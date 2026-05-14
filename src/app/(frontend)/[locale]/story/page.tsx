@@ -82,6 +82,7 @@ export default async function StoriesPage({ params, searchParams }: PageProps) {
       sort: '-publishedDate',
       where: {
         and: [
+          { _status: { equals: 'published' } },
           { publishedLocales: { equals: locale } },
           { category: { equals: CATEGORY } },
         ],

@@ -14,7 +14,7 @@ import PostDetail, {
   type TagData,
 } from '@/components/posts/PostDetail/PostDetail'
 
-const RELATED_POSTS_LIMIT = 5
+const RELATED_POSTS_LIMIT = 10
 
 function normalizeLocale(raw: string): Locale {
   return isLocale(raw) ? raw : 'en'

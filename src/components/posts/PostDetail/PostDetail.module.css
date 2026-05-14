@@ -55,8 +55,6 @@
 }
 
 .asideInner {
-  position: sticky;
-  top: var(--iropke-page-top);
   padding-left: 0;
   border-left: 0;
 }

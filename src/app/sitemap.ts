@@ -119,9 +119,13 @@ export default async function sitemap({
       depth: 0,
       limit: 1000,
       pagination: false,
-      // 본 locale 에서 공개된 글만
+      // 본 locale 에서 공개된 글만. `_status: published` 명시 — Payload draft:false
+      // 기본값은 main row 의 _status='draft' 를 자동 제외하지 못함.
       where: {
-        publishedLocales: { contains: localeId },
+        and: [
+          { _status: { equals: 'published' } },
+          { publishedLocales: { contains: localeId } },
+        ],
       },
     })
     posts = result.docs as Post[]

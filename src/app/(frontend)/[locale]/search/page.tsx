@@ -93,6 +93,7 @@ async function searchPosts(
       sort: '-publishedDate',
       where: {
         and: [
+          { _status: { equals: 'published' } },
           { publishedLocales: { equals: locale } },
           {
             or: [
@@ -133,6 +134,7 @@ async function searchPages(
       limit: RESULTS_PER_PAGE,
       where: {
         and: [
+          { _status: { equals: 'published' } },
           { publishedLocales: { equals: locale } },
           { title: { like: query } },
         ],

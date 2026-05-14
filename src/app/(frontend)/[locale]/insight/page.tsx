@@ -78,11 +78,12 @@ export default async function InsightsPage({ params, searchParams }: PageProps) 
       limit: POSTS_PER_PAGE,
       page: currentPage,
       sort: '-publishedDate',
-      // Payload drafts: `payload.find` 는 draft:false(기본값) 에서 _status=published
-      // 버전만 반환하므로 별도 status 조건 불필요. publishedLocales 로 언어별
-      // 공개 여부만 필터링.
+      // `_status: published` 명시 필수 — Payload draft:false 기본값은 main row 의
+      // _status='draft' 를 자동 제외하지 못함 (versioning 의미). `publishedLocales`
+      // 는 select hasMany 라 join 테이블에 row 가 남아있을 수 있어 단독 신뢰 불가.
       where: {
         and: [
+          { _status: { equals: 'published' } },
           { publishedLocales: { equals: locale } },
           { category: { equals: 'insight' } },
         ],

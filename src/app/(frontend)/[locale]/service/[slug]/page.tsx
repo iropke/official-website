@@ -125,6 +125,7 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
         : {
             and: [
               { slug: { equals: slug } },
+              { _status: { equals: 'published' } },
               { publishedLocales: { contains: locale } },
               { category: { equals: CATEGORY } },
             ],

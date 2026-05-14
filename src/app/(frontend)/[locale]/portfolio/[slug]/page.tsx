@@ -140,6 +140,7 @@ export default async function PortfolioDetailPage({ params, searchParams }: Page
         : {
             and: [
               { slug: { equals: slug } },
+              { _status: { equals: 'published' } },
               { publishedLocales: { contains: locale } },
               { category: { equals: CATEGORY } },
             ],
@@ -166,6 +167,7 @@ export default async function PortfolioDetailPage({ params, searchParams }: Page
         sort: '-publishedDate',
         where: {
           and: [
+            { _status: { equals: 'published' } },
             { publishedLocales: { contains: locale } },
             { slug: { not_equals: slug } },
             { cluster: { equals: postCluster } },
@@ -186,6 +188,7 @@ export default async function PortfolioDetailPage({ params, searchParams }: Page
         sort: '-publishedDate',
         where: {
           and: [
+            { _status: { equals: 'published' } },
             { publishedLocales: { contains: locale } },
             { slug: { not_equals: slug } },
             { category: { equals: CATEGORY } },

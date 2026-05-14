@@ -14,7 +14,7 @@ import PostDetail, {
   type TagData,
 } from '@/components/posts/PostDetail/PostDetail'
 
-const RELATED_POSTS_LIMIT = 5
+const RELATED_POSTS_LIMIT = 10
 const CATEGORY = 'portfolio' as const
 const CATEGORY_PATH = '/portfolio'
 

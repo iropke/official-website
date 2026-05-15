@@ -108,6 +108,27 @@ describe('humanize() — smart-city-cases cluster acronyms (2026-05-15)', () => 
   })
 })
 
+describe('humanize() — headless-cms + modern-frontend cluster acronyms (2026-05-16)', () => {
+  it('humanize("tco") === "TCO"', () => {
+    expect(humanize('tco')).toBe('TCO')
+  })
+  it('humanize("wysiwyg") === "WYSIWYG"', () => {
+    expect(humanize('wysiwyg')).toBe('WYSIWYG')
+  })
+  it('humanize("nextjs") === "Next.js" (brand mixed-case + dot)', () => {
+    expect(humanize('nextjs')).toBe('Next.js')
+  })
+  it('humanize("wordpress") === "WordPress" (brand mixed-case)', () => {
+    expect(humanize('wordpress')).toBe('WordPress')
+  })
+  it('humanize("javascript") === "JavaScript" (brand mixed-case)', () => {
+    expect(humanize('javascript')).toBe('JavaScript')
+  })
+  it('build-vs-buy compound keeps TCO when tokenized', () => {
+    expect(humanize('tco-analysis')).toBe('TCO Analysis')
+  })
+})
+
 describe('humanize() — edge cases', () => {
   it('empty string → ""', () => {
     expect(humanize('')).toBe('')

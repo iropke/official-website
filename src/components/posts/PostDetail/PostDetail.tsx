@@ -147,6 +147,7 @@ function renderInlineChildren(children: LexicalNode[] | undefined): React.ReactN
         <a
           key={i}
           href={url}
+          className={styles.editorialLink}
           {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
           {renderInlineChildren(child.children)}

@@ -593,6 +593,38 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Editorial Inline Links
+   ───────────────────────────────────────────────────────────────
+   admin 에디터에서 입력한 본문 인라인 링크(paragraph / heading / list /
+   quote 안). 클릭 가능 힌트로 점선 underline + 포인트 컬러 적용,
+   hover 시 텍스트도 포인트 컬러 + 실선 underline 으로 강조.
+   rawHtml 블록은 dangerouslySetInnerHTML 이라 className 부착 불가 →
+   `.editorialRaw a` descendant 선택자로 동일 시각 언어 유지.
+   ═══════════════════════════════════════════════════════════════ */
+.editorialLink,
+.editorialLink:visited,
+.editorialRaw a,
+.editorialRaw a:visited {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: #5eb6b2;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease, text-decoration-style 0.2s ease;
+}
+
+.editorialLink:hover,
+.editorialLink:focus-visible,
+.editorialRaw a:hover,
+.editorialRaw a:focus-visible {
+  color: #5eb6b2;
+  text-decoration-style: solid;
+  text-decoration-color: #5eb6b2;
+  outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Editorial Q&A
    ═══════════════════════════════════════════════════════════════ */
 .editorialQna {

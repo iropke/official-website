@@ -91,6 +91,7 @@ export const ACRONYMS = new Map([
   ['cms', 'CMS'],
   ['crm', 'CRM'],
   ['erp', 'ERP'],
+  ['tco', 'TCO'],
 
   // --- UX / 디자인 (UX / design)
   ['ui', 'UI'],
@@ -124,6 +125,7 @@ export const ACRONYMS = new Map([
   ['ci', 'CI'],
   ['cd', 'CD'],
   ['qa', 'QA'],
+  ['wysiwyg', 'WYSIWYG'],
 
   // --- 혼합 표기 (mixed casing — preserve exactly, do not Title-Case)
   ['ios', 'iOS'],
@@ -145,6 +147,13 @@ export const ACRONYMS = new Map([
   ['a11y', 'A11y'],
   ['webxr', 'WebXR'],
   ['neom', 'NEOM'],
+  ['javascript', 'JavaScript'],
+  ['wordpress', 'WordPress'],
+  // Next.js: humanize() tokenizes the slug form 'nextjs' (no dot); lint-acronyms.mjs
+  // lowercases the CLAUDE.md §2-A display token 'Next.js' to the key 'next.js'.
+  // Both keys map to the same display form so humanize + lint agree.
+  ['nextjs', 'Next.js'],
+  ['next.js', 'Next.js'],
 
   // --- 복합 표기 (compound acronyms — hyphen preserved in full slug)
   // Matched against full slug FIRST in humanize().

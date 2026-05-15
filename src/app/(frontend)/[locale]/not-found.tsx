@@ -1,26 +1,43 @@
 /**
  * Locale 세그먼트 내부 404.
  *
- * 기획서 (references/requirements/iropke_error.md) 가 "global header 없이"
- * 라고 명시하지만, Next.js App Router 의 `not-found.tsx` 는 부모 layout 을
- * 그대로 적용한다. 이 파일은 [locale]/layout.tsx 안에 렌더되므로 Header/Footer
- * 가 표시될 수 있다 — 향후 (frontend)/layout.tsx 단계로 끌어올리거나 not-found
- * 전용 layout 을 두는 후속 작업이 필요. 본 단계에서는 메시지 자체는 차분히
- * 표시되므로 사용자 경험 손실은 제한적.
+ * Next.js 16 에서 'use client' + usePathname() 패턴은 unmatched URL 시
+ * 정적 빌드 단계에서 의도대로 렌더되지 않고 프레임워크 기본 404 UI 로
+ * 폴백되는 사례가 있다 (e.g. `/en/foo-does-not-exist`). 이를 피하기 위해
+ * server component 로 전환하고 `headers()` 로 pathname 을 추출한다.
  *
- * locale param 을 비동기 props 로 받지 못하는 not-found 의 한계 때문에,
- * 클라이언트 측에서 pathname 첫 세그먼트로 locale 을 추출한다.
+ * not-found.tsx 는 params 를 받지 못하므로 locale 은 헤더에서 직접 파싱.
+ * 어떤 헤더도 사용 불가하면 'en' 기본값 (영문 fallback).
+ *
+ * 본 not-found 는 Next.js 동작상 `[locale]/layout.tsx` 의 Header/Footer 안에
+ * 렌더되지 않는 경우(unmatched URL)와 렌더되는 경우(notFound() 호출)가
+ * 공존한다 — ErrorScreen 자체가 layout-page 와 동일한 시각 토큰을 사용해
+ * standalone 으로도 일관된다.
  */
 
-'use client'
-
-import { usePathname } from 'next/navigation'
+import { headers } from 'next/headers'
 import ErrorScreen from '@/components/error/ErrorScreen'
 import { normalizeLocale } from '@/i18n/locales'
 
-export default function LocaleNotFound() {
-  const pathname = usePathname() ?? '/'
-  const segment = pathname.split('/').filter(Boolean)[0] ?? ''
+function pickLocaleFromPath(pathLike: string): string {
+  try {
+    const url = new URL(pathLike, 'http://localhost')
+    return url.pathname.split('/').filter(Boolean)[0] ?? ''
+  } catch {
+    return pathLike.split('/').filter(Boolean)[0] ?? ''
+  }
+}
+
+export default async function LocaleNotFound() {
+  const h = await headers()
+  const raw =
+    h.get('x-invoke-path') ||
+    h.get('x-pathname') ||
+    h.get('next-url') ||
+    h.get('x-matched-path') ||
+    h.get('referer') ||
+    ''
+  const segment = pickLocaleFromPath(raw)
   const locale = normalizeLocale(segment)
 
   return <ErrorScreen locale={locale} kind="404" />

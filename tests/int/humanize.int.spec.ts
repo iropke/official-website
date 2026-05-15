@@ -82,6 +82,30 @@ describe('humanize() — multi-token slugs with mixed acronyms', () => {
   it('"entity-seo" → "Entity SEO"', () => {
     expect(humanize('entity-seo')).toBe('Entity SEO')
   })
+  it('"ip-geolocation" → "IP Geolocation"', () => {
+    expect(humanize('ip-geolocation')).toBe('IP Geolocation')
+  })
+})
+
+describe('humanize() — location-based-experiences cluster acronyms (2026-05-15)', () => {
+  it('humanize("gps") === "GPS"', () => {
+    expect(humanize('gps')).toBe('GPS')
+  })
+  it('humanize("ip") === "IP"', () => {
+    expect(humanize('ip')).toBe('IP')
+  })
+  it('humanize("webxr") === "WebXR" (mixed casing preserved)', () => {
+    expect(humanize('webxr')).toBe('WebXR')
+  })
+})
+
+describe('humanize() — smart-city-cases cluster acronyms (2026-05-15)', () => {
+  it('humanize("3d-modeling") === "3D Modeling"', () => {
+    expect(humanize('3d-modeling')).toBe('3D Modeling')
+  })
+  it('humanize("neom") === "NEOM" (brand all-caps)', () => {
+    expect(humanize('neom')).toBe('NEOM')
+  })
 })
 
 describe('humanize() — edge cases', () => {

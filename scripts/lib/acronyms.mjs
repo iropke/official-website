@@ -57,6 +57,8 @@ export const ACRONYMS = new Map([
   ['tsv', 'TSV'],
   ['sql', 'SQL'],
   ['vpn', 'VPN'],
+  ['ip', 'IP'],
+  ['gps', 'GPS'],
 
   // --- AI / 데이터 (AI / data)
   ['ai', 'AI'],
@@ -67,6 +69,7 @@ export const ACRONYMS = new Map([
   ['ar', 'AR'],
   ['vr', 'VR'],
   ['xr', 'XR'],
+  ['3d', '3D'],
   ['gpu', 'GPU'],
   ['cpu', 'CPU'],
   ['ram', 'RAM'],
@@ -140,6 +143,8 @@ export const ACRONYMS = new Map([
   ['poc', 'PoC'],
   ['iot', 'IoT'],
   ['a11y', 'A11y'],
+  ['webxr', 'WebXR'],
+  ['neom', 'NEOM'],
 
   // --- 복합 표기 (compound acronyms — hyphen preserved in full slug)
   // Matched against full slug FIRST in humanize().

@@ -44,6 +44,7 @@ const STATIC_PATHS = [
   '/portfolio',
   '/solution',
   '/service',
+  '/origin',
   '/project-inquiry',
 ] as const
 
@@ -73,7 +74,7 @@ export async function generateSitemaps(): Promise<{ id: Locale }[]> {
 /**
  * 특정 locale 의 sub-sitemap entries.
  *
- * - 정적 페이지 7 종 (홈/insight/story/portfolio/solution/service/project-inquiry)
+ * - 정적 페이지 8 종 (홈/insight/story/portfolio/solution/service/origin/project-inquiry)
  * - Posts 상세: publishedLocales 에 해당 locale 이 포함된 published 글만 노출
  * - 모든 entry 에 9 locale alternates.languages 동시 발행
  *
@@ -111,6 +112,7 @@ export default async function sitemap({
   //   portfolio → /portfolio/[slug]
   //   solution  → /solution/[slug]
   //   service   → /service/[slug]
+  //   origin    → /origin/[slug]
   let posts: Post[] = []
   try {
     const payload = await getPayload({ config })

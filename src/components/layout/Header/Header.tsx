@@ -41,6 +41,7 @@ const navigationData: MegaMenuGroup[] = [
     items: [
       { title: 'Insight', description: 'Perspectives on search, AI answers, structured websites, and calm digital strategy.', href: '/en/insight', kicker: 'Insight', gradient: 'linear-gradient(135deg, #1d4a45, #12191b)' },
       { title: 'Story', description: 'Selected narratives around brand evolution, collaboration, and behind-the-scenes decisions.', href: '/en/story', kicker: 'Story', gradient: 'linear-gradient(135deg, #335565, #131d24)' },
+      { title: 'Origin', description: 'A chronicle of the first-ever moments in web, internet, and security — the records behind the technology we now take for granted.', href: '/en/origin', kicker: 'Origin', gradient: 'linear-gradient(135deg, #4a4326, #1a1610)' },
       { title: 'Portfolio', description: 'A concise view of outcome-driven projects across websites, platforms, and commerce experiences.', href: '/en/portfolio', kicker: 'Portfolio', gradient: 'linear-gradient(135deg, #40512e, #151d15)' },
       { title: 'Solution', description: 'Capability deep dives across our in-house solution products and reference architectures.', href: '/en/solution', kicker: 'Solution', gradient: 'linear-gradient(135deg, #2f4a5d, #131d24)' },
       { title: 'Service', description: 'How we approach each engagement area — methodology, scope, and outcomes.', href: '/en/service', kicker: 'Service', gradient: 'linear-gradient(135deg, #4a3d5d, #1a131f)' },

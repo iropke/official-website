@@ -197,7 +197,8 @@ export const Posts: CollectionConfig = {
       // v2 (2026-04-26): 영문 단일 파이프라인 정책. locale 미지정 시 'en' 기본.
       // ?preview=true 쿼리 + payload-token 쿠키가 모두 있어야 page.tsx 가 draft 모드로 응답.
       // 카테고리별 라우트 (insight → /insight, story → /story, portfolio → /portfolio,
-      // solution → /solution, service → /service) 로 분기. URL 은 모두 단수 (2026-05-11).
+      // solution → /solution, service → /service, origin → /origin) 로 분기.
+      // URL 은 모두 단수 (2026-05-11, origin 추가 2026-05-16).
       const baseUrl = resolveServerURL()
       const localeCode = typeof locale === 'string' && locale ? locale : 'en'
       const d = doc as { slug?: string; category?: string } | undefined
@@ -804,8 +805,9 @@ export const Posts: CollectionConfig = {
      // 별도 `isArchived: checkbox` 필드로 향후 추가.
 
     // ─── 분류 (카테고리) ──────────────────────────────────────
-    // category: 'insight' | 'story' | 'portfolio' | 'solution' | 'service'. 라우트 분기
-    //   (/insight · /story · /portfolio · /solution · /service — 모두 단수, 2026-05-11)
+    // category: 'insight' | 'story' | 'portfolio' | 'solution' | 'service' | 'origin'. 라우트 분기
+    //   (/insight · /story · /portfolio · /solution · /service · /origin — 모두 단수,
+    //   2026-05-11; origin = '최초의 기록' 연재, 2026-05-16 추가)
     //   + sitemap + 관련 글 query 의 기준.
     //   content-generation 의 meta.json 에서 import 시 그대로 바인딩됨.
     //   모든 운영 글은 이 다섯 중 하나에 속함. defaultValue 'insight' 라
@@ -823,11 +825,12 @@ export const Posts: CollectionConfig = {
         { label: 'Portfolio (포트폴리오)', value: 'portfolio' },
         { label: 'Solution (솔루션)', value: 'solution' },
         { label: 'Service (서비스)', value: 'service' },
+        { label: 'Origin (최초의 기록)', value: 'origin' },
       ],
       admin: {
         position: 'sidebar',
         description:
-          'insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례 / solution = 자체 솔루션 (Corpis 등) / service = 업무 영역. 라우트와 sitemap 분기 기준입니다.',
+          "insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례 / solution = 자체 솔루션 (Corpis 등) / service = 업무 영역 / origin = '최초의 기록' 연재 (IT·웹 역사상 최초 사건). 라우트와 sitemap 분기 기준입니다.",
       },
     },
 

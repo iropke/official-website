@@ -365,9 +365,9 @@ export interface Post {
   tags?: (number | Tag)[] | null;
   publishedDate?: string | null;
   /**
-   * insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례 / solution = 자체 솔루션 (Corpis 등) / service = 업무 영역. 라우트와 sitemap 분기 기준입니다.
+   * insight = 인사이트 / story = 회사 소식 / portfolio = 프로젝트 사례 / solution = 자체 솔루션 (Corpis 등) / service = 업무 영역 / origin = '최초의 기록' 연재 (IT·웹 역사상 최초 사건). 라우트와 sitemap 분기 기준입니다.
    */
-  category: 'insight' | 'story' | 'portfolio' | 'solution' | 'service';
+  category: 'insight' | 'story' | 'portfolio' | 'solution' | 'service' | 'origin';
   /**
    * 이 게시물을 공개할 언어를 선택하세요. 미선택 언어는 목록에서 숨겨집니다.
    */

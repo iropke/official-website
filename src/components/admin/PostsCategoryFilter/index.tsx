@@ -33,6 +33,7 @@ const CATEGORY_LABELS: Record<PostCategory, string> = {
   portfolio: 'Portfolio',
   solution: 'Solution',
   service: 'Service',
+  origin: 'Origin',
 }
 
 // Flat where-clause key. qs-esm (Payload's query parser) decodes the

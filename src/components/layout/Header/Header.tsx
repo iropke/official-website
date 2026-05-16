@@ -7,8 +7,12 @@ import SearchToggle from '../SearchToggle/SearchToggle';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import styles from './Header.module.css';
 
-/** Static navigation data — will be replaced by Payload CMS Navigation Global */
-const navigationData: MegaMenuGroup[] = [
+/**
+ * Fallback navigation — used only when the Payload `navigation` global has no
+ * visible items (e.g. never edited in admin, or fetch failed). When the global
+ * is populated it takes over via the `navigation` prop.
+ */
+const fallbackNavigationData: MegaMenuGroup[] = [
   {
     label: 'About',
     items: [
@@ -49,7 +53,15 @@ const navigationData: MegaMenuGroup[] = [
   },
 ];
 
-export default function Header() {
+interface HeaderProps {
+  /** Mapped from the Payload `navigation` global. Empty/undefined → static fallback. */
+  navigation?: MegaMenuGroup[];
+}
+
+export default function Header({ navigation }: HeaderProps) {
+  const navigationData =
+    navigation && navigation.length > 0 ? navigation : fallbackNavigationData;
+
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);

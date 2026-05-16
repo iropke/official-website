@@ -1,13 +1,64 @@
 import React from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import Header from '@/components/layout/Header/Header'
+import type { MegaMenuGroup } from '@/components/layout/MegaMenu/MegaMenu'
 import Footer from '@/components/layout/Footer/Footer'
 import FloatingActions from '@/components/layout/FloatingActions/FloatingActions'
 import CookieConsent from '@/components/CookieConsent/CookieConsent'
 import LocaleHtmlAttributes from './LocaleHtmlAttributes'
-import { isLocale } from '@/i18n/locales'
+import { isLocale, type Locale } from '@/i18n/locales'
 import { SITE_BASE_URL, buildAlternates } from '@/i18n/alternates'
+
+const FALLBACK_CARD_GRADIENT = 'linear-gradient(135deg, #1f4a44, #0d201d)'
+
+/**
+ * Map the Payload `navigation` global into the `MegaMenuGroup[]` shape the
+ * Header renders. Returns `[]` when there is nothing visible to show, in which
+ * case the Header falls back to its static data so the site never goes blank.
+ */
+async function loadNavigation(locale: Locale): Promise<MegaMenuGroup[]> {
+  try {
+    const payload = await getPayload({ config })
+    const nav = await payload.findGlobal({
+      slug: 'navigation',
+      locale,
+      depth: 1,
+    })
+
+    const groups: MegaMenuGroup[] = (nav.items ?? [])
+      .filter((item) => item.isVisible !== false)
+      .map((item) => ({
+        label: item.label,
+        items: (item.children ?? [])
+          .filter((child) => child.isVisible !== false)
+          .map((child) => {
+            const media =
+              child.media && typeof child.media === 'object'
+                ? child.media
+                : null
+            return {
+              title: child.label,
+              description: child.description ?? '',
+              href: child.link,
+              kicker: child.badge ?? child.label,
+              gradient: child.gradient || FALLBACK_CARD_GRADIENT,
+              mediaUrl: media?.url ?? undefined,
+              mediaAlt: media?.alt ?? undefined,
+              external: child.linkType === 'external',
+            }
+          }),
+      }))
+      .filter((group) => group.items.length > 0)
+
+    return groups
+  } catch (err) {
+    console.error('[LocaleLayout] Failed to load navigation global:', err)
+    return []
+  }
+}
 
 interface LocaleLayoutProps {
   children: React.ReactNode
@@ -43,11 +94,13 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   if (!isLocale(rawLocale)) notFound()
   const locale = rawLocale
 
+  const navigation = await loadNavigation(locale)
+
   return (
     <>
       <LocaleHtmlAttributes locale={locale} />
       <div className="layout-page layout-page--no-clip">
-        <Header />
+        <Header navigation={navigation} />
         <main className="layout-main">
           {children}
         </main>

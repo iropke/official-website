@@ -25,6 +25,7 @@ import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_bc61acef4eea4d85a7d9f54fe43c498c } from '../../../components/admin/TranslateButton/index'
 import { default as default_1a7952e870433f8ff23db7c49da30b7b } from '../../../components/admin/LocaleSwitcherWithSearch/index'
+import { default as default_postscategoryfilter } from '../../../components/admin/PostsCategoryFilter/index'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -56,5 +57,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/components/admin/TranslateButton/index#default": default_bc61acef4eea4d85a7d9f54fe43c498c,
   "/components/admin/LocaleSwitcherWithSearch/index#default": default_1a7952e870433f8ff23db7c49da30b7b,
+  "/components/admin/PostsCategoryFilter/index#default": default_postscategoryfilter,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

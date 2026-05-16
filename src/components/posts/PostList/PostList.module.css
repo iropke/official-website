@@ -296,6 +296,12 @@
   padding: 0 14px;
 }
 
+.paginationNavDisabled {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: default;
+}
+
 .paginationIcon {
   width: 1em;
   height: 1em;

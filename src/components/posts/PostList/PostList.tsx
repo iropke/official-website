@@ -131,12 +131,33 @@ interface PaginationProps {
   basePath: string;
 }
 
+/**
+ * 윈도우 단위 페이지네이션 — 한 번에 페이지 번호 5개만 노출.
+ * 이전/다음 화살표는 인접 페이지가 아니라 인접 "윈도우"(5개 묶음) 로 이동한다.
+ * 예) 1페이지 = 윈도우 [1-5], 다음 화살표 → 6페이지(윈도우 [6-10]).
+ *     10페이지 = 윈도우 [6-10], 이전 → 1페이지([1-5]), 다음 → 11페이지([11-15]).
+ * 첫 윈도우에서 이전, 마지막 윈도우에서 다음은 비활성(클릭 불가).
+ */
+const PAGINATION_WINDOW = 5;
+
 function Pagination({ pagination, basePath }: PaginationProps) {
   const { currentPage, totalPages } = pagination;
 
   if (totalPages <= 1) return null;
 
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const windowIndex = Math.floor((currentPage - 1) / PAGINATION_WINDOW);
+  const windowStart = windowIndex * PAGINATION_WINDOW + 1;
+  const windowEnd = Math.min(windowStart + PAGINATION_WINDOW - 1, totalPages);
+
+  const pages = Array.from(
+    { length: windowEnd - windowStart + 1 },
+    (_, i) => windowStart + i,
+  );
+
+  const hasPrevWindow = windowStart > 1;
+  const hasNextWindow = windowEnd < totalPages;
+  const prevWindowPage = windowStart - PAGINATION_WINDOW;
+  const nextWindowPage = windowStart + PAGINATION_WINDOW;
 
   return (
     <nav
@@ -144,19 +165,28 @@ function Pagination({ pagination, basePath }: PaginationProps) {
       aria-label="Pagination"
     >
       <ul className={styles.pagination}>
-        {/* Previous */}
+        {/* Previous window */}
         <li className={styles.paginationItem}>
-          <Link
-            href={currentPage > 1 ? `${basePath}?page=${currentPage - 1}` : '#'}
-            className={`${styles.paginationLink} ${styles.paginationNav}`}
-            aria-label="Previous page"
-            aria-disabled={currentPage <= 1}
-          >
-            <ChevronLeft className={styles.paginationIcon} />
-          </Link>
+          {hasPrevWindow ? (
+            <Link
+              href={`${basePath}?page=${prevWindowPage}`}
+              className={`${styles.paginationLink} ${styles.paginationNav}`}
+              aria-label="Previous pages"
+            >
+              <ChevronLeft className={styles.paginationIcon} />
+            </Link>
+          ) : (
+            <span
+              className={`${styles.paginationLink} ${styles.paginationNav} ${styles.paginationNavDisabled}`}
+              aria-label="Previous pages"
+              aria-disabled="true"
+            >
+              <ChevronLeft className={styles.paginationIcon} />
+            </span>
+          )}
         </li>
 
-        {/* Page numbers */}
+        {/* Page numbers (current window only) */}
         {pages.map((page) => (
           <li key={page} className={styles.paginationItem}>
             <Link
@@ -169,16 +199,25 @@ function Pagination({ pagination, basePath }: PaginationProps) {
           </li>
         ))}
 
-        {/* Next */}
+        {/* Next window */}
         <li className={styles.paginationItem}>
-          <Link
-            href={currentPage < totalPages ? `${basePath}?page=${currentPage + 1}` : '#'}
-            className={`${styles.paginationLink} ${styles.paginationNav}`}
-            aria-label="Next page"
-            aria-disabled={currentPage >= totalPages}
-          >
-            <ChevronRight className={styles.paginationIcon} />
-          </Link>
+          {hasNextWindow ? (
+            <Link
+              href={`${basePath}?page=${nextWindowPage}`}
+              className={`${styles.paginationLink} ${styles.paginationNav}`}
+              aria-label="Next pages"
+            >
+              <ChevronRight className={styles.paginationIcon} />
+            </Link>
+          ) : (
+            <span
+              className={`${styles.paginationLink} ${styles.paginationNav} ${styles.paginationNavDisabled}`}
+              aria-label="Next pages"
+              aria-disabled="true"
+            >
+              <ChevronRight className={styles.paginationIcon} />
+            </span>
+          )}
         </li>
       </ul>
     </nav>

@@ -28,11 +28,11 @@ import { POST_CATEGORIES, type PostCategory } from '@/lib/posts/urls'
 import './index.css'
 
 const CATEGORY_LABELS: Record<PostCategory, string> = {
-  insight: 'Insight (인사이트)',
-  story: 'Story (스토리)',
-  portfolio: 'Portfolio (포트폴리오)',
-  solution: 'Solution (솔루션)',
-  service: 'Service (서비스)',
+  insight: 'Insight',
+  story: 'Story',
+  portfolio: 'Portfolio',
+  solution: 'Solution',
+  service: 'Service',
 }
 
 // Flat where-clause key. qs-esm (Payload's query parser) decodes the

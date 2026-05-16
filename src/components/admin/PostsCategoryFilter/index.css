@@ -1,0 +1,43 @@
+/*
+ * PostsCategoryFilter — list-view category tab bar.
+ *
+ * Uses Payload CSS variables (theme-elevation scale) so the bar stays
+ * consistent in light/dark mode and visually adjacent to the list controls.
+ */
+
+.iropke-cat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 calc(var(--base, 0.25rem) * 3);
+  padding-bottom: calc(var(--base, 0.25rem) * 3);
+  border-bottom: 1px solid var(--theme-elevation-100, #ececec);
+}
+
+.iropke-cat-filter__tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--theme-elevation-800, #333);
+  background: var(--theme-elevation-50, #f5f5f5);
+  border: 1px solid var(--theme-elevation-150, #d8d8d8);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease,
+    color 120ms ease;
+}
+
+.iropke-cat-filter__tab:hover:not(.iropke-cat-filter__tab--active) {
+  background: var(--theme-elevation-100, #ececec);
+  border-color: var(--theme-elevation-250, #bcbcbc);
+}
+
+.iropke-cat-filter__tab--active {
+  color: var(--theme-elevation-0, #fff);
+  background: var(--theme-elevation-1000, #111);
+  border-color: var(--theme-elevation-1000, #111);
+  cursor: default;
+}

@@ -186,6 +186,13 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'publishedDate', '_status', 'updatedAt'],
     group: '콘텐츠',
+    components: {
+      // 목록 표 바로 위 카테고리 빠른필터 탭 바 (전체/Insight/Story/...).
+      // 선택 시 where[category][equals] 쿼리를 써서 빌트인 검색·Columns·Filters
+      // 와 함께 동작. Payload ListControls(우상단 버튼 줄)는 공개 슬롯이 없어
+      // beforeListTable 이 업그레이드 안전한 최적 위치 (함정 F11/F12 회피).
+      beforeListTable: ['/components/admin/PostsCategoryFilter/index#default'],
+    },
     preview: (doc, { locale }) => {
       // v2 (2026-04-26): 영문 단일 파이프라인 정책. locale 미지정 시 'en' 기본.
       // ?preview=true 쿼리 + payload-token 쿠키가 모두 있어야 page.tsx 가 draft 모드로 응답.

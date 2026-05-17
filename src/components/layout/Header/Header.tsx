@@ -56,9 +56,13 @@ const fallbackNavigationData: MegaMenuGroup[] = [
 interface HeaderProps {
   /** Mapped from the Payload `navigation` global. Empty/undefined → static fallback. */
   navigation?: MegaMenuGroup[];
+  /** From `site-settings.logo`. Undefined → bundled static symbol. */
+  logoUrl?: string;
+  /** From `site-settings.logo.alt`. */
+  logoAlt?: string;
 }
 
-export default function Header({ navigation }: HeaderProps) {
+export default function Header({ navigation, logoUrl, logoAlt }: HeaderProps) {
   const navigationData =
     navigation && navigation.length > 0 ? navigation : fallbackNavigationData;
 
@@ -126,8 +130,12 @@ export default function Header({ navigation }: HeaderProps) {
           <div className={styles.logo}>
             <a className={styles.logoLink} href="/" aria-label="Iropke home">
               <span className={styles.logoBadge}>
-                {/* Replace with actual SVG logo */}
-                <img src="/assets/svg/iropke_symbol.svg" alt="Iropke logo" width={200} height={35} />
+                <img
+                  src={logoUrl ?? '/assets/svg/iropke_symbol.svg'}
+                  alt={logoAlt ?? 'Iropke logo'}
+                  width={200}
+                  height={35}
+                />
               </span>
             </a>
           </div>

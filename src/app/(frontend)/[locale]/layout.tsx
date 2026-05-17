@@ -11,6 +11,7 @@ import CookieConsent from '@/components/CookieConsent/CookieConsent'
 import LocaleHtmlAttributes from './LocaleHtmlAttributes'
 import { isLocale, type Locale } from '@/i18n/locales'
 import { SITE_BASE_URL, buildAlternates } from '@/i18n/alternates'
+import { getSiteSettings } from '@/lib/site-settings'
 
 const FALLBACK_CARD_GRADIENT = 'linear-gradient(135deg, #1f4a44, #0d201d)'
 
@@ -83,9 +84,18 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
   const { locale: rawLocale } = await params
   if (!isLocale(rawLocale)) notFound()
 
+  const settings = await getSiteSettings(rawLocale)
+
   return {
     metadataBase: new URL(SITE_BASE_URL),
     alternates: buildAlternates(rawLocale, ''),
+    ...(settings.siteDescription
+      ? { description: settings.siteDescription }
+      : {}),
+    openGraph: {
+      siteName: settings.siteName,
+      ...(settings.ogImageUrl ? { images: [settings.ogImageUrl] } : {}),
+    },
   }
 }
 
@@ -94,17 +104,35 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   if (!isLocale(rawLocale)) notFound()
   const locale = rawLocale
 
-  const navigation = await loadNavigation(locale)
+  const [navigation, settings] = await Promise.all([
+    loadNavigation(locale),
+    getSiteSettings(locale),
+  ])
+
+  const policy = settings.footerPolicyLink
+  const privacyHref = !policy
+    ? `/${locale}/privacy-policy`
+    : /^https?:\/\//.test(policy)
+      ? policy
+      : `/${locale}${policy.startsWith('/') ? '' : '/'}${policy}`
 
   return (
     <>
       <LocaleHtmlAttributes locale={locale} />
       <div className="layout-page layout-page--no-clip">
-        <Header navigation={navigation} />
+        <Header
+          navigation={navigation}
+          logoUrl={settings.logoUrl}
+          logoAlt={settings.logoAlt}
+        />
         <main className="layout-main">
           {children}
         </main>
-        <Footer privacyHref={`/${locale}/privacy-policy`} />
+        <Footer
+          privacyHref={privacyHref}
+          copyright={settings.footerCopyright}
+          socialLinks={settings.socialLinks}
+        />
       </div>
       <FloatingActions inquiryHref={`/${locale}/project-inquiry`} />
       <CookieConsent />

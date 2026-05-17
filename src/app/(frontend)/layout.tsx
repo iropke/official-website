@@ -2,15 +2,28 @@ import React from 'react'
 import type { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { allFontVariables } from '@/fonts'
+import { getSiteSettings } from '@/lib/site-settings'
 import '@/styles/globals.css'
 import '@/styles/layout-page.css'
 
-export const metadata: Metadata = {
-  title: {
-    template: '%s | Iropke',
-    default: 'Iropke',
-  },
-  description: 'Structured growth systems for global brands.',
+/**
+ * Site-wide metadata driven by the `site-settings` global.
+ *
+ * Non-localized fields only (siteName → title, favicon → icons). The
+ * localized `siteDescription` and `openGraph.images` are layered on
+ * per-locale by `[locale]/layout.tsx`'s `generateMetadata`.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
+
+  return {
+    title: {
+      template: `%s | ${settings.siteName}`,
+      default: settings.siteName,
+    },
+    description: 'Structured growth systems for global brands.',
+    ...(settings.faviconUrl ? { icons: { icon: settings.faviconUrl } } : {}),
+  }
 }
 
 /**

@@ -45,7 +45,7 @@ async function loadNavigation(locale: Locale): Promise<MegaMenuGroup[]> {
               title: child.label,
               description: child.description ?? '',
               href: child.link,
-              kicker: child.badge ?? child.label,
+              kicker: child.badge || undefined,
               gradient: child.gradient || FALLBACK_CARD_GRADIENT,
               mediaUrl: media?.url ?? undefined,
               mediaAlt: media?.alt ?? undefined,

@@ -7,7 +7,8 @@ export interface MegaMenuItem {
   title: string;
   description: string;
   href: string;
-  kicker: string;
+  /** Badge pill text. Omitted → no badge rendered. */
+  kicker?: string;
   gradient: string;
   /** Card background image URL. Rendered over the gradient when present. */
   mediaUrl?: string;
@@ -48,7 +49,7 @@ export default function MegaMenu({ items, isOpen, ariaLabel }: MegaMenuProps) {
             >
               <div
                 className={styles.cardMedia}
-                data-kicker={item.kicker}
+                {...(item.kicker ? { 'data-kicker': item.kicker } : {})}
                 style={{ '--card-gradient': item.gradient } as React.CSSProperties}
               >
                 {item.mediaUrl ? (

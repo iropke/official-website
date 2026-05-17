@@ -81,7 +81,7 @@
   display: block;
 }
 
-.cardMedia::after {
+.cardMedia[data-kicker]::after {
   content: attr(data-kicker);
   position: absolute;
   left: 16px;

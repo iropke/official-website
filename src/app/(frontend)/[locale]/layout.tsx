@@ -33,6 +33,7 @@ async function loadNavigation(locale: Locale): Promise<MegaMenuGroup[]> {
       .filter((item) => item.isVisible !== false)
       .map((item) => ({
         label: item.label,
+        href: item.link || undefined,
         items: (item.children ?? [])
           .filter((child) => child.isVisible !== false)
           .map((child) => {
@@ -44,7 +45,7 @@ async function loadNavigation(locale: Locale): Promise<MegaMenuGroup[]> {
               title: child.label,
               description: child.description ?? '',
               href: child.link,
-              kicker: child.badge ?? child.label,
+              kicker: child.badge || undefined,
               gradient: child.gradient || FALLBACK_CARD_GRADIENT,
               mediaUrl: media?.url ?? undefined,
               mediaAlt: media?.alt ?? undefined,
@@ -52,7 +53,9 @@ async function loadNavigation(locale: Locale): Promise<MegaMenuGroup[]> {
             }
           }),
       }))
-      .filter((group) => group.items.length > 0)
+      // Keep a menu when it has visible cards OR a direct top-level link.
+      // Drop only menus that would render nothing (no cards, no link).
+      .filter((group) => group.items.length > 0 || Boolean(group.href))
 
     return groups
   } catch (err) {

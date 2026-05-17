@@ -19,6 +19,8 @@ export interface MegaMenuItem {
 export interface MegaMenuGroup {
   label: string;
   items: MegaMenuItem[];
+  /** Top-level direct link. Set when the menu has no cards and links straight out. */
+  href?: string;
 }
 
 interface MegaMenuProps {

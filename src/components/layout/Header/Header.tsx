@@ -145,28 +145,40 @@ export default function Header({ navigation, logoUrl, logoAlt }: HeaderProps) {
             {/* Desktop/Tablet Menu */}
             <div className={styles.menu} id="primaryMenu">
               <ul className={styles.menuList}>
-                {navigationData.map((group, index) => (
-                  <li
-                    key={group.label}
-                    className={`${styles.item} ${openMenuIndex === index ? styles.itemOpen : ''}`}
-                    data-mobile-item
-                  >
-                    <button
-                      className={styles.primary}
-                      type="button"
-                      aria-expanded={openMenuIndex === index}
-                      onClick={() => toggleMenuItem(index)}
+                {navigationData.map((group, index) => {
+                  const isDirectLink =
+                    group.items.length === 0 && Boolean(group.href);
+                  return (
+                    <li
+                      key={group.label}
+                      className={`${styles.item} ${openMenuIndex === index ? styles.itemOpen : ''}`}
+                      data-mobile-item
                     >
-                      <span>{group.label}</span>
-                      <IconChevron className={styles.chevron} aria-hidden="true" />
-                    </button>
-                    <MegaMenu
-                      items={group.items}
-                      isOpen={openMenuIndex === index}
-                      ariaLabel={`${group.label} menu`}
-                    />
-                  </li>
-                ))}
+                      {isDirectLink ? (
+                        <a className={styles.primary} href={group.href}>
+                          <span>{group.label}</span>
+                        </a>
+                      ) : (
+                        <>
+                          <button
+                            className={styles.primary}
+                            type="button"
+                            aria-expanded={openMenuIndex === index}
+                            onClick={() => toggleMenuItem(index)}
+                          >
+                            <span>{group.label}</span>
+                            <IconChevron className={styles.chevron} aria-hidden="true" />
+                          </button>
+                          <MegaMenu
+                            items={group.items}
+                            isOpen={openMenuIndex === index}
+                            ariaLabel={`${group.label} menu`}
+                          />
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>

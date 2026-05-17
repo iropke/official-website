@@ -1,21 +1,11 @@
 import type { GlobalConfig } from 'payload'
-import { LOCALES, LOCALE_LABELS_NATIVE, LOCALE_DIRS, DEFAULT_LOCALE } from '../i18n/locales'
-
-const LOCALE_SELECT_OPTIONS = LOCALES.map((code) => ({
-  label: `${LOCALE_LABELS_NATIVE[code]} (${code})`,
-  value: code,
-}))
-
-const RTL_LOCALE_OPTIONS = LOCALES.filter((code) => LOCALE_DIRS[code] === 'rtl').map(
-  (code) => ({ label: `${LOCALE_LABELS_NATIVE[code]} (${code})`, value: code }),
-)
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: '사이트 전역 설정',
   admin: {
     group: '설정',
-    description: '사이트 이름, 로고, 소셜 링크, 언어 설정 등 전역 값을 관리합니다',
+    description: '사이트 이름, 로고, 소셜 링크 등 전역 값을 관리합니다',
   },
   access: {
     read: () => true,
@@ -118,83 +108,7 @@ export const SiteSettings: GlobalConfig = {
           ],
         },
 
-        // ── 탭 3: 언어 설정 ──
-        {
-          label: '언어',
-          fields: [
-            {
-              name: 'defaultLocale',
-              type: 'select',
-              label: '기본 언어',
-              defaultValue: DEFAULT_LOCALE,
-              options: LOCALE_SELECT_OPTIONS,
-            },
-            {
-              name: 'enabledLocales',
-              type: 'select',
-              label: '활성화된 언어',
-              hasMany: true,
-              defaultValue: [DEFAULT_LOCALE],
-              options: LOCALE_SELECT_OPTIONS,
-            },
-            {
-              name: 'rtlLocales',
-              type: 'select',
-              label: 'RTL 언어 (우→좌)',
-              hasMany: true,
-              defaultValue: LOCALES.filter((code) => LOCALE_DIRS[code] === 'rtl'),
-              options: RTL_LOCALE_OPTIONS,
-              admin: {
-                description: '아랍어 등 우→좌 방향 언어. HTML dir="rtl" 자동 적용',
-              },
-            },
-          ],
-        },
-
-        // ── 탭 4: AI / 연동 설정 ──
-        {
-          label: 'AI / 연동',
-          fields: [
-            {
-              name: 'aiApiProvider',
-              type: 'select',
-              label: 'AI API 프로바이더',
-              defaultValue: 'claude',
-              options: [
-                { label: 'Anthropic Claude (Haiku)', value: 'claude' },
-                { label: 'OpenAI', value: 'openai' },
-              ],
-              admin: {
-                description: '콘텐츠 생성 및 다국어 번역에 사용할 AI 서비스',
-              },
-            },
-            {
-              name: 'contactEmail',
-              type: 'email',
-              label: '문의 수신 이메일',
-              defaultValue: 'hello@iropke.com',
-              admin: {
-                description: '프로젝트 문의 알림 수신 주소',
-              },
-            },
-            {
-              name: 'noReplyEmail',
-              type: 'email',
-              label: '발신 이메일 (no-reply)',
-              defaultValue: 'noreply@iropke.com',
-            },
-            {
-              name: 'recaptchaSiteKey',
-              type: 'text',
-              label: 'reCAPTCHA v3 Site Key',
-              admin: {
-                description: '프론트엔드에 노출되는 공개 키 (환경변수 권장)',
-              },
-            },
-          ],
-        },
-
-        // ── 탭 5: SEO ──
+        // ── 탭 3: SEO ──
         {
           label: 'SEO',
           fields: [
@@ -210,14 +124,19 @@ export const SiteSettings: GlobalConfig = {
             // googleAnalyticsId 필드는 2026-04-20 제거됨.
             // GA4 추적은 Vercel env `NEXT_PUBLIC_GA_ID` + `@next/third-parties`
             // 의 <GoogleAnalytics /> 로 일원화 (src/app/(frontend)/layout.tsx).
-            // 과거 이 필드에 입력된 값은 어떤 코드에서도 읽히지 않는 dead field
-            // 였다. 필요 시 admin 에서 데이터 정리 권장.
             //
             // googleSearchConsoleVerification 필드도 2026-04-20 제거됨.
-            // GSC 인증은 DNS TXT 레코드 방식으로 이미 완료되어 있고,
-            // 커스텀 도메인(iropke.com) 연결 시 재인증이 필요하면 그때도
-            // DNS 로 처리 예정. 코드에서 `<meta name="google-site-verification" />`
-            // 로 읽는 곳이 없어 dead field 였다.
+            // GSC 인증은 DNS TXT 레코드 방식.
+            //
+            // 언어 설정(defaultLocale/enabledLocales/rtlLocales)은
+            // 2026-05-17 제거됨. locale 은 src/i18n/locales.ts 코드 단일
+            // 소스가 진실 원천 (CLAUDE.md §4, 함정 F4/F10). admin 필드와
+            // 공존 시 진실 원천이 둘로 갈라져 혼란의 원인이 되었다.
+            //
+            // AI/연동 설정(aiApiProvider/contactEmail/noReplyEmail/
+            // recaptchaSiteKey)도 2026-05-17 제거됨. AI 키·메일·reCAPTCHA
+            // 는 모두 Vercel env 변수로 관리 (Resend / reCAPTCHA 정책).
+            // admin 필드는 어떤 코드에서도 읽히지 않는 dead field 였다.
           ],
         },
       ],

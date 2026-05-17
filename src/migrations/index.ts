@@ -5,6 +5,7 @@ import * as migration_20260510_120000 from './20260510_120000';
 import * as migration_20260511_105811 from './20260511_105811';
 import * as migration_20260511_133928 from './20260511_133928';
 import * as migration_20260516_072502 from './20260516_072502';
+import * as migration_20260517_052627_remove_site_settings_dead_fields from './20260517_052627_remove_site_settings_dead_fields';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20260516_072502.up,
     down: migration_20260516_072502.down,
-    name: '20260516_072502'
+    name: '20260516_072502',
+  },
+  {
+    up: migration_20260517_052627_remove_site_settings_dead_fields.up,
+    down: migration_20260517_052627_remove_site_settings_dead_fields.down,
+    name: '20260517_052627_remove_site_settings_dead_fields'
   },
 ];

@@ -971,7 +971,7 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
- * 사이트 이름, 로고, 소셜 링크, 언어 설정 등 전역 값을 관리합니다
+ * 사이트 이름, 로고, 소셜 링크 등 전역 값을 관리합니다
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
@@ -993,71 +993,6 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
-  defaultLocale?:
-    | (
-        | 'en'
-        | 'zh'
-        | 'ja'
-        | 'de'
-        | 'fr'
-        | 'es'
-        | 'ko'
-        | 'pt'
-        | 'hi'
-        | 'ru'
-        | 'nl'
-        | 'it'
-        | 'ar'
-        | 'sv'
-        | 'th'
-        | 'pl'
-        | 'id'
-        | 'ms'
-        | 'da'
-        | 'tr'
-      )
-    | null;
-  enabledLocales?:
-    | (
-        | 'en'
-        | 'zh'
-        | 'ja'
-        | 'de'
-        | 'fr'
-        | 'es'
-        | 'ko'
-        | 'pt'
-        | 'hi'
-        | 'ru'
-        | 'nl'
-        | 'it'
-        | 'ar'
-        | 'sv'
-        | 'th'
-        | 'pl'
-        | 'id'
-        | 'ms'
-        | 'da'
-        | 'tr'
-      )[]
-    | null;
-  /**
-   * 아랍어 등 우→좌 방향 언어. HTML dir="rtl" 자동 적용
-   */
-  rtlLocales?: 'ar'[] | null;
-  /**
-   * 콘텐츠 생성 및 다국어 번역에 사용할 AI 서비스
-   */
-  aiApiProvider?: ('claude' | 'openai') | null;
-  /**
-   * 프로젝트 문의 알림 수신 주소
-   */
-  contactEmail?: string | null;
-  noReplyEmail?: string | null;
-  /**
-   * 프론트엔드에 노출되는 공개 키 (환경변수 권장)
-   */
-  recaptchaSiteKey?: string | null;
   /**
    * 페이지별 OG 이미지가 없을 때 사용하는 기본값
    */
@@ -1192,13 +1127,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         isVisible?: T;
         id?: T;
       };
-  defaultLocale?: T;
-  enabledLocales?: T;
-  rtlLocales?: T;
-  aiApiProvider?: T;
-  contactEmail?: T;
-  noReplyEmail?: T;
-  recaptchaSiteKey?: T;
   ogImage?: T;
   updatedAt?: T;
   createdAt?: T;

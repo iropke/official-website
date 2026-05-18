@@ -16,6 +16,27 @@ import { getSiteSettings } from '@/lib/site-settings'
 const FALLBACK_CARD_GRADIENT = 'linear-gradient(135deg, #1f4a44, #0d201d)'
 
 /**
+ * Prefix the active locale onto an internal nav link so admins never have to
+ * type a locale segment. Self-healing: an existing `/en/solution` (or any
+ * stored locale prefix) is stripped and re-prefixed with the visitor's locale,
+ * so legacy locale-prefixed data and new locale-agnostic data both resolve.
+ * Absolute/external URLs and pure anchors pass through untouched.
+ */
+function localizeNavHref(
+  raw: string | null | undefined,
+  locale: Locale,
+): string | undefined {
+  const link = raw?.trim()
+  if (!link) return undefined
+  if (/^(https?:)?\/\//i.test(link) || /^(mailto:|tel:)/i.test(link)) return link
+  if (link.startsWith('#')) return link
+  const segments = link.replace(/^\/+/, '').split('/')
+  if (segments.length > 0 && isLocale(segments[0])) segments.shift()
+  const path = segments.join('/')
+  return path ? `/${locale}/${path}` : `/${locale}`
+}
+
+/**
  * Map the Payload `navigation` global into the `MegaMenuGroup[]` shape the
  * Header renders. Returns `[]` when there is nothing visible to show, in which
  * case the Header falls back to its static data so the site never goes blank.
@@ -33,7 +54,7 @@ async function loadNavigation(locale: Locale): Promise<MegaMenuGroup[]> {
       .filter((item) => item.isVisible !== false)
       .map((item) => ({
         label: item.label,
-        href: item.link || undefined,
+        href: localizeNavHref(item.link, locale),
         items: (item.children ?? [])
           .filter((child) => child.isVisible !== false)
           .map((child) => {
@@ -44,7 +65,10 @@ async function loadNavigation(locale: Locale): Promise<MegaMenuGroup[]> {
             return {
               title: child.label,
               description: child.description ?? '',
-              href: child.link,
+              href:
+                child.linkType === 'external'
+                  ? child.link
+                  : localizeNavHref(child.link, locale) ?? child.link,
               kicker: child.badge || undefined,
               gradient: child.gradient || FALLBACK_CARD_GRADIENT,
               mediaUrl: media?.url ?? undefined,

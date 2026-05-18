@@ -1,6 +1,7 @@
 import type { Block, CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { LOCALES, LOCALE_LABELS_NATIVE } from '../i18n/locales'
+import { resolveServerURL } from '../lib/serverURL'
 
 const LOCALE_SELECT_OPTIONS = LOCALES.map((code) => ({
   label: `${LOCALE_LABELS_NATIVE[code]} (${code})`,
@@ -73,6 +74,19 @@ export const Pages: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', '_status', 'updatedAt'],
     group: '페이지',
+    // Posts 와 동일 패턴: 편집 화면 우상단 "Preview" 버튼 (서버 사이드 함수).
+    // Pages 의 프론트 URL = /<locale>/<slug> (예: slug 'service/web-development'
+    // → /en/service/web-development). slug 선행 슬래시는 방어적으로 제거.
+    // ?preview=true 쿼리 + payload-token 쿠키가 모두 있어야 라우트가 draft
+    // 모드로 응답 (대상 라우트에 preview 분기 구현 필요 — 현재 web-development).
+    preview: (doc, { locale }) => {
+      const baseUrl = resolveServerURL()
+      const localeCode = typeof locale === 'string' && locale ? locale : 'en'
+      const d = doc as { slug?: string } | undefined
+      const slug = (d?.slug ?? '').replace(/^\/+/, '')
+      if (!slug) return null
+      return `${baseUrl}/${localeCode}/${slug}?preview=true`
+    },
   },
   access: {
     // 공개 읽기 허용

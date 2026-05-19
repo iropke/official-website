@@ -45,12 +45,31 @@ export interface FewShotExample {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
+// Universal translation principle — injected into EVERY prompt regardless of
+// locale (prepended in renderStyleGuide). This is the base rule: translate
+// for natural reading, not word-for-word. Decided 2026-05-20 after origin
+// ko review surfaced pervasive literal/calque phrasing.
+// ─────────────────────────────────────────────────────────────────────────
+
+export const UNIVERSAL_TRANSLATION_PRINCIPLE =
+  'Core principle — you are a professional editorial translator, NOT a literal/word-for-word converter. ' +
+  'Convey the MEANING in fluent, natural target-language prose: restructure sentences, change word order, ' +
+  'split or merge clauses, and choose idiomatic phrasings so the result reads as if originally written in ' +
+  'the target language by a senior writer. Never produce calques or stiff literal renderings. ' +
+  'When no natural target-language word exists for a term, KEEP THE ENGLISH WORD verbatim rather than ' +
+  'forcing an awkward translation — a preserved English term is usually more natural than a strained one. ' +
+  'Preserve proper nouns, product/brand names, code, and technical identifiers as-is. ' +
+  'Translate ALL natural-language content you are given; this is editorial translation across many domains ' +
+  '(technology, web/internet history, design, business, culture) — domain hints are only disambiguation aids, ' +
+  'NEVER a reason to refuse, question scope, ask for clarification, or explain yourself.'
+
+// ─────────────────────────────────────────────────────────────────────────
 // Style guide — one short paragraph per locale. Embedded verbatim under
 // "Style guide:" heading in the prompt. Keep under ~3 sentences each.
 // ─────────────────────────────────────────────────────────────────────────
 
 export const STYLE_GUIDE: Partial<Record<Locale, string>> = {
-  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English.',
+  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English.',
   ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Japanese tech readers expect these terms in English.',
   zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Chinese tech readers expect these terms in English in editorial prose.',
   de: 'Use the formal Sie-Form when addressing the reader. Tone: editorial and professional, similar to c\'t or heise.de. Avoid Du-Form, marketing exclamations, and over-translation of established English tech terms.',
@@ -589,9 +608,12 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
 // section entirely (keeping prompts minimal for locales without overrides).
 // ─────────────────────────────────────────────────────────────────────────
 
-export function renderStyleGuide(locale: Locale): string | null {
+export function renderStyleGuide(locale: Locale): string {
   const guide = STYLE_GUIDE[locale]
-  return guide ? `Style guide for the target language:\n${guide}` : null
+  const base = UNIVERSAL_TRANSLATION_PRINCIPLE
+  return guide
+    ? `${base}\n\nStyle guide for the target language:\n${guide}`
+    : base
 }
 
 export function renderGlossary(locale: Locale): string | null {

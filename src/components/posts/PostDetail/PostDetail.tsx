@@ -195,13 +195,18 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
     if (index === 0 && kids.length >= 2) {
       const c0 = kids[0];
       const c1 = kids[1];
+      // Tolerant match (defense-in-depth, 2026-05-20): the translation
+      // pipeline now preserves a verbatim bold "TL;DR" + ":" in every locale,
+      // but accept minor variance (spacing, TLDR, fullwidth colon ：) so a
+      // stray label never leaks visibly.
       const c0Bold =
         c0?.type === 'text' &&
         typeof c0.format === 'number' &&
         (c0.format & FORMAT_BOLD) !== 0 &&
-        c0.text === 'TL;DR';
+        typeof c0.text === 'string' &&
+        /^TL\s*;?\s*DR$/i.test(c0.text.trim());
       const c1Text = c1?.type === 'text' && typeof c1.text === 'string' ? c1.text : null;
-      const colon = c0Bold && c1Text != null ? c1Text.match(/^:\s*/)?.[0] : null;
+      const colon = c0Bold && c1Text != null ? c1Text.match(/^\s*[:：]\s*/)?.[0] : null;
       if (c0Bold && c1Text != null && colon != null) {
         const c1Trim = { ...c1, text: c1Text.slice(colon.length) };
         return (

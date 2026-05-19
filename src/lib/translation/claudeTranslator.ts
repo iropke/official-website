@@ -35,7 +35,13 @@ const LOCALE_NAMES: Record<Locale, string> = {
 
 export type SupportedLocale = Locale
 
-export type FieldType = 'title' | 'excerpt' | 'metaTitle' | 'metaDescription' | 'content'
+export type FieldType =
+  | 'title'
+  | 'excerpt'
+  | 'metaTitle'
+  | 'metaDescription'
+  | 'content'
+  | 'label'
 
 export interface TranslationRequest {
   /** 번역할 원문 */
@@ -74,6 +80,13 @@ const FIELD_HINTS: Record<FieldType, string> = {
     'This is an SEO meta title (under ~60 characters). Keep the key nouns and brand terms, no quotation marks.',
   metaDescription:
     'This is an SEO meta description (under ~155 characters). Make it informative and neutral.',
+  label:
+    'This is a SHORT STANDALONE LABEL — a table column header, a table cell, a caption, or a similar UI label. ' +
+    'It often is just one or a few words (e.g. "When", "Year", "Status", "Era", "Notes"), or a number / date / proper noun. ' +
+    'It is COMPLETE and meaningful on its own — it is NOT a fragment and NOT missing context. ' +
+    'Translate it directly and concisely as an equivalent label in the target language. ' +
+    'If it is a pure number, date, code, URL, or proper noun, keep it as-is. ' +
+    'CRITICAL: never say you need more context, never ask a question, never refuse, never explain — output ONLY the translated label (or the unchanged value for numbers/proper nouns).',
   content:
     'This is a body text passage from a Lexical rich-text node — typically a full paragraph, heading, list item, or quote. ' +
     'The passage MAY contain PLACEHOLDER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
@@ -85,7 +98,8 @@ const FIELD_HINTS: Record<FieldType, string> = {
     'Translate the natural-language text around the placeholders into a fluent, complete passage per the style guide. ' +
     'Preserve leading and trailing whitespace of the WHOLE passage exactly (if the source starts or ends with a space, your output must too). ' +
     'Do NOT add line breaks or quotation marks. ' +
-    'If the passage is a markdown table separator (e.g. "|---|---|"), a label-only line, a sequence of symbols only, or otherwise has no translatable natural-language content, RETURN THE SOURCE VERBATIM. ' +
+    'If the passage is a markdown table separator (e.g. "|---|---|"), a sequence of symbols/punctuation only, or has NO translatable letters at all, RETURN THE SOURCE VERBATIM. ' +
+    'A short single word or label (e.g. a table column header like "Year" / "When" / "Status") IS translatable natural language — translate it normally; do NOT return it verbatim. ' +
     'Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
 }
 
@@ -93,7 +107,9 @@ const DEFAULT_BRAND_RULE =
   'Brand rule: keep the brand name "Iropke" / "이롭게" unchanged. Preserve product names (NOVA, SAGE, LUMI, NIX) verbatim.'
 
 const DOMAIN_CONTEXT =
-  'Domain context: iropke is a software / product / design studio. Most source text refers to software development, web products, releases, and tools — interpret ambiguous vocabulary in that frame first.'
+  'Domain context: iropke is a software / product / design studio, but its editorial content spans many subjects — software and web development, internet / web history, design, marketing, business, and culture. ' +
+  'Use the software/product frame ONLY to disambiguate genuinely ambiguous vocabulary; it is NEVER a scope filter. ' +
+  'Translate every passage you are given regardless of subject (history, legal, biography, general narrative prose all included). Never treat any passage as out of scope.'
 
 /**
  * Build the prompt as a (system, user) pair.
@@ -127,7 +143,9 @@ function buildPrompts(req: TranslationRequest): { system: string; user: string }
     glossaryBlock,
     examplesBlock,
     brand,
-    'Return ONLY the translated text. Do not include explanations, quotes, or any prefix like "Translation:".',
+    'Return ONLY the translated text. Do not include explanations, quotes, or any prefix like "Translation:". ' +
+      'Under NO circumstances refuse, ask for confirmation, mention scope/domain/boundaries, say a passage is out of scope, or emit any meta commentary. ' +
+      'The input is always a valid passage to translate — output only its faithful, natural translation in the target language.',
   ]
   const system = systemSections.filter((s): s is string => Boolean(s)).join('\n\n')
 
@@ -243,41 +261,99 @@ export async function translateWithClaude(
 
   const { system, user } = buildPrompts(req)
 
-  // Reserve tokens against the in-process rate limit before issuing the
-  // call. The estimate is conservative; we correct to actual after.
+  const first = await performApiCall(system, user, apiKey)
+
+  // Refusal / meta-reply safety net. The model occasionally returns a
+  // scope-question or explanation instead of a translation (seen on
+  // history/legal passages under a software domain hint). Try ONE hardened
+  // retry — explicitly telling it the prior output was a forbidden refusal
+  // often makes it comply — then fall back to source verbatim so the field
+  // stays coherent rather than leaking an English meta-essay into prod.
+  if (isRefusalResponse(first.translated, req.text)) {
+    const hardenedSystem =
+      system +
+      '\n\nCRITICAL: A previous attempt produced a refusal or meta-reply, which is forbidden. ' +
+      'Output ONLY a faithful, natural translation of the source text below — no commentary, ' +
+      'no questions, no scope/domain remarks. Translation only.'
+    const retry = await performApiCall(hardenedSystem, user, apiKey)
+    const inputSum = first.totalInput + retry.totalInput
+    const outputSum = first.outputTokens + retry.outputTokens
+    if (!isRefusalResponse(retry.translated, req.text)) {
+      return {
+        translated: retry.translated,
+        model: MODEL,
+        usage: { inputTokens: inputSum, outputTokens: outputSum },
+      }
+    }
+    console.warn(
+      `[translate] refusal persisted after retry for ${req.fieldType ?? 'unknown'} field — source verbatim fallback. source="${req.text.slice(0, 60)}…" got="${retry.translated.slice(0, 60)}…"`,
+    )
+    return {
+      translated: req.text,
+      model: MODEL,
+      usage: { inputTokens: inputSum, outputTokens: outputSum },
+    }
+  }
+
+  return {
+    translated: first.translated,
+    model: MODEL,
+    usage: { inputTokens: first.totalInput, outputTokens: first.outputTokens },
+  }
+}
+
+/**
+ * One Anthropic Messages call + parse + rate-limit reservation correction.
+ * Split out of translateWithClaude so the refusal path can retry cheaply.
+ */
+async function performApiCall(
+  system: string,
+  user: string,
+  apiKey: string,
+): Promise<{ translated: string; totalInput: number; outputTokens: number }> {
   const estimated = estimateTokens(system) + estimateTokens(user)
   const reservation = await reserveTokensAndWait(estimated)
 
-  const response = await fetch(ANTHROPIC_API_URL, {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1024,
-      // System block is marked for ephemeral caching. Anthropic caches the
-      // tokens for 5 minutes; within an admin Translate batch all calls to
-      // the same locale × field combination hit the cache (~10x cheaper
-      // and ~85% faster). Below-threshold prompts are silently uncached.
-      system: [
-        {
-          type: 'text',
-          text: system,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages: [{ role: 'user', content: user }],
-    }),
+  const body = JSON.stringify({
+    model: MODEL,
+    max_tokens: 1024,
+    // System block marked for ephemeral caching (5-min TTL). Within a batch
+    // all calls to the same locale × field hit the cache (~10x cheaper).
+    system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: user }],
   })
 
-  if (!response.ok) {
+  // Anthropic returns transient 429 (rate) / 5xx / 529 (overloaded) under
+  // load. These are retryable — exponential backoff before giving up so a
+  // single overloaded blip doesn't fail a whole post / batch (2026-05-20:
+  // 529s during origin remediation).
+  const RETRYABLE = new Set([408, 409, 429, 500, 502, 503, 529])
+  const BACKOFF_MS = [3000, 9000, 20000, 40000]
+  let response: Response | null = null
+  for (let attempt = 0; attempt <= BACKOFF_MS.length; attempt++) {
+    response = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body,
+    })
+    if (response.ok) break
+    const status = response.status
     const errText = await response.text().catch(() => '<no body>')
-    throw new Error(
-      `Anthropic API ${response.status} ${response.statusText}: ${errText}`,
+    if (!RETRYABLE.has(status) || attempt === BACKOFF_MS.length) {
+      throw new Error(`Anthropic API ${status} ${response.statusText}: ${errText}`)
+    }
+    const waitMs = BACKOFF_MS[attempt]
+    console.warn(
+      `[translate] Anthropic ${status} (retryable) — backoff ${waitMs}ms, attempt ${attempt + 1}/${BACKOFF_MS.length}`,
     )
+    await new Promise((r) => setTimeout(r, waitMs))
+  }
+  if (!response || !response.ok) {
+    throw new Error('Anthropic API: no successful response after retries')
   }
 
   const data = (await response.json()) as {
@@ -290,9 +366,6 @@ export async function translateWithClaude(
     }
   }
 
-  // Correct the reservation to actual usage. All three input-token
-  // variants count toward Anthropic's TPM rate limit (cache reads at a
-  // discounted internal rate, but conservatively we record the full sum).
   const uncachedInput = data.usage?.input_tokens ?? 0
   const cacheCreation = data.usage?.cache_creation_input_tokens ?? 0
   const cacheRead = data.usage?.cache_read_input_tokens ?? 0
@@ -301,60 +374,57 @@ export async function translateWithClaude(
 
   const text = data.content?.find((c) => c.type === 'text')?.text ?? ''
   const translated = text.trim()
-
   if (!translated) {
     throw new Error('Anthropic API 가 빈 번역 결과를 반환했습니다.')
   }
 
-  // Safety net: when the model refuses to translate (asks for clarification,
-  // explains that the input is empty / table-only, etc.) it leaks meta text
-  // into the field. Heuristic detection on the response → fall back to the
-  // original source verbatim so the post body stays coherent.
-  if (isRefusalResponse(translated, req.text)) {
-    console.warn(
-      `[translate] refusal detected for ${req.fieldType ?? 'unknown'} field — falling back to source verbatim. source="${req.text.slice(0, 60)}…" got="${translated.slice(0, 60)}…"`,
-    )
-    return {
-      translated: req.text,
-      model: MODEL,
-      usage: {
-        inputTokens: totalInput,
-        outputTokens: data.usage?.output_tokens ?? 0,
-      },
-    }
-  }
-
-  return {
-    translated,
-    model: MODEL,
-    usage: {
-      inputTokens: totalInput,
-      outputTokens: data.usage?.output_tokens ?? 0,
-    },
-  }
+  return { translated, totalInput, outputTokens: data.usage?.output_tokens ?? 0 }
 }
 
-const REFUSAL_PATTERNS: readonly RegExp[] = [
-  /I notice/i,
-  /Could you (please )?provide/i,
-  /please provide the (actual|english|source)/i,
-  /I'?m ready to translate/i,
-  /appears to be (empty|a table|a markdown)/i,
-  /no (translatable|actual) (content|text)/i,
+/**
+ * STRONG markers — phrases that essentially never occur in a faithful
+ * translation (scope-refusal / domain-boundary essays). Any match = refusal,
+ * NO length gate (long source passages can produce refusals shorter than 2×).
+ * Origin history/legal incident 2026-05-20 (first-online-hacking).
+ */
+const STRONG_REFUSAL_PATTERNS: readonly RegExp[] = [
+  /falls? outside/i,
+  /outside (the |your )?(domain|scope|context)/i,
+  /domain context/i,
+  /out[- ]of[- ]scope/i,
+  /I appreciate (the|your) request/i,
+  /intended passage/i,
+  /boundary awareness/i,
+  /if this is a test/i,
+  /I should translate within/i,
+  /no connection to (software|product|the)/i,
+  /this passage (isn'?t|is not) about/i,
+  /flagging it as/i,
+  /per your instructions/i,
   /I cannot translate/i,
   /there is nothing to translate/i,
 ]
 
 /**
+ * SOFT markers — can appear briefly in legitimate text; require the response
+ * to also be meaningfully longer than the source to count as a refusal.
+ */
+const SOFT_REFUSAL_PATTERNS: readonly RegExp[] = [
+  /I notice/i,
+  /Could you (please )?(provide|confirm|clarify)/i,
+  /please provide (the|a|me)/i,
+  /I'?m ready to translate/i,
+  /appears to be (empty|a table|a markdown)/i,
+  /no (translatable|actual) (content|text)/i,
+]
+
+/**
  * Heuristic: detect when the model's response is a refusal/meta reply rather
- * than a translation. Triggers when (a) any known refusal phrase is present
- * AND (b) the response is meaningfully longer than the source (refusals are
- * typically 5–20× the source length).
+ * than a translation. STRONG markers fire unconditionally; SOFT markers need
+ * the response to be notably longer than the source (refusal essays are).
  */
 function isRefusalResponse(response: string, source: string): boolean {
-  const hasMarker = REFUSAL_PATTERNS.some((p) => p.test(response))
-  if (!hasMarker) return false
-  // Don't false-positive when the source itself contains one of these phrases
-  // (e.g. a doc that legitimately discusses refusals).
-  return response.length > Math.max(60, source.length * 2)
+  if (STRONG_REFUSAL_PATTERNS.some((p) => p.test(response))) return true
+  if (!SOFT_REFUSAL_PATTERNS.some((p) => p.test(response))) return false
+  return response.length > Math.max(80, source.length * 1.5)
 }

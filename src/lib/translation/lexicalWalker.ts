@@ -100,6 +100,115 @@ const PLACEHOLDER_CLOSE = '⟫'
 
 /** Lexical text-format bitfield: 1=bold, 2=italic, 4=strikethrough, 8=underline, 16=code. */
 const LEXICAL_FORMAT_CODE = 16
+const LEXICAL_FORMAT_BOLD = 1
+
+function isBoldFormatted(node: LexicalNode): boolean {
+  if (node.type !== 'text') return false
+  const fmt = node.format
+  if (typeof fmt !== 'number') return false
+  return (fmt & LEXICAL_FORMAT_BOLD) === LEXICAL_FORMAT_BOLD
+}
+
+/**
+ * The evergreen TL;DR convention: the lead paragraph starts with a bold
+ * "TL;DR" text node followed by a ":" prefix on the next text node. This is
+ * LOCALE-AGNOSTIC by design — the DOM keeps the literal "TL;DR:" in every
+ * language so AI crawlers extract it and PostDetail.tsx can visually hide it.
+ * When translating we must therefore NEVER translate the "TL;DR" label and
+ * MUST preserve the leading colon, otherwise the frontend hide breaks and the
+ * label leaks visibly (2026-05-20 ko incident).
+ */
+function isTldrParagraph(node: LexicalNode): boolean {
+  if (node.type !== 'paragraph' || !Array.isArray(node.children)) return false
+  const k0 = node.children[0]
+  const k1 = node.children[1]
+  if (!k0 || k0.type !== 'text' || !isBoldFormatted(k0) || k0.text !== 'TL;DR') {
+    return false
+  }
+  return !!k1 && k1.type === 'text' && typeof k1.text === 'string' && /^\s*:/.test(k1.text)
+}
+
+function asNodeArray(v: unknown): LexicalNode[] {
+  return Array.isArray(v) ? (v as LexicalNode[]) : []
+}
+
+/**
+ * Translate one plain string field (block caption / cell / qna text / label).
+ * Skips empty / untranslatable values. Updates usage like a text node.
+ */
+async function translateField(
+  value: unknown,
+  translate: TranslateText,
+  usage: WalkerUsage,
+): Promise<unknown> {
+  if (typeof value !== 'string' || value.trim().length === 0) return value
+  if (isUntranslatable(value)) return value
+  const r = await translate(value)
+  usage.inputTokens += r.inputTokens
+  usage.outputTokens += r.outputTokens
+  usage.nodes += 1
+  return r.translated && r.translated.length > 0 ? r.translated : value
+}
+
+/**
+ * Translate the text-bearing fields of a Payload BlocksFeature node
+ * (`{ type:'block', fields:{ blockType, ... } }`). Per policy (2026-05-20):
+ * translate editorialTable / qnaList / caption / label text, but NEVER
+ * codeBlock.code or rawHtml.html. Unknown / structured blocks (pricingCards,
+ * featureCards, codeBlock) are left untouched.
+ */
+async function translateBlockFields(
+  node: LexicalNode,
+  translate: TranslateText,
+  usage: WalkerUsage,
+): Promise<void> {
+  const f = node.fields as Record<string, unknown> | undefined
+  if (!f) return
+  const bt = f.blockType
+
+  if (bt === 'editorialTable') {
+    f.caption = await translateField(f.caption, translate, usage)
+    for (const h of asNodeArray(f.headers)) {
+      if (h && typeof h.text === 'string') h.text = (await translateField(h.text, translate, usage)) as string
+    }
+    for (const row of asNodeArray(f.rows)) {
+      for (const cell of asNodeArray((row as Record<string, unknown>)?.cells)) {
+        if (cell && typeof cell.text === 'string') {
+          cell.text = (await translateField(cell.text, translate, usage)) as string
+        }
+      }
+    }
+    return
+  }
+
+  if (bt === 'qnaList') {
+    for (const it of asNodeArray(f.items)) {
+      if (it && typeof it.text === 'string') {
+        it.text = (await translateField(it.text, translate, usage)) as string
+      }
+    }
+    return
+  }
+
+  if (bt === 'editorialMedia') {
+    f.caption = await translateField(f.caption, translate, usage)
+    f.alt = await translateField(f.alt, translate, usage)
+    return
+  }
+
+  if (bt === 'videoEmbed') {
+    f.caption = await translateField(f.caption, translate, usage)
+    return
+  }
+
+  if (bt === 'rawHtml') {
+    // Translate the optional label only — NEVER the html source (policy).
+    f.label = await translateField(f.label, translate, usage)
+    return
+  }
+
+  // codeBlock / pricingCards / featureCards / unknown → leave untouched.
+}
 
 // ── Public entry point ───────────────────────────────────────────────────
 
@@ -112,6 +221,33 @@ export async function translateLexicalRoot(
   if (cloned.root) {
     await walkNode(cloned.root, translate, usage)
   }
+  return { translated: cloned, usage }
+}
+
+/**
+ * Blocks-only pass: translate ONLY Payload block fields (table cells/headers/
+ * caption, qna text, captions, rawHtml label), leaving every paragraph/text
+ * node untouched. Used to remediate already-translated posts whose prose may
+ * carry manual edits — we must not re-translate the body, only the blocks the
+ * original walker skipped (2026-05-20 origin table fix).
+ */
+export async function translateLexicalBlocksOnly(
+  source: LexicalRoot,
+  translate: TranslateText,
+): Promise<{ translated: LexicalRoot; usage: WalkerUsage }> {
+  const cloned = structuredClone(source) as LexicalRoot
+  const usage: WalkerUsage = { inputTokens: 0, outputTokens: 0, nodes: 0 }
+  const recurse = async (node: LexicalNode): Promise<void> => {
+    if (!node || typeof node !== 'object') return
+    if (node.type === 'block') {
+      await translateBlockFields(node, translate, usage)
+      return
+    }
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) await recurse(child)
+    }
+  }
+  if (cloned.root) await recurse(cloned.root)
   return { translated: cloned, usage }
 }
 
@@ -345,7 +481,38 @@ async function walkNode(
   translate: TranslateText,
   usage: WalkerUsage,
 ): Promise<void> {
+  // Payload BlocksFeature node — translate its text-bearing fields (table
+  // cells, qna, captions, label) but never code/html. Block nodes carry data
+  // in `fields`, not `children`, so the generic recurse below would skip them.
+  if (node.type === 'block') {
+    await translateBlockFields(node, translate, usage)
+    return
+  }
+
   if (BATCH_CONTAINER_TYPES.has(node.type)) {
+    // Lead TL;DR paragraph: keep the bold "TL;DR" label + leading ":" prefix
+    // verbatim (locale-agnostic convention), translate only the answer.
+    if (isTldrParagraph(node)) {
+      const kids = node.children as LexicalNode[]
+      const c1 = kids[1]
+      const c1Text = typeof c1.text === 'string' ? c1.text : ''
+      const prefix = c1Text.match(/^\s*:\s*/)?.[0] ?? ':'
+      c1.text = c1Text.slice(prefix.length)
+
+      const items: BatchItem[] = []
+      const deferred: LexicalNode[] = []
+      for (const child of kids.slice(1)) {
+        collectBatchItems(child, items, deferred, false)
+      }
+      await translateBatch(items, translate, usage)
+      for (const block of deferred) await walkNode(block, translate, usage)
+
+      // Re-attach the colon prefix to the (now translated) first answer node.
+      c1.text = prefix + (typeof c1.text === 'string' ? c1.text : '')
+      // kids[0] ("TL;DR", bold) intentionally left untouched.
+      return
+    }
+
     const items: BatchItem[] = []
     const deferredBlocks: LexicalNode[] = []
     collectBatchItems(node, items, deferredBlocks, true)

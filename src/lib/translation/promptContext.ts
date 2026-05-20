@@ -59,6 +59,13 @@ export const UNIVERSAL_TRANSLATION_PRINCIPLE =
   'When no natural target-language word exists for a term, KEEP THE ENGLISH WORD verbatim rather than ' +
   'forcing an awkward translation — a preserved English term is usually more natural than a strained one. ' +
   'Preserve proper nouns, product/brand names, code, and technical identifiers as-is. ' +
+  'CRITICAL — boundary whitespace: when the source text has leading or trailing whitespace (a single space, ' +
+  'multiple spaces, or other whitespace), preserve that EXACT leading/trailing whitespace in your output. ' +
+  'Do NOT trim, normalize, or alter boundary whitespace. The input may be a fragment of a larger sentence ' +
+  '(broken up by inline links / bold spans / inline code), and the surrounding spaces are load-bearing — ' +
+  'stripping them causes adjacent fragments to collide in the rendered HTML (e.g. "ranking" + " Google" ' +
+  'must NOT become "rankingGoogle"). When translating around inline-element placeholders (⟪0⟫ ⟪1⟫ ...), ' +
+  'keep the spacing that surrounds each placeholder. ' +
   'Translate ALL natural-language content you are given; this is editorial translation across many domains ' +
   '(technology, web/internet history, design, business, culture) — domain hints are only disambiguation aids, ' +
   'NEVER a reason to refuse, question scope, ask for clarification, or explain yourself.'
@@ -69,7 +76,7 @@ export const UNIVERSAL_TRANSLATION_PRINCIPLE =
 // ─────────────────────────────────────────────────────────────────────────
 
 export const STYLE_GUIDE: Partial<Record<Locale, string>> = {
-  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English.',
+  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. AVOID ARCHAIC 한자어 that modern Korean readers do not use — examples: "선조" (use "전신" / "원형" / "초기 형태" for "predecessor / precursor"), "고로" (use "그래서" / "따라서"), "여하튼" (use "어쨌든" / "아무튼"), "왈" (use "말한다" / "말하기를"), "차치하고" (use "제쳐두고" / "차지하고"). If in doubt, choose the word a 2026 newspaper editor would use, not a 1970s textbook. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English. WHITESPACE: when your input fragment has a leading or trailing space (because it sits next to a bold span, link, or inline code in the parent paragraph), reproduce that exact leading/trailing space in your output — Korean does not need spaces between sentences but it DOES need spaces between adjacent inline elements in the rendered HTML, so do not strip boundary whitespace.',
   ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Japanese tech readers expect these terms in English.',
   zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Chinese tech readers expect these terms in English in editorial prose.',
   de: 'Use the formal Sie-Form when addressing the reader. Tone: editorial and professional, similar to c\'t or heise.de. Avoid Du-Form, marketing exclamations, and over-translation of established English tech terms.',
@@ -107,6 +114,35 @@ const SOFTWARE_CONTEXT_NOTE =
 export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
   // ── CJK ────────────────────────────────────────────────────────────────
   ko: [
+    {
+      source: 'Answer Engine Optimization / AEO',
+      target: 'Answer Engine Optimization (AEO) / AEO (영문 보존)',
+      note:
+        'KEEP IN ENGLISH VERBATIM — "AEO" is an established industry term (parallel to "SEO") that Korean ' +
+        'marketing/tech readers expect in English. First mention may spell out as "Answer Engine Optimization (AEO)"; ' +
+        'subsequent mentions use "AEO" alone. NEVER translate as "답변 엔진 최적화" — this is a stiff calque that ' +
+        'no Korean industry source uses. Same policy as "SEO" / "GEO" / "LLM" — preserve as-is.',
+    },
+    {
+      source: 'GEO / Generative Engine Optimization',
+      target: 'GEO / Generative Engine Optimization (영문 보존)',
+      note:
+        'KEEP IN ENGLISH VERBATIM — industry term coined 2023-2024 (Gartner). Use "GEO" or spell out in English. ' +
+        'NEVER "생성 엔진 최적화" / "생성형 엔진 최적화".',
+    },
+    {
+      source: 'SEO',
+      target: 'SEO (영문 보존)',
+      note: 'KEEP IN ENGLISH VERBATIM. NEVER "검색 엔진 최적화" in editorial prose.',
+    },
+    {
+      source: 'predecessor / precursor',
+      target: '전신 / 원형 / 초기 형태 / 토대',
+      note:
+        'NOT 선조 — "선조" is archaic and means "ancestor" in a genealogical sense. For "structural precursor", ' +
+        '"intellectual ancestor", "predecessor of X" in tech/history writing, use 전신 (most natural for direct ' +
+        'lineage), 원형 (when emphasizing prototype/template role), 초기 형태 (early form), or 토대 (foundation).',
+    },
     {
       source: 'ship',
       target: '출시 (런칭 의미) / 적용 / 반영 (엔지니어 코드 적용 의미)',
@@ -476,6 +512,22 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     {
       en: 'The migration is incremental and the gains compound.',
       target: '마이그레이션은 점진적이며 실행에 따른 이점이 누적됩니다.',
+    },
+    // AEO — keep English verbatim, NOT "답변 엔진 최적화"
+    {
+      en: 'Answer Engine Optimization (AEO) is the practice of structuring page content so AI engines extract and cite your text.',
+      target:
+        'Answer Engine Optimization (AEO) 는 AI 엔진이 페이지 콘텐츠를 추출하고 인용하도록 구조를 잡는 작업입니다.',
+    },
+    // "predecessor" / "precursor" — NOT 선조 (archaic, genealogical)
+    {
+      en: 'Google launched what is the structural precursor of all AI answer engines.',
+      target: 'Google은 모든 AI 답변 엔진의 구조적 전신이라 할 만한 기능을 출시했습니다.',
+    },
+    // Boundary whitespace preservation — fragment with leading space before "Google"
+    {
+      en: ' Google launched the feature in November 2020.',
+      target: ' Google은 2020년 11월에 그 기능을 출시했습니다.',
     },
   ],
   ja: [

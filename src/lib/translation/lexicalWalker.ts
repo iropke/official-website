@@ -147,7 +147,8 @@ async function translateField(
   usage.inputTokens += r.inputTokens
   usage.outputTokens += r.outputTokens
   usage.nodes += 1
-  return r.translated && r.translated.length > 0 ? r.translated : value
+  if (!r.translated || r.translated.length === 0) return value
+  return preserveBoundaryWhitespace(value, r.translated)
 }
 
 /**
@@ -358,6 +359,29 @@ function splitByPlaceholders(
 }
 
 /**
+ * Restore the original leading/trailing whitespace pattern onto a translated
+ * fragment. Language models routinely strip boundary whitespace when
+ * translating short fragments — harmless for standalone paragraphs but
+ * destructive in per-item / single-item modes where the fragment is part of
+ * a larger paragraph (bold span + regular text, link + regular text, etc.):
+ * stripping the leading space on "Google launched..." after a preceding
+ * bold "Ranking." span produces rendered HTML "순위 매기기Google이..." with
+ * no space (2026-05-21 AEO ko incident).
+ *
+ * Strategy: take the original's leading/trailing whitespace verbatim,
+ * strip whatever leading/trailing whitespace the model emitted, and
+ * sandwich the model's body between the originals. This guarantees the
+ * boundary contract regardless of model behavior.
+ */
+function preserveBoundaryWhitespace(original: string, translated: string): string {
+  if (translated.length === 0) return translated
+  const leadingWs = original.match(/^\s*/)?.[0] ?? ''
+  const trailingWs = original.match(/\s*$/)?.[0] ?? ''
+  const body = translated.replace(/^\s+|\s+$/g, '')
+  return leadingWs + body + trailingWs
+}
+
+/**
  * Translate every translatable item individually (v1 behavior). Used as a
  * fallback when batching fails to preserve placeholders.
  */
@@ -369,7 +393,7 @@ async function translatePerItem(
   for (const it of items) {
     if (it.role !== 'translatable') continue
     const result = await translate(it.original)
-    it.node.text = result.translated
+    it.node.text = preserveBoundaryWhitespace(it.original, result.translated)
     usage.inputTokens += result.inputTokens
     usage.outputTokens += result.outputTokens
     usage.nodes += 1
@@ -391,10 +415,13 @@ async function translateBatch(
   if (translatableCount === 0) return
 
   // Special case — single translatable item and nothing to preserve:
-  // skip the placeholder machinery, translate directly.
+  // skip the placeholder machinery, translate directly. Even for a "single"
+  // item, the text may carry leading/trailing whitespace from the source
+  // (e.g. a fragment that sits next to a link in the parent paragraph) —
+  // preserve that boundary whitespace to prevent inline-element collisions.
   if (items.length === 1 && items[0].role === 'translatable') {
     const result = await translate(items[0].original)
-    items[0].node.text = result.translated
+    items[0].node.text = preserveBoundaryWhitespace(items[0].original, result.translated)
     usage.inputTokens += result.inputTokens
     usage.outputTokens += result.outputTokens
     usage.nodes += 1
@@ -455,7 +482,9 @@ async function translateBatch(
   // Assign fragments to translatable items in tree order. For each
   // preserve item we step past one fragment boundary; translatable items
   // receive the fragment for the current "slot" (number of placeholders
-  // seen so far).
+  // seen so far). Boundary whitespace around each placeholder MUST survive
+  // — the fragment may have been trimmed by the model around the marker,
+  // so we restore the original leading/trailing whitespace pattern.
   let placeholdersSeen = 0
   for (const it of items) {
     if (it.role === 'preserve') {
@@ -464,11 +493,8 @@ async function translateBatch(
     }
     const fragIdx = placeholdersSeen
     const newText = fragments[fragIdx]
-    // Defensive: if the model collapsed a translatable fragment to empty
-    // while the source was non-empty, keep the source rather than wiping
-    // the node. (Real empties would have been filtered earlier.)
     if (typeof newText === 'string' && newText.length > 0) {
-      it.node.text = newText
+      it.node.text = preserveBoundaryWhitespace(it.original, newText)
     }
     usage.nodes += 1
   }
@@ -537,7 +563,7 @@ async function walkNode(
       !isCodeFormatted(node)
     ) {
       const result = await translate(raw)
-      node.text = result.translated
+      node.text = preserveBoundaryWhitespace(raw, result.translated)
       usage.inputTokens += result.inputTokens
       usage.outputTokens += result.outputTokens
       usage.nodes += 1

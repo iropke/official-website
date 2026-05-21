@@ -76,7 +76,7 @@ export const UNIVERSAL_TRANSLATION_PRINCIPLE =
 // ─────────────────────────────────────────────────────────────────────────
 
 export const STYLE_GUIDE: Partial<Record<Locale, string>> = {
-  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. AVOID ARCHAIC 한자어 that modern Korean readers do not use — examples: "선조" (use "전신" / "원형" / "초기 형태" for "predecessor / precursor"), "고로" (use "그래서" / "따라서"), "여하튼" (use "어쨌든" / "아무튼"), "왈" (use "말한다" / "말하기를"), "차치하고" (use "제쳐두고" / "차지하고"). If in doubt, choose the word a 2026 newspaper editor would use, not a 1970s textbook. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English. WHITESPACE: when your input fragment has a leading or trailing space (because it sits next to a bold span, link, or inline code in the parent paragraph), reproduce that exact leading/trailing space in your output — Korean does not need spaces between sentences but it DOES need spaces between adjacent inline elements in the rendered HTML, so do not strip boundary whitespace.',
+  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. AVOID ARCHAIC 한자어 that modern Korean readers do not use — examples: "선조" (use "전신" / "원형" / "초기 형태" for "predecessor / precursor"), "고로" (use "그래서" / "따라서"), "여하튼" (use "어쨌든" / "아무튼"), "왈" (use "말한다" / "말하기를"), "차치하고" (use "제쳐두고" / "차지하고"). If in doubt, choose the word a 2026 newspaper editor would use, not a 1970s textbook. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English. ACRONYMS: PRESERVE English acronyms (UI / UX / AI / ML / API / URL / CSS / HTML / JS / TS / SEO / AEO / GEO / CMS / CRM / ERP / SaaS / B2B / B2C / GDPR / KPI / ROI / OKR / TCO / RFP / RAG / LLM / NLP / WCAG / JSON-LD / E-E-A-T etc.) VERBATIM in Korean prose. NEVER phonetically transliterate to Hangul (no 유아이 / 에이아이 / 에이피아이 / 에스이오 / 지디피알). NEVER swap an English acronym for its expanded Korean meaning ("AI" stays as "AI", NOT "인공지능"; "SEO" stays as "SEO", NOT "검색엔진최적화"). A first-mention inline gloss is acceptable when natural — "AI (인공지능)" once, then "AI" thereafter — but the acronym itself is never replaced by the meaning. FIRST PERSON: when the source uses "we / our" referring to Iropke (the publisher), render as 저희 / 이롭게 — NOT 우리. 우리 reads either casual or inclusive-of-the-reader in formal editorial; 저희 keeps the polite editorial distance. WHITESPACE: when your input fragment has a leading or trailing space (because it sits next to a bold span, link, or inline code in the parent paragraph), reproduce that exact leading/trailing space in your output — Korean does not need spaces between sentences but it DOES need spaces between adjacent inline elements in the rendered HTML, so do not strip boundary whitespace.',
   ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Japanese tech readers expect these terms in English.',
   zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Chinese tech readers expect these terms in English in editorial prose.',
   de: 'Use the formal Sie-Form when addressing the reader. Tone: editorial and professional, similar to c\'t or heise.de. Avoid Du-Form, marketing exclamations, and over-translation of established English tech terms.',
@@ -204,6 +204,107 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     { source: 'SDK', target: 'SDK', note: 'keep verbatim' },
     { source: 'this week', target: '이번 주' },
     { source: 'next week', target: '다음 주' },
+
+    // ── Audit / review / inspection — editorial context, NOT 감사 / 감시 ────
+    {
+      source: 'audit',
+      target: '점검 / 진단 / 검토 (SEO·content·performance·accessibility·UX·brand 맥락) — 감사 (financial·compliance·회계 맥락만)',
+      note:
+        'CRITICAL — context-dependent and HEAVILY mistranslated. ' +
+        '(a) For SEO / content / performance / accessibility / UX / brand audits in editorial prose, ALWAYS render as 점검 / 진단 / 검토. ' +
+        'NEVER 감사 in these contexts — 감사 carries a financial-audit / internal-investigation nuance that reads wrong for an SEO or content review. ' +
+        'NEVER 감시 — 감시 means surveillance (a completely different word, full mistranslation). ' +
+        '(b) For genuine financial / regulatory / compliance audits (회계 감사, 내부 감사), 감사 IS correct and should be used. ' +
+        '(c) For security audits, prefer 보안 점검; 보안 감사 is tolerated but less natural in editorial prose. ' +
+        'Inflected forms ("auditing", "audited", "auditor") follow the same context rule.',
+    },
+    {
+      source: 'review',
+      target: '검토 (일반) / 리뷰 (code · design 산출물 맥락)',
+      note: 'NOT 감사 — review ≠ audit. General "review" is 검토; code review / design review use 리뷰.',
+    },
+    { source: 'assessment', target: '평가 / 진단' },
+    { source: 'inspection', target: '점검 / 검사' },
+
+    // ── Business / strategy vocabulary ─────────────────────────────────
+    {
+      source: 'playbook',
+      target: '실행 지침 / 운영 가이드 (preferred) / 플레이북 (acceptable but imported feel)',
+      note:
+        'Prefer 실행 지침 or 운영 가이드 for editorial consistency. 플레이북 is a valid transliteration but reads as borrowed jargon — use only when the source emphasizes the imported nuance.',
+    },
+    {
+      source: 'framework',
+      target: '체계 / 틀 / 프레임 (사고·전략 맥락) — 프레임워크 (tech library 맥락만: React 프레임워크, Next.js 프레임워크)',
+      note:
+        'CRITICAL — context-dependent. (a) Strategic / mental / conceptual "framework" (decision framework, strategic framework, mental framework) → 체계 / 틀 / 프레임. (b) Technical library / runtime (React, Vue, Next.js, Django) → 프레임워크. Picking the wrong sense makes editorial prose read as a code tutorial.',
+    },
+    {
+      source: 'posture',
+      target: '태세 / 대응 체계',
+      note: 'NOT 자세 — 자세 means physical body posture, wrong nuance in business prose. Security posture = 보안 태세; brand posture = 브랜드 태세.',
+    },
+    {
+      source: 'stewardship',
+      target: '운영 책임 / 관리 책임',
+      note: 'NOT 집사 / 집사직 — those are literal "butler / butlership" translations that read absurd in business prose. Brand stewardship = 브랜드 운영 책임; data stewardship = 데이터 관리 책임.',
+    },
+    {
+      source: 'gate',
+      target: '게이트 / 검수 단계 / 체크포인트',
+      note: 'For quality gate / handoff gate / approval gate. NOT 관문 — 관문 is literal and archaic, reads as a physical gateway, not a process checkpoint.',
+    },
+    {
+      source: 'stack',
+      target: '스택 / 기술 스택 (IT 맥락) — 구성 / 조합 (일반 맥락)',
+      note: 'Context-dependent. Tech "stack" (frontend stack, deployment stack, MarTech stack) → 스택 / 기술 스택. General "stack of priorities" / "stack of options" → 구성 / 조합.',
+    },
+    {
+      source: 'rollout',
+      target: '단계적 도입 / 전환 / 배포',
+      note: '롤아웃 is acceptable only in IT release context. In business / strategy prose (feature rollout, market rollout, policy rollout), prefer 단계적 도입 or 전환.',
+    },
+    {
+      source: 'trade-off',
+      target: '상충 관계 / 트레이드오프',
+      note: 'NOT 거래 — 거래 is a literal mistranslation; trade-off is not a transaction. 상충 관계 is most editorial; 트레이드오프 is acceptable in tech/PM contexts.',
+    },
+    {
+      source: 'takeaway',
+      target: '핵심 / 시사점 / 요점',
+      note: 'NOT 테이크아웃 — 테이크아웃 is food takeaway, a completely different word. "Key takeaway" = 핵심 시사점; "main takeaways" = 주요 요점.',
+    },
+    { source: 'deliverable', target: '산출물 / 결과물' },
+    {
+      source: 'scope',
+      target: '범위 / 스코프',
+      note: 'Project scope context. 범위 is most natural editorial; 스코프 is acceptable in PM / engineering jargon.',
+    },
+    { source: 'scope creep', target: '범위 확장 / 스코프 크리프', note: 'Both are used; pick the one that matches surrounding register.' },
+    {
+      source: 'buy-in',
+      target: '승인 / 공감 확보 / 동의 확보',
+      note: 'NOT 구매 — 구매 is literal "purchase" and is a complete mistranslation. Stakeholder buy-in = 이해관계자 동의 확보; executive buy-in = 임원 승인.',
+    },
+    { source: 'roadmap', target: '로드맵' },
+    {
+      source: 'baseline',
+      target: '기준선 / 베이스라인',
+      note: 'Tech baseline (performance baseline, browser-support Baseline, perf baseline) → 베이스라인. General reference baseline (baseline measurement, baseline year) → 기준선.',
+    },
+    { source: 'benchmark', target: '벤치마크 / 기준 척도' },
+
+    // ── Company / brand vocabulary ─────────────────────────────────────
+    {
+      source: 'enterprise',
+      target: '엔터프라이즈 / 기업',
+      note: 'Adjective ("enterprise web", "enterprise CTO", "enterprise build") — both are acceptable; pick whichever flows better in the sentence and KEEP THE CHOICE CONSISTENT within a single article.',
+    },
+    {
+      source: 'in-house',
+      target: '사내 / 인하우스',
+      note: 'For in-house design / dev / brand team. 사내 is more native Korean; 인하우스 is industry jargon. Either is acceptable — pick by surrounding register.',
+    },
   ],
   ja: [
     {
@@ -528,6 +629,50 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     {
       en: ' Google launched the feature in November 2020.',
       target: ' Google은 2020년 11월에 그 기능을 출시했습니다.',
+    },
+    // "audit" — editorial SEO/content/UX context → 점검 / 진단, NEVER 감사 / 감시
+    {
+      en: 'Run a content audit before the next planning cycle.',
+      target: '다음 기획 사이클 전에 콘텐츠 점검을 진행합니다.',
+    },
+    {
+      en: 'The accessibility audit surfaced three blocking issues.',
+      target: '접근성 점검에서 세 가지 차단성 이슈가 발견되었습니다.',
+    },
+    // Enterprise altitude framing — typical altitude-correct H2 phrasing
+    {
+      en: 'Diagnostic checklist for the next planning cycle',
+      target: '차기 기획 사이클을 위한 진단 체크리스트',
+    },
+    // "playbook" — 실행 지침 (preferred over 플레이북)
+    {
+      en: 'This playbook is the operating model for marketing-led growth.',
+      target: '이 실행 지침은 마케팅 주도 성장을 위한 운영 모델입니다.',
+    },
+    // "posture" — 태세, NOT 자세
+    {
+      en: 'The security posture must be re-evaluated each year.',
+      target: '보안 태세는 매년 재평가해야 합니다.',
+    },
+    // "stewardship" — 운영 책임, NOT 집사
+    {
+      en: 'Brand consistency is an act of stewardship, not policing.',
+      target: '브랜드 일관성은 단속이 아니라 운영 책임의 한 형태입니다.',
+    },
+    // "buy-in" — 승인 / 동의 확보, NOT 구매
+    {
+      en: 'Executive buy-in is the bottleneck on every enterprise rebuild.',
+      target: '엔터프라이즈 재구축에서 임원 승인은 매번 병목 지점입니다.',
+    },
+    // "we / our" referring to Iropke → 저희 (NOT 우리)
+    {
+      en: 'Our team has shipped this pattern across enterprise builds.',
+      target: '저희 팀은 엔터프라이즈 빌드 전반에 이 패턴을 적용해 왔습니다.',
+    },
+    // "framework" — context split: strategic 체계 vs technical 프레임워크
+    {
+      en: 'This decision framework helps leadership prioritize cross-functional bets.',
+      target: '이러한 의사결정 체계는 리더십이 부서 간 투자 우선순위를 정하는 데 도움이 됩니다.',
     },
   ],
   ja: [

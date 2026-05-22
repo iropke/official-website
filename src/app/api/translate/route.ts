@@ -255,12 +255,12 @@ export async function POST(req: NextRequest) {
           const root = raw as LexicalRoot
           if (!root.root) continue
 
-          const { translated, usage } = await translateLexicalRoot(root, async (text, context) => {
+          const { translated, usage } = await translateLexicalRoot(root, async (text, context, kind) => {
             const r = await translateWithClaude({
               text,
               sourceLocale,
               targetLocale: locale,
-              fieldType: 'content',
+              fieldType: kind ?? 'content',
               context,
             })
             return {

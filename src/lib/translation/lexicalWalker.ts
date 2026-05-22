@@ -77,6 +77,12 @@ export type TranslateText = (
    * references (demonstratives, elided subjects). Never translated/emitted.
    */
   context?: string,
+  /**
+   * Field kind hint. 'content' (default) for body passages; 'label' for
+   * standalone block fields (table cells/headers, captions, qna text) so the
+   * model uses the short-label prompt and does not refuse a terse cell.
+   */
+  kind?: 'content' | 'label',
 ) => Promise<{
   translated: string
   inputTokens: number
@@ -162,7 +168,10 @@ async function translateField(
 ): Promise<unknown> {
   if (typeof value !== 'string' || value.trim().length === 0) return value
   if (isUntranslatable(value)) return value
-  const r = await translate(value)
+  // Block fields (table cells/headers, captions, qna text) are standalone
+  // labels — use the 'label' prompt so the model translates a terse cell
+  // directly instead of refusing it for "lack of context".
+  const r = await translate(value, undefined, 'label')
   usage.inputTokens += r.inputTokens
   usage.outputTokens += r.outputTokens
   usage.nodes += 1
@@ -440,7 +449,10 @@ function splitBatchByMarkers(text: string, itemCount: number): string[] | null {
  * AEO incident). They must never reach the rendered page.
  */
 function stripStrayMarkers(text: string): string {
-  return text.replace(/⟪\d+⟫/g, '')
+  if (!/⟪\d+⟫/.test(text)) return text
+  // Removing a marker that sat between spaces leaves a double space — collapse
+  // runs of spaces back to one (only touches text that actually had markers).
+  return text.replace(/⟪\d+⟫/g, '').replace(/ {2,}/g, ' ')
 }
 
 function preserveBoundaryWhitespace(original: string, translated: string): string {
@@ -582,22 +594,38 @@ async function translateBatch(
     }
   }
 
-  // Duplication guard — when a text-code-text span reorders around the code
-  // for SOV word order, the model sometimes translates the clause twice and
-  // places it in two slots; redistributing would render it twice (2026-05-23
-  // p32 incident). If one translatable slot's content is wholly contained in
-  // another's, fall back to per-item.
-  const tslots = items
-    .map((it, i) => ({ role: it.role, text: clean[i].trim() }))
-    .filter((s) => s.role === 'translatable' && s.text.length >= 12)
-  for (let a = 0; a < tslots.length; a++) {
-    for (let b = 0; b < tslots.length; b++) {
-      if (a !== b && tslots[b].text.includes(tslots[a].text)) {
-        console.warn('[lexicalWalker] duplicated slot content — falling back to per-item.')
-        await translatePerItem(items, translate, usage, passageSource)
-        return
-      }
+  // Duplication / code-leak guard. When a text-code-text span reorders around
+  // the inline code for SOV word order, the model sometimes translates the
+  // clause twice and/or copies the code identifier into the surrounding text
+  // (2026-05-23 p32 incident). Two detectable signatures:
+  //  (1) one translatable slot's trimmed text is wholly inside another's;
+  //  (2) an inline-code identifier (10+ chars) appears verbatim in a
+  //      translatable slot — a code node's text must never reach plain text.
+  // Either way, fall back to per-item rather than render duplicated content.
+  let duplicated = false
+  const tIdx = items
+    .map((_, i) => i)
+    .filter((i) => items[i].role === 'translatable' && clean[i].trim().length >= 12)
+  for (const a of tIdx) {
+    for (const b of tIdx) {
+      if (a !== b && clean[b].includes(clean[a].trim())) duplicated = true
     }
+  }
+  const codeIds = items
+    .filter((it) => it.role === 'preserve')
+    .map((it) => it.original.trim())
+    .filter((t) => t.length >= 10)
+  for (const id of codeIds) {
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].role === 'translatable' && clean[i].includes(id)) duplicated = true
+    }
+  }
+  if (duplicated) {
+    console.warn(
+      '[lexicalWalker] duplicated / code-leaked slot content — falling back to per-item.',
+    )
+    await translatePerItem(items, translate, usage, passageSource)
+    return
   }
 
   // Redistribute slots onto the original nodes. The model placed

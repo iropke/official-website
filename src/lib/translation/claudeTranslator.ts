@@ -432,10 +432,11 @@ const STRONG_REFUSAL_PATTERNS: readonly RegExp[] = [
   /there is nothing to translate/i,
   // Target-language (Korean) refusals — the model occasionally answers a
   // short label / table cell with a Korean meta-reply ("이 요청은 번역할
-  // 실제 내용이 없습니다" / "번역할 영문 콘텐츠를 제공해 주시면…"). The
+  // 실제 내용이 없습니다" / "번역할 소스 텍스트를 제공해 주십시오"). The
   // English patterns above never catch these (2026-05-23 AEO table-cell leak).
-  /번역할\s*(실제\s*)?(영문\s*)?(내용|텍스트|콘텐츠|문단)[^.\n]{0,8}(없|제공)/,
+  /번역할\s*(실제\s*|영문\s*|소스\s*)*(내용|텍스트|콘텐츠|문단|단락)[^.\n]{0,10}(없|제공)/,
   /번역\s*대상[^.\n]{0,8}(제공되지|없)/,
+  /제공해\s*주(시면|십시오)/,
 ]
 
 /**

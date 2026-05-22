@@ -66,6 +66,74 @@ const CTABannerBlock: Block = {
   ],
 }
 
+// 글 목록 블록 — Posts 컬렉션의 글을 cluster / tag / category 기준으로 묶어
+// 최신순 노출. 서비스 허브 페이지 하단의 "관련 글" 영역 등에 사용.
+// 렌더는 <PageBlocks> (src/components/pages/PageBlocks) 가 담당하며, 이 블록을
+// 만나면 서버에서 payload.find 로 Posts 를 조회한다.
+const PostListBlock: Block = {
+  slug: 'postList',
+  labels: { singular: '글 목록 블록', plural: '글 목록 블록' },
+  fields: [
+    {
+      name: 'heading',
+      type: 'text',
+      label: '섹션 제목',
+      localized: true,
+      admin: { description: '예: "Related Articles". 비어 있으면 제목 미렌더.' },
+    },
+    {
+      name: 'filterField',
+      type: 'select',
+      label: '묶음 기준',
+      required: true,
+      defaultValue: 'cluster',
+      options: [
+        { label: '클러스터 (cluster)', value: 'cluster' },
+        { label: '태그 (tag)', value: 'tag' },
+        { label: '카테고리 (category)', value: 'category' },
+      ],
+      admin: { description: '어떤 기준으로 Post 를 묶어 노출할지 선택.' },
+    },
+    {
+      name: 'filterValue',
+      type: 'text',
+      label: '기준 값',
+      required: true,
+      admin: {
+        description:
+          'cluster / category 는 slug 문자열 (예: web-development). tag 는 태그 slug.',
+      },
+    },
+    {
+      name: 'sort',
+      type: 'select',
+      label: '정렬',
+      defaultValue: '-publishedDate',
+      options: [
+        { label: '최신순', value: '-publishedDate' },
+        { label: '오래된순', value: 'publishedDate' },
+      ],
+    },
+    {
+      name: 'limit',
+      type: 'number',
+      label: '노출 개수',
+      defaultValue: 6,
+      min: 1,
+      max: 24,
+    },
+    {
+      name: 'emptyText',
+      type: 'text',
+      label: '글이 없을 때 문구 (선택)',
+      localized: true,
+      admin: {
+        description: '비어 있으면 글이 0건일 때 섹션 자체가 숨겨집니다.',
+      },
+    },
+  ],
+}
+
 // ─── Pages Collection ─────────────────────────────────────────────
 
 export const Pages: CollectionConfig = {
@@ -127,7 +195,7 @@ export const Pages: CollectionConfig = {
       name: 'layout',
       type: 'blocks',
       label: '페이지 레이아웃',
-      blocks: [HeroBlock, ContentBlock, CardGridBlock, CTABannerBlock],
+      blocks: [HeroBlock, ContentBlock, CardGridBlock, CTABannerBlock, PostListBlock],
     },
 
     // ─── 발행 설정 ──────────────────────────────────────────

@@ -1,0 +1,234 @@
+/* <PageBlocks> — shared renderer for Pages `layout` blocks.
+   Self-contained; brand tokens via globals vars. Used by every service-hub route. */
+
+.page {
+  width: 100%;
+  color: var(--grayscale-gs-primary, #232329);
+}
+
+/* ── Hero: full-bleed band, bg image/video + dark overlay ──
+   padding-top uses --iropke-page-top so the headline starts at the same
+   vertical position as every other page's content (consistent start point). */
+.hero {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: calc(var(--iropke-page-top, 120px) + 24px) 0 clamp(40px, 5vw, 72px);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Non-mobile: fixed 16:9 box so a single 16:9 bg image/video maps 1:1 (no
+   awkward crop across screen sizes). aspect-ratio yields to taller content
+   if needed, so the headline never clips. */
+@media (min-width: 768px) {
+  .hero {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Mobile: height driven by viewport; bg covers by height (object-fit: cover). */
+@media (max-width: 767px) {
+  .hero {
+    min-height: clamp(440px, 82vh, 660px);
+  }
+}
+
+.heroMedia {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(8, 26, 24, 0.62), rgba(8, 26, 24, 0.78));
+}
+
+/* Left-aligned, constrained to the same shell as the card sections so the
+   hero text shares the card grid's left edge. */
+.heroInner {
+  width: 100%;
+  max-width: var(--page-shell-max, 1440px);
+  margin: 0 auto;
+  padding: 0 var(--page-shell-gutter, 20px);
+  text-align: left;
+}
+
+/* font-family: serif heading token (en → NotoSerifDisplay). max-width in ch
+   forces the headline onto ~2 lines regardless of viewport. */
+.heroTitle {
+  margin: 0 0 18px;
+  max-width: 22ch;
+  font-family: var(--font-heading-h1-3);
+  font-size: clamp(2.2rem, 4.4vw, 3.4rem);
+  line-height: 1.14;
+  font-weight: 830;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+/* Wide enough that the sub-copy lands on ~2 lines on desktop/tablet. */
+.heroSub {
+  margin: 0 0 28px;
+  max-width: min(100%, 880px);
+  font-size: clamp(0.88rem, 1vw, 0.98rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.heroCta,
+.bannerCta {
+  display: inline-block;
+  font-weight: 700;
+  padding: 15px 32px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    color 0.24s ease,
+    background-color 0.24s ease,
+    border-color 0.24s ease,
+    transform 0.24s ease,
+    box-shadow 0.24s ease;
+}
+
+.heroCta {
+  background: var(--primary, #5eb6b2);
+  color: #06231f;
+}
+
+/* FloatingActions-style hover: smooth invert to white + accent, subtle lift. */
+.heroCta:hover,
+.heroCta:focus-visible {
+  background: var(--grayscale-gs-white, #fff);
+  color: var(--primary-hover, #22908b);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(8, 26, 24, 0.28);
+}
+
+.bannerCta:hover,
+.bannerCta:focus-visible {
+  background: var(--primary-hover, #22908b);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(8, 26, 24, 0.22);
+}
+
+/* ── Section shell: site-standard full width (not the old 1080 cap) ── */
+.section {
+  width: 100%;
+  max-width: var(--page-shell-max, 1440px);
+  margin: 0 auto;
+  padding: clamp(48px, 6vw, 80px) var(--page-shell-gutter, 20px) 0;
+}
+
+.sectionTitle {
+  margin: 0 0 28px;
+  font-family: var(--font-heading-h1-3);
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
+  font-weight: 800;
+}
+
+/* ── Responsive card grid: 4 → 2×2 (tablet) → 1 (mobile) ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+@media (min-width: 768px) and (max-width: 1079px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  display: block;
+  border: 1px solid rgba(35, 35, 41, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+a.card:hover {
+  box-shadow: 0 16px 40px rgba(20, 33, 38, 0.12);
+  transform: translateY(-2px);
+}
+
+.cardImg {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+}
+
+.cardBody {
+  padding: 20px 20px 24px;
+}
+
+.cardTitle {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.cardDesc {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: var(--grayscale-gs-secondary-1, #5e6670);
+}
+
+.cardLink {
+  display: inline-block;
+  margin-top: 14px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--primary-hover, #22908b);
+}
+
+/* ── CTA banner ── */
+/* Wrapped in .section so its box width matches the card grid exactly. */
+.bannerSection {
+  padding-top: clamp(56px, 7vw, 88px);
+}
+
+.banner {
+  width: 100%;
+  padding: clamp(48px, 7vw, 80px) 24px;
+  border-radius: 18px;
+  text-align: center;
+  color: #fff;
+}
+
+.bannerMsg {
+  margin: 0 0 22px;
+  font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+  font-weight: 800;
+}
+
+.bannerCta {
+  background: #fff;
+  color: #14201f;
+}

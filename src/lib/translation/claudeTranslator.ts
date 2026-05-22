@@ -96,8 +96,9 @@ const FIELD_HINTS: Record<FieldType, string> = {
     'CRITICAL: never say you need more context, never ask a question, never refuse, never explain — output ONLY the translated label (or the unchanged value for numbers/proper nouns).',
   content:
     'This is a body text passage from a Lexical rich-text node — typically a full paragraph, heading, list item, or quote. ' +
-    'The passage USUALLY contains MARKER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
+    'The passage MAY contain MARKER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
     'Each ⟪N⟫ marks the start of one inline span of the passage — a run of plain text, a bold or linked phrase, or an inline-code element. The markers let the system map your translation back onto the original formatted spans. ' +
+    'If the passage contains NO ⟪N⟫ markers, simply translate it as ordinary prose — NEVER add, invent, or insert ⟪N⟫ tokens of your own (not at sentence boundaries, not anywhere). Markers are only ever placed by the system; keep the ones already present and never create new ones. ' +
     'CRITICAL — treat the whole marked passage as ONE sentence (or paragraph) and translate it AS A WHOLE into fluent, natural target-language prose. Do NOT translate each marked span in isolation: the markers are only positional anchors. The result must read naturally from end to end, with a correct, explicit subject and correct word order — never invent or guess a subject, and never leave any span untranslated. ' +
     'RULES for markers: ' +
     '(a) every ⟪N⟫ in the source MUST appear in your output exactly once, VERBATIM — same digits, same "⟪" and "⟫" characters. Never translate, transliterate, omit, duplicate, or renumber a marker. ' +

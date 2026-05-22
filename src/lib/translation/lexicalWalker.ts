@@ -167,7 +167,7 @@ async function translateField(
   usage.outputTokens += r.outputTokens
   usage.nodes += 1
   if (!r.translated || r.translated.length === 0) return value
-  return preserveBoundaryWhitespace(value, r.translated)
+  return preserveBoundaryWhitespace(value, stripStrayMarkers(r.translated))
 }
 
 /**
@@ -432,6 +432,17 @@ function splitBatchByMarkers(text: string, itemCount: number): string[] | null {
  * sandwich the model's body between the originals. This guarantees the
  * boundary contract regardless of model behavior.
  */
+/**
+ * Remove stray ⟪N⟫ marker tokens from translated text. Real markers are
+ * consumed as delimiters by splitBatchByMarkers; any that survive inside a
+ * node's text are model noise (the model sometimes invents markers on
+ * marker-free input, primed by the marker-heavy content prompt — 2026-05-23
+ * AEO incident). They must never reach the rendered page.
+ */
+function stripStrayMarkers(text: string): string {
+  return text.replace(/⟪\d+⟫/g, '')
+}
+
 function preserveBoundaryWhitespace(original: string, translated: string): string {
   if (translated.length === 0) return translated
   const trailingWs = original.match(/\s*$/)?.[0] ?? ''
@@ -468,7 +479,7 @@ async function translatePerItem(
   for (const it of items) {
     if (it.role !== 'translatable') continue
     const result = await translate(it.original, context)
-    it.node.text = preserveBoundaryWhitespace(it.original, result.translated)
+    it.node.text = preserveBoundaryWhitespace(it.original, stripStrayMarkers(result.translated))
     usage.inputTokens += result.inputTokens
     usage.outputTokens += result.outputTokens
     usage.nodes += 1
@@ -502,7 +513,10 @@ async function translateBatch(
   // preserve that boundary whitespace to prevent inline-element collisions.
   if (items.length === 1 && items[0].role === 'translatable') {
     const result = await translate(items[0].original, context)
-    items[0].node.text = preserveBoundaryWhitespace(items[0].original, result.translated)
+    items[0].node.text = preserveBoundaryWhitespace(
+      items[0].original,
+      stripStrayMarkers(result.translated),
+    )
     usage.inputTokens += result.inputTokens
     usage.outputTokens += result.outputTokens
     usage.nodes += 1
@@ -550,12 +564,16 @@ async function translateBatch(
     return
   }
 
-  // An empty slot for a translatable item means the model merged that span's
-  // content into a neighbour — redistributing would leak the English source
-  // (slot kept empty) or blank the node. Fall back to per-item instead, with
-  // the whole passage as reference context so fragments stay sentence-aware.
+  // Strip any ⟪N⟫ markers the model hallucinated inside a slot (real markers
+  // were consumed as delimiters; leftovers are model noise).
+  const clean = slots.map(stripStrayMarkers)
+
+  // Empty-slot guard — an empty slot for a translatable item means the model
+  // merged that span into a neighbour. Redistributing would leak the English
+  // source. Fall back to per-item, with the whole passage as reference
+  // context so fragments stay sentence-aware.
   for (let i = 0; i < items.length; i++) {
-    if (items[i].role === 'translatable' && slots[i].trim().length === 0) {
+    if (items[i].role === 'translatable' && clean[i].trim().length === 0) {
       console.warn(
         `[lexicalWalker] empty slot for translatable item ${i} — falling back to per-item.`,
       )
@@ -564,14 +582,30 @@ async function translateBatch(
     }
   }
 
+  // Duplication guard — when a text-code-text span reorders around the code
+  // for SOV word order, the model sometimes translates the clause twice and
+  // places it in two slots; redistributing would render it twice (2026-05-23
+  // p32 incident). If one translatable slot's content is wholly contained in
+  // another's, fall back to per-item.
+  const tslots = items
+    .map((it, i) => ({ role: it.role, text: clean[i].trim() }))
+    .filter((s) => s.role === 'translatable' && s.text.length >= 12)
+  for (let a = 0; a < tslots.length; a++) {
+    for (let b = 0; b < tslots.length; b++) {
+      if (a !== b && tslots[b].text.includes(tslots[a].text)) {
+        console.warn('[lexicalWalker] duplicated slot content — falling back to per-item.')
+        await translatePerItem(items, translate, usage, passageSource)
+        return
+      }
+    }
+  }
+
   // Redistribute slots onto the original nodes. The model placed
   // target-language spacing across the whole sentence, so each translatable
-  // node takes its slot verbatim — re-applying the English fragment's
-  // boundary whitespace here would corrupt it. Preserve items keep their
-  // original code text.
+  // node takes its slot verbatim. Preserve items keep their original code text.
   for (let i = 0; i < items.length; i++) {
     if (items[i].role !== 'translatable') continue
-    items[i].node.text = slots[i]
+    items[i].node.text = clean[i]
     usage.nodes += 1
   }
 }
@@ -644,7 +678,7 @@ async function walkNode(
       !isCodeFormatted(node)
     ) {
       const result = await translate(raw)
-      node.text = preserveBoundaryWhitespace(raw, result.translated)
+      node.text = preserveBoundaryWhitespace(raw, stripStrayMarkers(result.translated))
       usage.inputTokens += result.inputTokens
       usage.outputTokens += result.outputTokens
       usage.nodes += 1

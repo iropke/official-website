@@ -499,6 +499,38 @@ async function translatePerItem(
 }
 
 /**
+ * Detect a low-quality marker split worth one retry. Three signatures, all
+ * seen with code-heavy / text-code-text passages (2026-05-23 p25 / p32):
+ *  - an empty slot for a translatable item (a span got merged away);
+ *  - one translatable slot's trimmed text wholly inside another's (the model
+ *    translated the clause twice);
+ *  - an inline-code identifier (10+ chars) leaked verbatim into a text slot.
+ */
+function hasQualityProblem(items: BatchItem[], slots: string[]): boolean {
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].role === 'translatable' && slots[i].trim().length === 0) return true
+  }
+  const tIdx = items
+    .map((_, i) => i)
+    .filter((i) => items[i].role === 'translatable' && slots[i].trim().length >= 12)
+  for (const a of tIdx) {
+    for (const b of tIdx) {
+      if (a !== b && slots[b].includes(slots[a].trim())) return true
+    }
+  }
+  const codeIds = items
+    .filter((it) => it.role === 'preserve')
+    .map((it) => it.original.trim())
+    .filter((t) => t.length >= 10)
+  for (const id of codeIds) {
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].role === 'translatable' && slots[i].includes(id)) return true
+    }
+  }
+  return false
+}
+
+/**
  * Translate a batch of items (all inline content of one paragraph-like
  * container) as a SINGLE coherent passage.
  *
@@ -553,87 +585,47 @@ async function translateBatch(
   // fallback so even the degraded path sees the full sentence.
   const passageSource = items.map((it) => it.original).join('')
 
-  let result
-  try {
-    result = await translate(batchString, context)
-  } catch {
-    // Network / API failure during batch translate — fall back to per-item.
-    await translatePerItem(items, translate, usage, passageSource)
-    return
+  // Up to 2 batch attempts. Translation is non-deterministic, so a retry
+  // usually clears a transient marker / duplication / code-leak glitch.
+  // Per-item is only a LAST resort (markers unrecoverable on both attempts):
+  // per-item translation of sub-sentence fragments is itself low quality and
+  // makes the model emit meta-commentary on tiny connective fragments
+  // (2026-05-23 p25 incident — a code-heavy paragraph degraded that way).
+  let chosen: string[] | null = null
+  for (let attempt = 0; attempt < 2 && chosen === null; attempt++) {
+    let translated: string
+    try {
+      const result = await translate(batchString, context)
+      usage.inputTokens += result.inputTokens
+      usage.outputTokens += result.outputTokens
+      translated = result.translated
+    } catch {
+      continue // network/API error — retry, then per-item
+    }
+    const s = splitBatchByMarkers(translated, items.length)
+    if (s === null) continue // markers broken — retry, then per-item
+    const cleaned = s.map(stripStrayMarkers)
+    // First attempt: retry once if the split has a quality problem. Last
+    // attempt: accept the split regardless — a minor imperfection in a batch
+    // result still beats the per-item commentary failure mode.
+    if (attempt === 0 && hasQualityProblem(items, cleaned)) continue
+    chosen = cleaned
   }
-  usage.inputTokens += result.inputTokens
-  usage.outputTokens += result.outputTokens
 
-  const slots = splitBatchByMarkers(result.translated, items.length)
-  if (slots === null) {
-    // Model dropped or duplicated a marker — fall back to per-item, but pass
-    // the whole passage as reference context so fragments are still
-    // translated with sentence-level awareness.
+  if (chosen === null) {
     console.warn(
-      `[lexicalWalker] markers missing/duplicated in batch translation — falling back to per-item. batch="${batchString.slice(0, 80)}..."`,
+      `[lexicalWalker] batch markers unrecoverable after retry — per-item fallback. batch="${batchString.slice(0, 80)}..."`,
     )
     await translatePerItem(items, translate, usage, passageSource)
     return
   }
 
-  // Strip any ⟪N⟫ markers the model hallucinated inside a slot (real markers
-  // were consumed as delimiters; leftovers are model noise).
-  const clean = slots.map(stripStrayMarkers)
-
-  // Empty-slot guard — an empty slot for a translatable item means the model
-  // merged that span into a neighbour. Redistributing would leak the English
-  // source. Fall back to per-item, with the whole passage as reference
-  // context so fragments stay sentence-aware.
-  for (let i = 0; i < items.length; i++) {
-    if (items[i].role === 'translatable' && clean[i].trim().length === 0) {
-      console.warn(
-        `[lexicalWalker] empty slot for translatable item ${i} — falling back to per-item.`,
-      )
-      await translatePerItem(items, translate, usage, passageSource)
-      return
-    }
-  }
-
-  // Duplication / code-leak guard. When a text-code-text span reorders around
-  // the inline code for SOV word order, the model sometimes translates the
-  // clause twice and/or copies the code identifier into the surrounding text
-  // (2026-05-23 p32 incident). Two detectable signatures:
-  //  (1) one translatable slot's trimmed text is wholly inside another's;
-  //  (2) an inline-code identifier (10+ chars) appears verbatim in a
-  //      translatable slot — a code node's text must never reach plain text.
-  // Either way, fall back to per-item rather than render duplicated content.
-  let duplicated = false
-  const tIdx = items
-    .map((_, i) => i)
-    .filter((i) => items[i].role === 'translatable' && clean[i].trim().length >= 12)
-  for (const a of tIdx) {
-    for (const b of tIdx) {
-      if (a !== b && clean[b].includes(clean[a].trim())) duplicated = true
-    }
-  }
-  const codeIds = items
-    .filter((it) => it.role === 'preserve')
-    .map((it) => it.original.trim())
-    .filter((t) => t.length >= 10)
-  for (const id of codeIds) {
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].role === 'translatable' && clean[i].includes(id)) duplicated = true
-    }
-  }
-  if (duplicated) {
-    console.warn(
-      '[lexicalWalker] duplicated / code-leaked slot content — falling back to per-item.',
-    )
-    await translatePerItem(items, translate, usage, passageSource)
-    return
-  }
-
-  // Redistribute slots onto the original nodes. The model placed
+  // Redistribute the chosen slots onto the original nodes. The model placed
   // target-language spacing across the whole sentence, so each translatable
   // node takes its slot verbatim. Preserve items keep their original code text.
   for (let i = 0; i < items.length; i++) {
     if (items[i].role !== 'translatable') continue
-    items[i].node.text = clean[i]
+    items[i].node.text = chosen[i]
     usage.nodes += 1
   }
 }

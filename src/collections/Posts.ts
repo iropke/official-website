@@ -656,7 +656,21 @@ export const Posts: CollectionConfig = {
                       { label: '4 columns', value: '4' },
                     ],
                     admin: {
-                      description: '모바일 (<=1079px) 에서는 세로 stack.',
+                      description: '모바일 (<=1079px) 에서는 세로 stack. layout=alternating 일 때 무시됨.',
+                    },
+                  },
+                  {
+                    name: 'layout',
+                    type: 'select',
+                    label: '레이아웃',
+                    defaultValue: 'grid',
+                    options: [
+                      { label: 'Grid (카드 그리드)', value: 'grid' },
+                      { label: 'Alternating (지그재그 text↔image 교차)', value: 'alternating' },
+                    ],
+                    admin: {
+                      description:
+                        'alternating: 각 카드가 한 행, 이미지·텍스트 좌우 교차 (Service 카테고리 ServiceDetail 에서만 적용 — 그 외 PostDetail 은 grid 로 fallback 렌더).',
                     },
                   },
                   {
@@ -688,6 +702,32 @@ export const Posts: CollectionConfig = {
                           description:
                             '카드 좌상단 작은 라벨. 예: "01", "Step 1", "→". 비어 있으면 미표시.',
                         },
+                      },
+                      {
+                        name: 'imageUrl',
+                        type: 'text',
+                        label: '이미지 URL (선택)',
+                        admin: {
+                          description:
+                            '카드 옆/위에 표시할 이미지. 정적 자산 경로(/assets/...) 또는 절대 URL. layout=alternating 에서 주로 사용.',
+                        },
+                      },
+                      {
+                        name: 'bullets',
+                        type: 'array',
+                        label: '불릿 (선택)',
+                        labels: { singular: 'Bullet', plural: 'Bullets' },
+                        admin: {
+                          description: '카드 본문 하단 불릿 리스트. layout=alternating 에서 주로 사용.',
+                        },
+                        fields: [
+                          {
+                            name: 'text',
+                            type: 'text',
+                            label: '텍스트',
+                            required: true,
+                          },
+                        ],
                       },
                     ],
                   },

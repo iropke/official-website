@@ -7,11 +7,12 @@ import type { Media, Post, Tag } from '@/payload-types'
 import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
 import { buildAlternates } from '@/i18n/alternates'
 
-import PostDetail, {
-  type PostDetailData,
+import ServiceDetail, {
+  type ServiceDetailData,
   type ReferenceData,
   type TagData,
-} from '@/components/posts/PostDetail/PostDetail'
+  type RelatedPostData,
+} from '@/components/posts/ServiceDetail/ServiceDetail'
 
 const CATEGORY = 'service' as const
 const CATEGORY_PATH = '/service'
@@ -20,7 +21,10 @@ function normalizeLocale(raw: string): Locale {
   return isLocale(raw) ? raw : 'en'
 }
 
-function formatDate(dateString: string | null | undefined, locale: Locale): { label: string; iso: string } {
+function formatDate(
+  dateString: string | null | undefined,
+  locale: Locale,
+): { label: string; iso: string } {
   if (!dateString) return { label: '', iso: '' }
   try {
     const d = new Date(dateString)
@@ -49,10 +53,7 @@ function resolveMedia(
   return { url: '', alt: fallbackAlt }
 }
 
-function resolveTags(
-  refs: Post['tags'],
-  basePath: string,
-): TagData[] {
+function resolveTags(refs: Post['tags'], basePath: string): TagData[] {
   if (!Array.isArray(refs)) return []
   return refs
     .filter((t): t is Tag => typeof t === 'object' && t !== null)
@@ -72,6 +73,20 @@ function resolveReferences(rows: Post['references']): ReferenceData[] {
       link: typeof row?.link === 'string' ? row.link.trim() : '',
     }))
     .filter((r) => r.title || r.content || r.link)
+}
+
+/**
+ * Cluster slug → human hub label.
+ * "web-development" → "Web Development"
+ * For acronym-aware mapping see scripts/lib/humanize.mjs (used in content tooling);
+ * this inline version is sufficient for service-hub names which avoid acronyms.
+ */
+function humanizeClusterSlug(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
 }
 
 interface PageProps {
@@ -117,10 +132,7 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
       draft: isPreviewUser,
       where: isPreviewUser
         ? {
-            and: [
-              { slug: { equals: slug } },
-              { category: { equals: CATEGORY } },
-            ],
+            and: [{ slug: { equals: slug } }, { category: { equals: CATEGORY } }],
           }
         : {
             and: [
@@ -140,10 +152,54 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
     notFound()
   }
 
-  // Service 카테고리는 업무 영역 entry 라 우측 관련글 sidebar 없이 full-width 로 렌더.
-  // PostDetail 에 hideAside={true} 로 전달하여 본문이 12-col 전체를 사용. relatedPosts 쿼리도 skip.
+  // Hub label from cluster slug (e.g. cluster='web-development' → "Web Development")
+  const clusterSlug = typeof post.cluster === 'string' ? post.cluster : ''
+  const hubLabel = clusterSlug ? humanizeClusterSlug(clusterSlug) : undefined
+
+  // Case Study query — portfolio Posts tagged with any of this service post's tags.
+  // Empty if no matches; ServiceDetail hides the section when empty.
+  const tagIds = Array.isArray(post.tags)
+    ? post.tags
+        .filter((t): t is Tag => typeof t === 'object' && t !== null && 'id' in t)
+        .map((t) => t.id)
+    : []
+  let caseStudies: RelatedPostData[] = []
+  if (tagIds.length > 0) {
+    try {
+      const csRes = await payload.find({
+        collection: 'posts',
+        locale,
+        depth: 1,
+        limit: 3,
+        sort: '-publishedDate',
+        where: {
+          and: [
+            { category: { equals: 'portfolio' } },
+            { tags: { in: tagIds } },
+            { _status: { equals: 'published' } },
+            { publishedLocales: { contains: locale } },
+          ],
+        },
+      })
+      caseStudies = csRes.docs.map((p) => {
+        const thumb = resolveMedia(p.thumbnail, p.title ?? '')
+        const d = formatDate(p.publishedDate, locale)
+        return {
+          slug: p.slug ?? '',
+          title: p.title ?? '',
+          date: d.label,
+          dateISO: d.iso,
+          thumbnailUrl: thumb.url,
+          thumbnailAlt: thumb.alt,
+        }
+      })
+    } catch (err) {
+      console.error('[ServiceDetailPage] Failed to load case studies:', err)
+    }
+  }
+
   const heroThumb = resolveMedia(post.thumbnail, post.title ?? '')
-  const postData: PostDetailData = {
+  const postData: ServiceDetailData = {
     title: post.title ?? '',
     intro: post.excerpt ?? '',
     heroImageUrl: heroThumb.url,
@@ -154,12 +210,12 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
   }
 
   return (
-    <PostDetail
+    <ServiceDetail
       basePath={basePath}
       locale={locale}
       post={postData}
-      relatedPosts={[]}
-      hideAside
+      hubLabel={hubLabel}
+      caseStudies={caseStudies}
     />
   )
 }

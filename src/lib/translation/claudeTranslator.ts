@@ -59,6 +59,13 @@ export interface TranslationRequest {
   fieldType?: FieldType
   /** 선택: 문체/브랜드 용어 보존 지침 */
   brandGuideline?: string
+  /**
+   * 선택: 직전 문단(원문)을 참조용 컨텍스트로 전달. content 필드 번역 시
+   * lexicalWalker(v3) 가 직전 container 의 원문을 넘겨, 모델이 지시어
+   * ("this" / "these" / "the reverse" 등) · 생략된 주어를 명확히 풀어 쓰도록
+   * 돕는다. 번역/출력 대상이 아니라 참조 전용이다.
+   */
+  context?: string
 }
 
 export interface TranslationResult {
@@ -89,17 +96,22 @@ const FIELD_HINTS: Record<FieldType, string> = {
     'CRITICAL: never say you need more context, never ask a question, never refuse, never explain — output ONLY the translated label (or the unchanged value for numbers/proper nouns).',
   content:
     'This is a body text passage from a Lexical rich-text node — typically a full paragraph, heading, list item, or quote. ' +
-    'The passage MAY contain PLACEHOLDER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
-    'Each placeholder represents an inline element (inline code, a symbol-only run, etc.) that exists in the source between text spans and MUST be preserved as-is so the system can re-insert the original element. ' +
-    'CRITICAL RULES for placeholders: ' +
-    '(a) every ⟪N⟫ in the source MUST appear in your output VERBATIM — exact same digits, exact same opening "⟪" and closing "⟫" characters, exact same count. Do not translate, transliterate, omit, duplicate, or renumber placeholders. ' +
-    '(b) You MAY move a placeholder to a different position within the sentence if target-language word order requires it (e.g. Korean / Japanese / Chinese SOV may place an inline-code reference at a different position than English SVO). The system splits your output on the placeholders to redistribute fragments, so word order around them is your choice. ' +
-    '(c) Do NOT insert spaces immediately adjacent to a placeholder unless the source had them there. ' +
-    'Translate the natural-language text around the placeholders into a fluent, complete passage per the style guide. ' +
-    'Preserve leading and trailing whitespace of the WHOLE passage exactly (if the source starts or ends with a space, your output must too). ' +
+    'The passage MAY contain MARKER TOKENS of the form ⟪0⟫, ⟪1⟫, ⟪2⟫, etc. ' +
+    'Each ⟪N⟫ marks the start of one inline span of the passage — a run of plain text, a bold or linked phrase, or an inline-code element. The markers let the system map your translation back onto the original formatted spans. ' +
+    'If the passage contains NO ⟪N⟫ markers, simply translate it as ordinary prose — NEVER add, invent, or insert ⟪N⟫ tokens of your own (not at sentence boundaries, not anywhere). Markers are only ever placed by the system; keep the ones already present and never create new ones. ' +
+    'CRITICAL — treat the whole marked passage as ONE sentence (or paragraph) and translate it AS A WHOLE into fluent, natural target-language prose. Do NOT translate each marked span in isolation: the markers are only positional anchors. The result must read naturally from end to end, with a correct, explicit subject and correct word order — never invent or guess a subject, and never leave any span untranslated. ' +
+    'RULES for markers: ' +
+    '(a) every ⟪N⟫ in the source MUST appear in your output exactly once, VERBATIM — same digits, same "⟪" and "⟫" characters. Never translate, transliterate, omit, duplicate, or renumber a marker. ' +
+    '(b) Keep each ⟪N⟫ immediately before the translated words that belong to the span it opened. You MAY move a marker if target-language word order requires it (Korean / Japanese / Chinese SOV) — keep it next to its span. ' +
+    '(c) Some markers have no text of their own (they stand for an inline-code element) — keep the marker but put no words between it and the next marker. ' +
+    '(d) Place spaces only where the natural target-language sentence needs them. ' +
     'Do NOT add line breaks or quotation marks. ' +
-    'If the passage is a markdown table separator (e.g. "|---|---|"), a sequence of symbols/punctuation only, or has NO translatable letters at all, RETURN THE SOURCE VERBATIM. ' +
-    'A short single word or label (e.g. a table column header like "Year" / "When" / "Status") IS translatable natural language — translate it normally; do NOT return it verbatim. ' +
+    'If the WHOLE passage is a markdown table separator (e.g. "|---|---|"), a run of symbols/punctuation only, or has NO translatable letters at all, RETURN THE SOURCE VERBATIM. ' +
+    'A short single word or label (e.g. "Year" / "When" / "Status") IS translatable natural language — translate it normally; do NOT return it verbatim. ' +
+    'You MAY also be given a REFERENCE CONTEXT block before the SOURCE block. ' +
+    'It is nearby text from the same document (the preceding paragraph, or the full sentence this fragment belongs to), provided ONLY so you can resolve references. ' +
+    'When the SOURCE uses a pronoun, a demonstrative ("this" / "these" / "that" / "such" / "the former" / "the latter" / "the reverse" / "the opposite"), or an elided subject whose referent lives in the REFERENCE CONTEXT, translate so that referent is NAMED EXPLICITLY and the sentence reads naturally on its own — do NOT leave a bare dangling demonstrative (Korean 이것/그것/이 + bare noun, etc.). ' +
+    'NEVER translate, summarize, quote, or echo the REFERENCE CONTEXT; translate ONLY the SOURCE block. ' +
     'Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
 }
 
@@ -149,7 +161,22 @@ function buildPrompts(req: TranslationRequest): { system: string; user: string }
   ]
   const system = systemSections.filter((s): s is string => Boolean(s)).join('\n\n')
 
-  const user = ['--- SOURCE ---', req.text, '--- END ---'].join('\n')
+  // Cross-paragraph reference context (lexicalWalker v3): only for `content`
+  // fields, only when a non-empty preceding passage was supplied. Lives in the
+  // (uncached) user block since it varies per paragraph.
+  const hasContext =
+    req.fieldType === 'content' &&
+    typeof req.context === 'string' &&
+    req.context.trim().length > 0
+  const user = hasContext
+    ? [
+        '--- REFERENCE CONTEXT (reference only — do NOT translate or echo) ---',
+        req.context!.trim(),
+        '--- SOURCE (translate ONLY this) ---',
+        req.text,
+        '--- END ---',
+      ].join('\n')
+    : ['--- SOURCE ---', req.text, '--- END ---'].join('\n')
 
   return { system, user }
 }
@@ -403,6 +430,13 @@ const STRONG_REFUSAL_PATTERNS: readonly RegExp[] = [
   /per your instructions/i,
   /I cannot translate/i,
   /there is nothing to translate/i,
+  // Target-language (Korean) refusals — the model occasionally answers a
+  // short label / table cell with a Korean meta-reply ("이 요청은 번역할
+  // 실제 내용이 없습니다" / "번역할 소스 텍스트를 제공해 주십시오"). The
+  // English patterns above never catch these (2026-05-23 AEO table-cell leak).
+  /번역할\s*(실제\s*|영문\s*|소스\s*)*(내용|텍스트|콘텐츠|문단|단락)[^.\n]{0,10}(없|제공)/,
+  /번역\s*대상[^.\n]{0,8}(제공되지|없)/,
+  /제공해\s*주(시면|십시오)/,
 ]
 
 /**

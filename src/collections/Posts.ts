@@ -693,6 +693,62 @@ export const Posts: CollectionConfig = {
                   },
                 ],
               },
+
+              // ─── 프로세스 플로우 (processFlow) ───
+              // 순차 단계를 번호 매겨진 세로 타임라인으로 렌더 (How We Work /
+              // 프로젝트 진행 단계 등). featureCards 와 달리 단계 간 연결선이 있어
+              // "순서/흐름" 을 시각적으로 표현. richText BlocksFeature 블록이므로
+              // Lexical JSON 에 저장됨 — 별도 DB 테이블/마이그레이션 불필요.
+              {
+                slug: 'processFlow',
+                labels: { singular: '프로세스 플로우', plural: '프로세스 플로우' },
+                fields: [
+                  {
+                    name: 'heading',
+                    type: 'text',
+                    label: '섹션 제목 (선택)',
+                    admin: {
+                      description: '예: "How We Work". 비어 있으면 미렌더.',
+                    },
+                  },
+                  {
+                    name: 'intro',
+                    type: 'textarea',
+                    label: '섹션 소개 (선택)',
+                    admin: { rows: 2 },
+                  },
+                  {
+                    name: 'steps',
+                    type: 'array',
+                    label: '단계',
+                    minRows: 2,
+                    labels: { singular: 'Step', plural: 'Steps' },
+                    fields: [
+                      {
+                        name: 'label',
+                        type: 'text',
+                        label: '라벨/번호 (선택)',
+                        admin: {
+                          description: '단계 마커에 표시. 비어 있으면 01, 02… 자동 번호.',
+                        },
+                      },
+                      {
+                        name: 'title',
+                        type: 'text',
+                        label: '단계 제목',
+                        required: true,
+                      },
+                      {
+                        name: 'description',
+                        type: 'textarea',
+                        label: '단계 설명',
+                        required: true,
+                        admin: { rows: 3 },
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
           }),
         ],

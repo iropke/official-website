@@ -577,6 +577,46 @@ function renderBlockNode({ node, index, revealClass, delay, styles: s }: RenderB
       );
     }
 
+    // processFlow: 순차 단계 — 번호 매겨진 세로 타임라인 (How We Work 등)
+    //   heading + intro + steps[] (label?, title, description)
+    if (blockType === 'processFlow') {
+      type ProcessStep = { title?: unknown; description?: unknown; label?: unknown };
+      const heading = typeof fields?.heading === 'string' ? fields.heading.trim() : '';
+      const intro = typeof fields?.intro === 'string' ? fields.intro.trim() : '';
+      const stepsRaw = Array.isArray(fields?.steps) ? (fields.steps as ProcessStep[]) : [];
+      const steps = stepsRaw.filter(
+        (st) => typeof st?.title === 'string' && typeof st?.description === 'string',
+      );
+      if (!steps.length) return null;
+      return (
+        <div
+          key={key}
+          className={`${s.processFlow} ${revealClass}`}
+          style={{ transitionDelay: delay }}
+        >
+          {heading && <h3 className={s.processFlowHeading}>{heading}</h3>}
+          {intro && <p className={s.processFlowIntro}>{intro}</p>}
+          <div className={s.processFlowList}>
+            {steps.map((st, si) => {
+              const rawLabel = typeof st.label === 'string' ? st.label.trim() : '';
+              const label = rawLabel || String(si + 1).padStart(2, '0');
+              return (
+                <div key={si} className={s.processFlowStep}>
+                  <div className={s.processFlowMarker} aria-hidden="true">
+                    {label}
+                  </div>
+                  <div className={s.processFlowBody}>
+                    <h4 className={s.processFlowStepTitle}>{st.title as string}</h4>
+                    <p className={s.processFlowStepDesc}>{st.description as string}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
     // videoEmbed: YouTube URL → youtube-nocookie embed (editorial-media 프레임 재사용)
     if (blockType === 'videoEmbed') {
       const url = typeof fields?.url === 'string' ? fields.url.trim() : '';

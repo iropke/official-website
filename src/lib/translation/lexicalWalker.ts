@@ -38,6 +38,17 @@
  * deferred during batch collection and recursed into separately after
  * the parent's batch is translated.
  *
+ * ── v3: cross-paragraph reference context ────────────────────────────────
+ *
+ * v2 still translated each paragraph in isolation, so a demonstrative that
+ * points at an EARLIER paragraph ("these two layers", "the reverse", "this
+ * approach") could not be resolved — the model never saw the referent and
+ * left a bare 이것/그것 that reads as a dangling reference in Korean. v3
+ * threads the source text of the immediately preceding container into the
+ * next container's translation as reference-only context, so the model can
+ * name the referent explicitly. This matters far more for Korean / Japanese
+ * (which need an explicit subject where English elides it) than for English.
+ *
  * Limits unchanged from v1:
  *   - Custom block fields (editorialMedia.caption / editorialTable.cells /
  *     qnaList.items[].text / videoEmbed.caption / rawHtml.label) are not
@@ -58,7 +69,15 @@ export interface LexicalNode {
   [k: string]: unknown
 }
 
-export type TranslateText = (input: string) => Promise<{
+export type TranslateText = (
+  input: string,
+  /**
+   * Source text of the preceding paragraph-like container, passed as
+   * reference-only context so the model can resolve cross-paragraph
+   * references (demonstratives, elided subjects). Never translated/emitted.
+   */
+  context?: string,
+) => Promise<{
   translated: string
   inputTokens: number
   outputTokens: number
@@ -219,8 +238,9 @@ export async function translateLexicalRoot(
 ): Promise<{ translated: LexicalRoot; usage: WalkerUsage }> {
   const cloned = structuredClone(source) as LexicalRoot
   const usage: WalkerUsage = { inputTokens: 0, outputTokens: 0, nodes: 0 }
+  const xref: CrossRefContext = { previous: null }
   if (cloned.root) {
-    await walkNode(cloned.root, translate, usage)
+    await walkNode(cloned.root, translate, usage, xref)
   }
   return { translated: cloned, usage }
 }
@@ -290,6 +310,35 @@ interface BatchItem {
    * 'preserve'     → text is inline code / symbol run; replaced by placeholder.
    */
   role: 'translatable' | 'preserve'
+}
+
+/**
+ * Cross-paragraph reference context (v3). Threaded through the walk so each
+ * paragraph-like container can be translated knowing the SOURCE TEXT of the
+ * one immediately before it. The model uses this ONLY to resolve references
+ * (demonstratives, elided subjects); it is never translated or emitted.
+ */
+interface CrossRefContext {
+  /** Source text of the most recently translated container, null before the first. */
+  previous: string | null
+}
+
+/**
+ * Upper bound on reference-context length — keeps token cost bounded for
+ * unusually long preceding paragraphs. The tail is kept because anaphora
+ * usually points at the end of the prior passage.
+ */
+const MAX_CONTEXT_CHARS = 1000
+
+/**
+ * Plain source text of a batch (translatable + preserved items joined in
+ * tree order), used as reference context for the NEXT container. Returns
+ * null when the container carries no textual content.
+ */
+function batchSourceText(items: BatchItem[]): string | null {
+  const joined = items.map((it) => it.original).join('').trim()
+  if (joined.length === 0) return null
+  return joined.length > MAX_CONTEXT_CHARS ? joined.slice(-MAX_CONTEXT_CHARS) : joined
 }
 
 /**
@@ -389,10 +438,11 @@ async function translatePerItem(
   items: BatchItem[],
   translate: TranslateText,
   usage: WalkerUsage,
+  context?: string,
 ): Promise<void> {
   for (const it of items) {
     if (it.role !== 'translatable') continue
-    const result = await translate(it.original)
+    const result = await translate(it.original, context)
     it.node.text = preserveBoundaryWhitespace(it.original, result.translated)
     usage.inputTokens += result.inputTokens
     usage.outputTokens += result.outputTokens
@@ -410,6 +460,7 @@ async function translateBatch(
   items: BatchItem[],
   translate: TranslateText,
   usage: WalkerUsage,
+  context?: string,
 ): Promise<void> {
   const translatableCount = items.filter((it) => it.role === 'translatable').length
   if (translatableCount === 0) return
@@ -420,7 +471,7 @@ async function translateBatch(
   // (e.g. a fragment that sits next to a link in the parent paragraph) —
   // preserve that boundary whitespace to prevent inline-element collisions.
   if (items.length === 1 && items[0].role === 'translatable') {
-    const result = await translate(items[0].original)
+    const result = await translate(items[0].original, context)
     items[0].node.text = preserveBoundaryWhitespace(items[0].original, result.translated)
     usage.inputTokens += result.inputTokens
     usage.outputTokens += result.outputTokens
@@ -437,7 +488,7 @@ async function translateBatch(
   // translatable items.
   for (let i = 0; i < items.length - 1; i++) {
     if (items[i].role === 'translatable' && items[i + 1].role === 'translatable') {
-      await translatePerItem(items, translate, usage)
+      await translatePerItem(items, translate, usage, context)
       return
     }
   }
@@ -459,10 +510,10 @@ async function translateBatch(
 
   let result
   try {
-    result = await translate(batchString)
+    result = await translate(batchString, context)
   } catch {
     // Network / API failure during batch translate — fall back to per-item.
-    await translatePerItem(items, translate, usage)
+    await translatePerItem(items, translate, usage, context)
     return
   }
   usage.inputTokens += result.inputTokens
@@ -475,7 +526,7 @@ async function translateBatch(
     console.warn(
       `[lexicalWalker] placeholders missing from batch translation — falling back to per-item. batch="${batchString.slice(0, 80)}..."`,
     )
-    await translatePerItem(items, translate, usage)
+    await translatePerItem(items, translate, usage, context)
     return
   }
 
@@ -506,6 +557,7 @@ async function walkNode(
   node: LexicalNode,
   translate: TranslateText,
   usage: WalkerUsage,
+  xref: CrossRefContext,
 ): Promise<void> {
   // Payload BlocksFeature node — translate its text-bearing fields (table
   // cells, qna, captions, label) but never code/html. Block nodes carry data
@@ -530,8 +582,10 @@ async function walkNode(
       for (const child of kids.slice(1)) {
         collectBatchItems(child, items, deferred, false)
       }
-      await translateBatch(items, translate, usage)
-      for (const block of deferred) await walkNode(block, translate, usage)
+      const containerSource = batchSourceText(items)
+      await translateBatch(items, translate, usage, xref.previous ?? undefined)
+      if (containerSource) xref.previous = containerSource
+      for (const block of deferred) await walkNode(block, translate, usage, xref)
 
       // Re-attach the colon prefix to the (now translated) first answer node.
       c1.text = prefix + (typeof c1.text === 'string' ? c1.text : '')
@@ -543,12 +597,14 @@ async function walkNode(
     const deferredBlocks: LexicalNode[] = []
     collectBatchItems(node, items, deferredBlocks, true)
 
-    await translateBatch(items, translate, usage)
+    const containerSource = batchSourceText(items)
+    await translateBatch(items, translate, usage, xref.previous ?? undefined)
+    if (containerSource) xref.previous = containerSource
 
     // Recurse into any block-level children that were deferred during
     // collection (e.g. a `list` nested inside a `listitem`).
     for (const block of deferredBlocks) {
-      await walkNode(block, translate, usage)
+      await walkNode(block, translate, usage, xref)
     }
     return
   }
@@ -574,7 +630,7 @@ async function walkNode(
   // Container above the paragraph level (root, list) — recurse.
   if (Array.isArray(node.children)) {
     for (const child of node.children) {
-      await walkNode(child, translate, usage)
+      await walkNode(child, translate, usage, xref)
     }
   }
 }

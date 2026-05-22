@@ -59,6 +59,13 @@ export interface TranslationRequest {
   fieldType?: FieldType
   /** 선택: 문체/브랜드 용어 보존 지침 */
   brandGuideline?: string
+  /**
+   * 선택: 직전 문단(원문)을 참조용 컨텍스트로 전달. content 필드 번역 시
+   * lexicalWalker(v3) 가 직전 container 의 원문을 넘겨, 모델이 지시어
+   * ("this" / "these" / "the reverse" 등) · 생략된 주어를 명확히 풀어 쓰도록
+   * 돕는다. 번역/출력 대상이 아니라 참조 전용이다.
+   */
+  context?: string
 }
 
 export interface TranslationResult {
@@ -100,6 +107,10 @@ const FIELD_HINTS: Record<FieldType, string> = {
     'Do NOT add line breaks or quotation marks. ' +
     'If the passage is a markdown table separator (e.g. "|---|---|"), a sequence of symbols/punctuation only, or has NO translatable letters at all, RETURN THE SOURCE VERBATIM. ' +
     'A short single word or label (e.g. a table column header like "Year" / "When" / "Status") IS translatable natural language — translate it normally; do NOT return it verbatim. ' +
+    'You MAY also be given a PRECEDING PARAGRAPH block before the SOURCE block. ' +
+    'That block is the text immediately before this passage in the same document, provided ONLY so you can resolve references. ' +
+    'When the SOURCE uses a pronoun, a demonstrative ("this" / "these" / "that" / "such" / "the former" / "the latter" / "the reverse" / "the opposite"), or an elided subject whose referent lives in the PRECEDING PARAGRAPH, translate so that referent is NAMED EXPLICITLY and the sentence reads naturally on its own — do NOT leave a bare dangling demonstrative (Korean 이것/그것/이 + bare noun, etc.). ' +
+    'NEVER translate, summarize, quote, or echo the PRECEDING PARAGRAPH; translate ONLY the SOURCE block. ' +
     'Never ask for clarification, never explain, never refuse — output only the translated or unchanged text.',
 }
 
@@ -149,7 +160,22 @@ function buildPrompts(req: TranslationRequest): { system: string; user: string }
   ]
   const system = systemSections.filter((s): s is string => Boolean(s)).join('\n\n')
 
-  const user = ['--- SOURCE ---', req.text, '--- END ---'].join('\n')
+  // Cross-paragraph reference context (lexicalWalker v3): only for `content`
+  // fields, only when a non-empty preceding passage was supplied. Lives in the
+  // (uncached) user block since it varies per paragraph.
+  const hasContext =
+    req.fieldType === 'content' &&
+    typeof req.context === 'string' &&
+    req.context.trim().length > 0
+  const user = hasContext
+    ? [
+        '--- PRECEDING PARAGRAPH (reference only — do NOT translate or echo) ---',
+        req.context!.trim(),
+        '--- SOURCE (translate ONLY this) ---',
+        req.text,
+        '--- END ---',
+      ].join('\n')
+    : ['--- SOURCE ---', req.text, '--- END ---'].join('\n')
 
   return { system, user }
 }

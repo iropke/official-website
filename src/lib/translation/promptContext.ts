@@ -66,6 +66,11 @@ export const UNIVERSAL_TRANSLATION_PRINCIPLE =
   'stripping them causes adjacent fragments to collide in the rendered HTML (e.g. "ranking" + " Google" ' +
   'must NOT become "rankingGoogle"). When translating around inline-element placeholders (⟪0⟫ ⟪1⟫ ...), ' +
   'keep the spacing that surrounds each placeholder. ' +
+  'Resolve references for the reader: when the source uses a pronoun or demonstrative ' +
+  "('it', 'this', 'these', 'that', 'the former/latter', 'the reverse') whose referent is recoverable, " +
+  'prefer naming that referent explicitly in the target language instead of mirroring a bare anaphor — ' +
+  'many target languages (Korean, Japanese, and others) read as vague or broken when an English pronoun ' +
+  'is carried over literally. ' +
   'Translate ALL natural-language content you are given; this is editorial translation across many domains ' +
   '(technology, web/internet history, design, business, culture) — domain hints are only disambiguation aids, ' +
   'NEVER a reason to refuse, question scope, ask for clarification, or explain yourself.'
@@ -76,7 +81,7 @@ export const UNIVERSAL_TRANSLATION_PRINCIPLE =
 // ─────────────────────────────────────────────────────────────────────────
 
 export const STYLE_GUIDE: Partial<Record<Locale, string>> = {
-  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. AVOID ARCHAIC 한자어 that modern Korean readers do not use — examples: "선조" (use "전신" / "원형" / "초기 형태" for "predecessor / precursor"), "고로" (use "그래서" / "따라서"), "여하튼" (use "어쨌든" / "아무튼"), "왈" (use "말한다" / "말하기를"), "차치하고" (use "제쳐두고" / "차지하고"). If in doubt, choose the word a 2026 newspaper editor would use, not a 1970s textbook. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English. ACRONYMS: PRESERVE English acronyms (UI / UX / AI / ML / API / URL / CSS / HTML / JS / TS / SEO / AEO / GEO / CMS / CRM / ERP / SaaS / B2B / B2C / GDPR / KPI / ROI / OKR / TCO / RFP / RAG / LLM / NLP / WCAG / JSON-LD / E-E-A-T etc.) VERBATIM in Korean prose. NEVER phonetically transliterate to Hangul (no 유아이 / 에이아이 / 에이피아이 / 에스이오 / 지디피알). NEVER swap an English acronym for its expanded Korean meaning ("AI" stays as "AI", NOT "인공지능"; "SEO" stays as "SEO", NOT "검색엔진최적화"). A first-mention inline gloss is acceptable when natural — "AI (인공지능)" once, then "AI" thereafter — but the acronym itself is never replaced by the meaning. FIRST PERSON: when the source uses "we / our" referring to Iropke (the publisher), render as 저희 / 이롭게 — NOT 우리. 우리 reads either casual or inclusive-of-the-reader in formal editorial; 저희 keeps the polite editorial distance. WHITESPACE: when your input fragment has a leading or trailing space (because it sits next to a bold span, link, or inline code in the parent paragraph), reproduce that exact leading/trailing space in your output — Korean does not need spaces between sentences but it DOES need spaces between adjacent inline elements in the rendered HTML, so do not strip boundary whitespace.',
+  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. AVOID ARCHAIC 한자어 that modern Korean readers do not use — examples: "선조" (use "전신" / "원형" / "초기 형태" for "predecessor / precursor"), "고로" (use "그래서" / "따라서"), "여하튼" (use "어쨌든" / "아무튼"), "왈" (use "말한다" / "말하기를"), "차치하고" (use "제쳐두고" / "차지하고"). If in doubt, choose the word a 2026 newspaper editor would use, not a 1970s textbook. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English. ACRONYMS: PRESERVE English acronyms (UI / UX / AI / ML / API / URL / CSS / HTML / JS / TS / SEO / AEO / GEO / CMS / CRM / ERP / SaaS / B2B / B2C / GDPR / KPI / ROI / OKR / TCO / RFP / RAG / LLM / NLP / WCAG / JSON-LD / E-E-A-T etc.) VERBATIM in Korean prose. NEVER phonetically transliterate to Hangul (no 유아이 / 에이아이 / 에이피아이 / 에스이오 / 지디피알). NEVER swap an English acronym for its expanded Korean meaning ("AI" stays as "AI", NOT "인공지능"; "SEO" stays as "SEO", NOT "검색엔진최적화"). A first-mention inline gloss is acceptable when natural — "AI (인공지능)" once, then "AI" thereafter — but the acronym itself is never replaced by the meaning. FIRST PERSON: when the source uses "we / our" referring to Iropke (the publisher), render as 저희 / 이롭게 — NOT 우리. 우리 reads either casual or inclusive-of-the-reader in formal editorial; 저희 keeps the polite editorial distance. WHITESPACE: when your input fragment has a leading or trailing space (because it sits next to a bold span, link, or inline code in the parent paragraph), reproduce that exact leading/trailing space in your output — Korean does not need spaces between sentences but it DOES need spaces between adjacent inline elements in the rendered HTML, so do not strip boundary whitespace. KOREAN SYNTAX — translate the MEANING, never mirror English structure. (1) EXPLICIT SUBJECTS: a Korean sentence needs a clear subject/topic far more often than English. When the English elides the subject or carries it with "it / this / these / that / the reverse", name the actual noun in Korean — e.g. "the reverse is also true" → "반대의 경우도 마찬가지입니다" (NOT "반대 방향도 마찬가지입니다"). A bare "이 두 계층은 …" when the reader cannot tell what the two layers are reads as a dangling reference — name them. (2) DO NOT STACK MODIFIERS: English piles pre-modifiers in front of a noun ("top-ranking pages with deep heading structures and pronoun-heavy paragraphs"); mirroring that in Korean reads badly — break it into a short relative clause or split into two sentences. (3) ONE TOPIC PER SENTENCE: do not let the topic marker (X은/는) and the real subject of the predicate diverge — "이 두 계층은 … 이점이 누적됩니다" is broken Korean; recast so the sentence has one coherent subject. (4) DO NOT MIRROR "each X … each X" repetition — say "각 계층은 … 그 아래 계층에 의존합니다" once. (5) CHOOSE THE WORD BY MEANING, not by dictionary lookup — never reach for a stiff or technical 한자어 when a plain word carries the sense: "discrete" → 독립된 / 별개의 (NOT 이산적), "floor / indexing floor" → 최소 요건 (NOT 바닥선), "rewards" (each layer rewards X) → ~에 영향을 준다 / 유리하게 작용한다 (NOT 보상한다), "honest" (honest update date) → 정확한 (NOT 솔직한), "passage" (AEO sense) → 발췌 단위 (NOT 구절 / 구간 / 텍스트 조각). (6) NEVER compose an unfamiliar compound term morpheme-by-morpheme — "co-citation" is 동시 인용 (NOT 동료 + 인용), "byline" is 작성자 표기 (NOT 필명 + 서명); translate the whole concept or keep the English term. (7) If a sentence still reads awkwardly after a literal pass, REWRITE it from the meaning — restructure clause order and word order freely so the result reads as native Korean editorial prose, not as translated English.',
   ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Japanese tech readers expect these terms in English.',
   zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Chinese tech readers expect these terms in English in editorial prose.',
   de: 'Use the formal Sie-Form when addressing the reader. Tone: editorial and professional, similar to c\'t or heise.de. Avoid Du-Form, marketing exclamations, and over-translation of established English tech terms.',
@@ -139,9 +144,11 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
       source: 'predecessor / precursor',
       target: '전신 / 원형 / 초기 형태 / 토대',
       note:
-        'NOT 선조 — "선조" is archaic and means "ancestor" in a genealogical sense. For "structural precursor", ' +
-        '"intellectual ancestor", "predecessor of X" in tech/history writing, use 전신 (most natural for direct ' +
-        'lineage), 원형 (when emphasizing prototype/template role), 초기 형태 (early form), or 토대 (foundation).',
+        'NOT 선조 — "선조" is archaic and means "ancestor" in a genealogical sense. For "intellectual ancestor", ' +
+        '"predecessor of X" in tech/history writing, use 전신 (most natural for direct lineage), 원형 (prototype/' +
+        'template role), 초기 형태 (early form), or 토대 (foundation). For "structural precursor" specifically, ' +
+        'a bare "구조적 전신" reads opaque — REWRITE the sentence around the meaning: "the structural precursor of ' +
+        'all AI answer engines" → "오늘날 모든 AI 답변 엔진의 구조적 토대가 된 …" or "… 의 구조를 처음 제시한 …".',
     },
     {
       source: 'ship',
@@ -304,6 +311,70 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
       source: 'in-house',
       target: '사내 / 인하우스',
       note: 'For in-house design / dev / brand team. 사내 is more native Korean; 인하우스 is industry jargon. Either is acceptable — pick by surrounding register.',
+    },
+
+    // ── Editorial / AEO vocabulary that is routinely calqued ───────────
+    {
+      source: 'passage',
+      target: '단락 / 문단 (물리적 텍스트 블록) — 발췌 단위 / 추출 단위 (AEO 추출 개념)',
+      note:
+        'CRITICAL — context-dependent and heavily mistranslated. (a) When "passage" means a physical block of ' +
+        'body text → 단락 / 문단. (b) When it means the AEO concept — a short self-contained chunk an AI answer ' +
+        'engine extracts (the "passage" in "passage ranking" / "passage-level competition" / "AEO ranks passages") ' +
+        '→ 발췌 단위 or 추출 단위. NEVER 구절 (reads as a scripture verse), NEVER 구간 (reads as an interval / ' +
+        'route section), NEVER 텍스트 조각 (sounds like a stray fragment). "AEO ranks passages" → ' +
+        '"AEO 는 발췌 단위를 평가합니다" (NOT "구간을 순위 매깁니다").',
+    },
+    {
+      source: 'discrete',
+      target: '독립된 / 별개의 / 하나하나 구분되는',
+      note:
+        'NOT 이산적 — 이산적 is a mathematics/CS term (discrete vs. continuous) an ordinary reader does not parse. ' +
+        '"a discrete chunk of text" → 독립된 텍스트 단위 / 하나의 완결된 텍스트 단위.',
+    },
+    {
+      source: 'honest (honest update date / honest signal 등)',
+      target: '정확한 / 사실에 기반한',
+      note:
+        'NOT 솔직한 — 솔직한 means "candid / frank" (a personality trait) and is wrong here. An "honest update ' +
+        'date" is one that truthfully reflects when the content changed → 정확한 업데이트 날짜 / 실제 수정 시점을 ' +
+        '반영한 날짜.',
+    },
+    {
+      source: 'the reverse / the opposite (the reverse is also true 등)',
+      target: '반대의 경우 / 그 반대도',
+      note:
+        'NOT 반대 방향 — 반대 방향 means a physical direction. "The reverse is also true" → ' +
+        '"반대의 경우도 마찬가지입니다".',
+    },
+    {
+      source: 'reward / rewards (each layer rewards different work 등)',
+      target: '~에 영향을 준다 / ~에 유리하게 작용한다 / 좌우한다',
+      note:
+        'NOT 보상하다 — 보상 means compensation / a reward payment. "Each layer rewards different work" means ' +
+        'each layer responds to / is moved by different work → "각 계층은 서로 다른 작업에 영향을 받습니다".',
+    },
+    {
+      source: 'floor (indexing floor / baseline floor 등)',
+      target: '최소 요건 / 기본 전제 / 하한선',
+      note:
+        'NOT 바닥선 — 바닥선 is not idiomatic Korean and is unparseable. An "indexing floor" is the minimum bar ' +
+        'a page must clear → "색인을 위한 최소 요건".',
+    },
+    {
+      source: 'co-citation',
+      target: '동시 인용 (여러 출처가 같은 맥락에서 함께 인용되는 현상)',
+      note:
+        'A SINGLE concept — do NOT split it morpheme-by-morpheme into "동료(co) + 인용/말하다" (이는 완전 오역). ' +
+        'It is the SEO/AEO phenomenon of two entities being cited together. Translate as 동시 인용; first mention ' +
+        'may keep "co-citation" in English if a gloss helps.',
+    },
+    {
+      source: 'byline',
+      target: '작성자 표기 / 바이라인',
+      note:
+        'The author-credit line on an article. Do NOT compose it morpheme-by-morpheme (e.g. "필명이 서명한 배열" ' +
+        '— nonsensical). "consistent bylines across articles" → "모든 기사에서 일관된 작성자 표기".',
     },
   ],
   ja: [
@@ -620,10 +691,10 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
       target:
         'Answer Engine Optimization (AEO) 는 AI 엔진이 페이지 콘텐츠를 추출하고 인용하도록 구조를 잡는 작업입니다.',
     },
-    // "predecessor" / "precursor" — NOT 선조 (archaic, genealogical)
+    // "structural precursor" — rewrite, do NOT calque as "구조적 전신"
     {
       en: 'Google launched what is the structural precursor of all AI answer engines.',
-      target: 'Google은 모든 AI 답변 엔진의 구조적 전신이라 할 만한 기능을 출시했습니다.',
+      target: 'Google이 출시한 그 기능은 오늘날 모든 AI 답변 엔진의 구조적 토대가 되었습니다.',
     },
     // Boundary whitespace preservation — fragment with leading space before "Google"
     {
@@ -674,6 +745,39 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
       en: 'This decision framework helps leadership prioritize cross-functional bets.',
       target: '이러한 의사결정 체계는 리더십이 부서 간 투자 우선순위를 정하는 데 도움이 됩니다.',
     },
+    // "passage" (AEO sense) — 발췌 단위, NOT 구절 / 구간
+    {
+      en: 'Classic SEO ranks pages; Answer Engine Optimization ranks passages.',
+      target:
+        'Classic SEO 는 페이지를 평가하고, Answer Engine Optimization (AEO) 는 발췌 단위를 평가합니다.',
+    },
+    // "discrete" — 독립된, NOT 이산적 (math jargon)
+    {
+      en: 'A passage is a discrete chunk of text, 50–90 words long, that an AI engine lifts out as a visible answer.',
+      target:
+        '발췌 단위란 AI 엔진이 눈에 보이는 답변으로 뽑아내는, 50~90단어 길이의 독립된 텍스트 단위입니다.',
+    },
+    // "the reverse" — 반대의 경우, NOT 반대 방향
+    { en: 'The reverse is also true.', target: '반대의 경우도 마찬가지입니다.' },
+    // Anti-calque: an English sentence rewritten as native Korean, not mirrored
+    {
+      en: 'A page that is not crawlable or carries no canonical link value will not be extracted, no matter how well its paragraphs are written.',
+      target:
+        '크롤링이 불가능하거나 링크로서의 가치가 없는 페이지는 문단이 아무리 잘 작성되어 있어도 인용되지 않습니다.',
+    },
+    // Anti-stacking: break English pre-modifier pile-ups into a clean clause
+    {
+      en: 'Top-ranking pages with deep heading structures and pronoun-heavy paragraphs may still be invisible in AI Overviews.',
+      target:
+        '제목 구조가 복잡하거나 대명사가 많은 문단으로 이루어진 페이지는 검색 순위가 높더라도 AI Overviews 에는 노출되지 않을 수 있습니다.',
+    },
+    // "rewards" — 영향을 받는다, NOT 보상한다; and no "each…each" mirroring
+    {
+      en: 'Each layer rewards different work, and each depends on the one beneath it.',
+      target: '각 계층은 서로 다른 작업에 영향을 받으며, 그 아래 계층에 의존합니다.',
+    },
+    // "honest" (honest update date) — 정확한, NOT 솔직한
+    { en: 'an honest update date', target: '정확한 업데이트 날짜' },
   ],
   ja: [
     // "ship" sense (a): public release

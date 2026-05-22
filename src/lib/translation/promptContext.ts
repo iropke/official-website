@@ -376,6 +376,15 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
         'The author-credit line on an article. Do NOT compose it morpheme-by-morpheme (e.g. "필명이 서명한 배열" ' +
         '— nonsensical). "consistent bylines across articles" → "모든 기사에서 일관된 작성자 표기".',
     },
+    {
+      source: 'companion spoke / the companion spoke on',
+      target: '관련 글 / 함께 보면 좋은 글',
+      note:
+        'CRITICAL — here "spoke" is the NOUN from "hub-and-spoke" (a sibling article in the same content ' +
+        'cluster), NOT the past tense of "speak". "The companion spoke on [X] covers …" → ' +
+        '"[X] 를 다루는 관련 글에서는 … 다룹니다". NEVER 동료가 말했습니다 / 동료는 다음과 같이 말했습니다 ' +
+        '(reading "spoke" as a verb and "companion" as a colleague — a full mistranslation).',
+    },
   ],
   ja: [
     {

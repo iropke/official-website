@@ -383,28 +383,38 @@ function collectBatchItems(
 }
 
 /**
- * Split translated text on `⟪idx⟫` placeholders. Returns N+1 fragments for
- * N placeholders (the text BEFORE, BETWEEN, and AFTER each marker).
+ * Split a marker-delimited batch translation into per-item slots.
  *
- * Returns `null` if any expected placeholder is missing — that signals the
- * model failed to preserve markers and the caller should fall back to
+ * Every item i is emitted into the batch with a leading `⟪i⟫` marker; item
+ * i's slot is the text from its marker up to the next marker in OUTPUT order
+ * (markers may be reordered by SOV target languages — each item still
+ * receives one contiguous run). Any text before the first marker is folded
+ * into that marker's slot.
+ *
+ * Returns `null` if any `⟪i⟫` is missing or appears more than once — that
+ * signals the model broke the markers and the caller should fall back to
  * per-item translation.
  */
-function splitByPlaceholders(
-  text: string,
-  preserveIndices: number[],
-): string[] | null {
-  const fragments: string[] = []
-  let remaining = text
-  for (const idx of preserveIndices) {
-    const placeholder = `${PLACEHOLDER_OPEN}${idx}${PLACEHOLDER_CLOSE}`
-    const pos = remaining.indexOf(placeholder)
-    if (pos < 0) return null
-    fragments.push(remaining.substring(0, pos))
-    remaining = remaining.substring(pos + placeholder.length)
+function splitBatchByMarkers(text: string, itemCount: number): string[] | null {
+  const found: { index: number; at: number; end: number }[] = []
+  for (let i = 0; i < itemCount; i++) {
+    const marker = `${PLACEHOLDER_OPEN}${i}${PLACEHOLDER_CLOSE}`
+    const at = text.indexOf(marker)
+    if (at < 0) return null
+    if (text.indexOf(marker, at + marker.length) >= 0) return null
+    found.push({ index: i, at, end: at + marker.length })
   }
-  fragments.push(remaining)
-  return fragments
+  found.sort((a, b) => a.at - b.at)
+  const slots: string[] = new Array(itemCount).fill('')
+  for (let p = 0; p < found.length; p++) {
+    const nextAt = p + 1 < found.length ? found[p + 1].at : text.length
+    slots[found[p].index] = text.substring(found[p].end, nextAt)
+  }
+  // Text before the first marker → fold into the slot that marker opens.
+  if (found[0].at > 0) {
+    slots[found[0].index] = text.substring(0, found[0].at) + slots[found[0].index]
+  }
+  return slots
 }
 
 /**
@@ -424,8 +434,23 @@ function splitByPlaceholders(
  */
 function preserveBoundaryWhitespace(original: string, translated: string): string {
   if (translated.length === 0) return translated
-  const leadingWs = original.match(/^\s*/)?.[0] ?? ''
   const trailingWs = original.match(/\s*$/)?.[0] ?? ''
+
+  // Leading "joiner": a sentence-joining punctuation mark + whitespace at the
+  // very start of the fragment. When a fragment sits right after an inline
+  // span (bold / link) that ENDS a sentence, the fragment carries the joining
+  // ". " — e.g. `<strong>…aggregators</strong>` + `. Cite the W3C spec …`.
+  // The model routinely drops that leading ". " when translating the fragment
+  // standalone, collapsing the two rendered spans into "…제외W3C" (2026-05-23
+  // AEO ko incident). Re-apply the joiner when the model omitted it.
+  const joinerMatch = original.match(/^\s*[.,;:!?]\s+/)
+  if (joinerMatch) {
+    const body = translated.replace(/^\s+|\s+$/g, '')
+    const modelKeptJoiner = /^\s*[.,;:!?]\s/.test(translated)
+    return (modelKeptJoiner ? '' : joinerMatch[0]) + body + trailingWs
+  }
+
+  const leadingWs = original.match(/^\s*/)?.[0] ?? ''
   const body = translated.replace(/^\s+|\s+$/g, '')
   return leadingWs + body + trailingWs
 }
@@ -451,10 +476,15 @@ async function translatePerItem(
 }
 
 /**
- * Translate a batch of items as a single passage. Substitutes placeholders
- * for preserve-role items, sends the merged string to the translator, then
- * redistributes the translated text back into translatable items by
- * splitting on placeholders.
+ * Translate a batch of items (all inline content of one paragraph-like
+ * container) as a SINGLE coherent passage.
+ *
+ * Every item — translatable text, bold/linked spans, inline code — is emitted
+ * with a leading `⟪i⟫` marker. The whole marked string goes to the model in
+ * one call, so the model sees the entire sentence (correct grammar, no
+ * hallucinated subjects, no fragments left untranslated) and only has to keep
+ * the markers. The translation is then split back onto the original nodes by
+ * marker. If the model drops a marker we fall back to per-item translation.
  */
 async function translateBatch(
   items: BatchItem[],
@@ -479,74 +509,69 @@ async function translateBatch(
     return
   }
 
-  // Guard: when two translatable items sit adjacent (with no preserve
-  // between them — happens with inline format runs like bold/italic spans,
-  // or with link-wrapped text), there is no anchor to redistribute the
-  // translated fragment between them. Fall back to per-item translation
-  // for the whole batch in that case. The inline-code case (the primary
-  // motivation for batching) is unaffected because code items sit between
-  // translatable items.
-  for (let i = 0; i < items.length - 1; i++) {
-    if (items[i].role === 'translatable' && items[i + 1].role === 'translatable') {
-      await translatePerItem(items, translate, usage, context)
-      return
-    }
-  }
-
-  // Build batch string with placeholders for preserve items, original text
-  // for translatable items. Use the item's tree-order index as the
-  // placeholder number so we can map fragments back to items.
+  // Build the marked batch string: a leading ⟪i⟫ marker for EVERY item,
+  // followed by the item's source text (preserve items — inline code — emit
+  // their marker only; their content is reinserted verbatim from the node).
+  // Marking every item means adjacent translatable spans (bold + text, link
+  // text + text) are translated together as one sentence instead of being
+  // split into isolated fragments — the v2 per-item fallback for that case
+  // hallucinated subjects and left fragments untranslated (2026-05-23 AEO
+  // ko incident).
   const batchParts: string[] = []
-  const preserveIndices: number[] = []
   for (let i = 0; i < items.length; i++) {
-    if (items[i].role === 'preserve') {
-      preserveIndices.push(i)
-      batchParts.push(`${PLACEHOLDER_OPEN}${i}${PLACEHOLDER_CLOSE}`)
-    } else {
-      batchParts.push(items[i].original)
-    }
+    batchParts.push(`${PLACEHOLDER_OPEN}${i}${PLACEHOLDER_CLOSE}`)
+    if (items[i].role === 'translatable') batchParts.push(items[i].original)
   }
   const batchString = batchParts.join('')
+  // Plain source of the whole passage — reference context for the per-item
+  // fallback so even the degraded path sees the full sentence.
+  const passageSource = items.map((it) => it.original).join('')
 
   let result
   try {
     result = await translate(batchString, context)
   } catch {
     // Network / API failure during batch translate — fall back to per-item.
-    await translatePerItem(items, translate, usage, context)
+    await translatePerItem(items, translate, usage, passageSource)
     return
   }
   usage.inputTokens += result.inputTokens
   usage.outputTokens += result.outputTokens
 
-  const fragments = splitByPlaceholders(result.translated, preserveIndices)
-  if (fragments === null) {
-    // Model failed to preserve placeholders. Discard the batch usage cost
-    // for the broken call (already recorded above) and translate per item.
+  const slots = splitBatchByMarkers(result.translated, items.length)
+  if (slots === null) {
+    // Model dropped or duplicated a marker — fall back to per-item, but pass
+    // the whole passage as reference context so fragments are still
+    // translated with sentence-level awareness.
     console.warn(
-      `[lexicalWalker] placeholders missing from batch translation — falling back to per-item. batch="${batchString.slice(0, 80)}..."`,
+      `[lexicalWalker] markers missing/duplicated in batch translation — falling back to per-item. batch="${batchString.slice(0, 80)}..."`,
     )
-    await translatePerItem(items, translate, usage, context)
+    await translatePerItem(items, translate, usage, passageSource)
     return
   }
 
-  // Assign fragments to translatable items in tree order. For each
-  // preserve item we step past one fragment boundary; translatable items
-  // receive the fragment for the current "slot" (number of placeholders
-  // seen so far). Boundary whitespace around each placeholder MUST survive
-  // — the fragment may have been trimmed by the model around the marker,
-  // so we restore the original leading/trailing whitespace pattern.
-  let placeholdersSeen = 0
-  for (const it of items) {
-    if (it.role === 'preserve') {
-      placeholdersSeen++
-      continue
+  // An empty slot for a translatable item means the model merged that span's
+  // content into a neighbour — redistributing would leak the English source
+  // (slot kept empty) or blank the node. Fall back to per-item instead, with
+  // the whole passage as reference context so fragments stay sentence-aware.
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].role === 'translatable' && slots[i].trim().length === 0) {
+      console.warn(
+        `[lexicalWalker] empty slot for translatable item ${i} — falling back to per-item.`,
+      )
+      await translatePerItem(items, translate, usage, passageSource)
+      return
     }
-    const fragIdx = placeholdersSeen
-    const newText = fragments[fragIdx]
-    if (typeof newText === 'string' && newText.length > 0) {
-      it.node.text = preserveBoundaryWhitespace(it.original, newText)
-    }
+  }
+
+  // Redistribute slots onto the original nodes. The model placed
+  // target-language spacing across the whole sentence, so each translatable
+  // node takes its slot verbatim — re-applying the English fragment's
+  // boundary whitespace here would corrupt it. Preserve items keep their
+  // original code text.
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].role !== 'translatable') continue
+    items[i].node.text = slots[i]
     usage.nodes += 1
   }
 }

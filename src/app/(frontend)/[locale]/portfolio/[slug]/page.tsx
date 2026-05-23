@@ -130,6 +130,8 @@ export default async function PortfolioDetailPage({ params, searchParams }: Page
       depth: 2,
       limit: 1,
       draft: isPreviewUser,
+      // `publishedDate <= now()` = scheduled-publish visibility gate (drip queue,
+      // visitor branch only — preview users see future-dated posts to verify schedule).
       where: isPreviewUser
         ? {
             and: [
@@ -141,6 +143,7 @@ export default async function PortfolioDetailPage({ params, searchParams }: Page
             and: [
               { slug: { equals: slug } },
               { _status: { equals: 'published' } },
+              { publishedDate: { less_than_equal: new Date().toISOString() } },
               { publishedLocales: { contains: locale } },
               { category: { equals: CATEGORY } },
             ],
@@ -165,9 +168,11 @@ export default async function PortfolioDetailPage({ params, searchParams }: Page
         depth: 1,
         limit: RELATED_POSTS_LIMIT * 2,
         sort: '-publishedDate',
+        // `publishedDate <= now()` = scheduled-publish visibility gate (drip queue).
         where: {
           and: [
             { _status: { equals: 'published' } },
+            { publishedDate: { less_than_equal: new Date().toISOString() } },
             { publishedLocales: { contains: locale } },
             { slug: { not_equals: slug } },
             { cluster: { equals: postCluster } },
@@ -186,9 +191,11 @@ export default async function PortfolioDetailPage({ params, searchParams }: Page
         depth: 1,
         limit: RELATED_POSTS_LIMIT,
         sort: '-publishedDate',
+        // `publishedDate <= now()` = scheduled-publish visibility gate (drip queue).
         where: {
           and: [
             { _status: { equals: 'published' } },
+            { publishedDate: { less_than_equal: new Date().toISOString() } },
             { publishedLocales: { contains: locale } },
             { slug: { not_equals: slug } },
             { category: { equals: CATEGORY } },

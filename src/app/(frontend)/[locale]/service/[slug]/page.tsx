@@ -115,6 +115,8 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
       depth: 2,
       limit: 1,
       draft: isPreviewUser,
+      // `publishedDate <= now()` = scheduled-publish visibility gate (drip queue,
+      // visitor branch only — preview users see future-dated posts to verify schedule).
       where: isPreviewUser
         ? {
             and: [
@@ -126,6 +128,7 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
             and: [
               { slug: { equals: slug } },
               { _status: { equals: 'published' } },
+              { publishedDate: { less_than_equal: new Date().toISOString() } },
               { publishedLocales: { contains: locale } },
               { category: { equals: CATEGORY } },
             ],

@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
       {
         pathname: '/api/media/file/**',
       },
+      {
+        // Static design assets under /public/assets/** (service hub mockups,
+        // service-detail feature-row images, etc.). Without this entry, Vercel's
+        // image optimizer returns 400 INVALID_IMAGE_OPTIMIZE_REQUEST for any
+        // next/image referencing /assets/... paths.
+        pathname: '/assets/**',
+      },
     ],
     remotePatterns: [
       {

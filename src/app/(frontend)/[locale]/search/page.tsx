@@ -91,9 +91,11 @@ async function searchPosts(
       depth: 0,
       limit: RESULTS_PER_PAGE,
       sort: '-publishedDate',
+      // `publishedDate <= now()` = scheduled-publish visibility gate (drip queue).
       where: {
         and: [
           { _status: { equals: 'published' } },
+          { publishedDate: { less_than_equal: new Date().toISOString() } },
           { publishedLocales: { equals: locale } },
           {
             or: [

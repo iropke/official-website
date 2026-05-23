@@ -80,9 +80,11 @@ export default async function StoriesPage({ params, searchParams }: PageProps) {
       limit: POSTS_PER_PAGE,
       page: currentPage,
       sort: '-publishedDate',
+      // `publishedDate <= now()` = scheduled-publish visibility gate (drip queue).
       where: {
         and: [
           { _status: { equals: 'published' } },
+          { publishedDate: { less_than_equal: new Date().toISOString() } },
           { publishedLocales: { equals: locale } },
           { category: { equals: CATEGORY } },
         ],

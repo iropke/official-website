@@ -81,9 +81,12 @@ export default async function InsightsPage({ params, searchParams }: PageProps) 
       // `_status: published` 명시 필수 — Payload draft:false 기본값은 main row 의
       // _status='draft' 를 자동 제외하지 못함 (versioning 의미). `publishedLocales`
       // 는 select hasMany 라 join 테이블에 row 가 남아있을 수 있어 단독 신뢰 불가.
+      // `publishedDate <= now()` 는 scheduled-publish visibility gate — drip 큐가
+      // 미래일자 publishedDate 로 _status='published' flip 한 게시물을 도착 시각까지 숨김.
       where: {
         and: [
           { _status: { equals: 'published' } },
+          { publishedDate: { less_than_equal: new Date().toISOString() } },
           { publishedLocales: { equals: locale } },
           { category: { equals: 'insight' } },
         ],

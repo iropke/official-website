@@ -91,11 +91,13 @@ export default async function HomePage({ params }: HomePageProps) {
       sort: '-publishedDate',
       // `_status: published` 명시 필수 (PR fix/posts-draft-status-filter 2026-05-15) —
       // Payload draft:false 기본값은 main row 의 _status='draft' 를 자동 제외하지 못함.
+      // `publishedDate <= now()` = scheduled-publish visibility gate (drip queue).
       // "Latest Insights" 섹션은 insight 카테고리만 노출 (story / portfolio 는
       // 별도 라우트에 자체 카드 그리드를 둘 예정).
       where: {
         and: [
           { _status: { equals: 'published' } },
+          { publishedDate: { less_than_equal: new Date().toISOString() } },
           { publishedLocales: { equals: locale } },
           { category: { equals: 'insight' } },
         ],

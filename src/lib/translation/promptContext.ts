@@ -81,7 +81,7 @@ export const UNIVERSAL_TRANSLATION_PRINCIPLE =
 // ─────────────────────────────────────────────────────────────────────────
 
 export const STYLE_GUIDE: Partial<Record<Locale, string>> = {
-  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. AVOID ARCHAIC 한자어 that modern Korean readers do not use — examples: "선조" (use "전신" / "원형" / "초기 형태" for "predecessor / precursor"), "고로" (use "그래서" / "따라서"), "여하튼" (use "어쨌든" / "아무튼"), "왈" (use "말한다" / "말하기를"), "차치하고" (use "제쳐두고" / "차지하고"). If in doubt, choose the word a 2026 newspaper editor would use, not a 1970s textbook. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English. ACRONYMS: PRESERVE English acronyms (UI / UX / AI / ML / API / URL / CSS / HTML / JS / TS / SEO / AEO / GEO / CMS / CRM / ERP / SaaS / B2B / B2C / GDPR / KPI / ROI / OKR / TCO / RFP / RAG / LLM / NLP / WCAG / JSON-LD / E-E-A-T etc.) VERBATIM in Korean prose. NEVER phonetically transliterate to Hangul (no 유아이 / 에이아이 / 에이피아이 / 에스이오 / 지디피알). NEVER swap an English acronym for its expanded Korean meaning ("AI" stays as "AI", NOT "인공지능"; "SEO" stays as "SEO", NOT "검색엔진최적화"). A first-mention inline gloss is acceptable when natural — "AI (인공지능)" once, then "AI" thereafter — but the acronym itself is never replaced by the meaning. FIRST PERSON: when the source uses "we / our" referring to Iropke (the publisher), render as 저희 / 이롭게 — NOT 우리. 우리 reads either casual or inclusive-of-the-reader in formal editorial; 저희 keeps the polite editorial distance. WHITESPACE: when your input fragment has a leading or trailing space (because it sits next to a bold span, link, or inline code in the parent paragraph), reproduce that exact leading/trailing space in your output — Korean does not need spaces between sentences but it DOES need spaces between adjacent inline elements in the rendered HTML, so do not strip boundary whitespace. KOREAN SYNTAX — translate the MEANING, never mirror English structure. (1) EXPLICIT SUBJECTS: a Korean sentence needs a clear subject/topic far more often than English. When the English elides the subject or carries it with "it / this / these / that / the reverse", name the actual noun in Korean — e.g. "the reverse is also true" → "반대의 경우도 마찬가지입니다" (NOT "반대 방향도 마찬가지입니다"). A bare "이 두 계층은 …" when the reader cannot tell what the two layers are reads as a dangling reference — name them. (2) DO NOT STACK MODIFIERS: English piles pre-modifiers in front of a noun ("top-ranking pages with deep heading structures and pronoun-heavy paragraphs"); mirroring that in Korean reads badly — break it into a short relative clause or split into two sentences. (3) ONE TOPIC PER SENTENCE: do not let the topic marker (X은/는) and the real subject of the predicate diverge — "이 두 계층은 … 이점이 누적됩니다" is broken Korean; recast so the sentence has one coherent subject. (4) DO NOT MIRROR "each X … each X" repetition — say "각 계층은 … 그 아래 계층에 의존합니다" once. (5) CHOOSE THE WORD BY MEANING, not by dictionary lookup — never reach for a stiff or technical 한자어 when a plain word carries the sense: "discrete" → 독립된 / 별개의 (NOT 이산적), "floor / indexing floor" → 최소 요건 (NOT 바닥선), "rewards" (each layer rewards X) → ~에 영향을 준다 / 유리하게 작용한다 (NOT 보상한다), "honest" (honest update date) → 정확한 (NOT 솔직한), "passage" (AEO sense) → 발췌 단위(passage), the Korean term with English in parentheses on every occurrence (NOT 구절 / 구간 / 텍스트 조각). (6) NEVER compose an unfamiliar compound term morpheme-by-morpheme — "co-citation" is 동시 인용 (NOT 동료 + 인용), "byline" is 작성자 표기 (NOT 필명 + 서명); translate the whole concept or keep the English term. (7) If a sentence still reads awkwardly after a literal pass, REWRITE it from the meaning — restructure clause order and word order freely so the result reads as native Korean editorial prose, not as translated English.',
+  ko: 'Use 합쇼체 (formal polite ~합니다 / ~입니다). Tone: editorial, calm, professional — like a senior engineer writing for peers. Do NOT use 해요체 (~해요), 반말 (~한다), advertising slogans, exclamation marks, or marketing superlatives. For best-practice recommendations (English imperatives like "Avoid X.", "Do Y.", "Prefer Z."), render as recommendation forms (~해야 합니다 / ~하는 것이 좋습니다 / ~을 권장합니다) — NOT plain statements (~합니다). SENTENCE-ENDING CONSISTENCY (STRICT): within a single paragraph / clause sequence / list, every sentence ending must be 합쇼체 (~합니다 / ~입니다 / ~합니다.). NEVER switch to plain 평어 (~한다 / ~된다 / ~이다) mid-passage — even one such ending breaks the editorial register. Watch especially short English imperative sequences ("do X. don\'t do Y. the fix is Z.") where the model tends to mirror the curt tone with 평어; render every sentence with 합쇼체. MINIMIZE Sino-Korean (한자어) and stiff bookish wording: prefer plain, modern, natural Korean a real reader would say. AVOID ARCHAIC 한자어 that modern Korean readers do not use — examples: "선조" (use "전신" / "원형" / "초기 형태" for "predecessor / precursor"), "고로" (use "그래서" / "따라서"), "여하튼" (use "어쨌든" / "아무튼"), "왈" (use "말한다" / "말하기를"), "차치하고" (use "제쳐두고" / "차지하고"). AVOID FORMAL-BUSINESS 한자어 that read as 1990s corporate boilerplate — "지배적" (use 명확한 / 시장을 독점하는 / 높은 시장 점유율을 보이는 / 두드러진 for "dominant"), "귀사" / "귀하의" / "당신의" (NEVER — see SECOND-PERSON rule). If in doubt, choose the word a 2026 newspaper editor would use, not a 1970s textbook. Do NOT translate word-for-word — rewrite each sentence so it reads naturally in Korean (recast structure, do not mirror English syntax). When a natural Korean word does not exist, keep the English term rather than forcing an awkward 한자어/직역 (e.g. "persistent world" → "온라인 멀티플레이어 게임" 같은 자연스러운 의역 또는 영어 용어, NOT "영속적 세계"). NEVER INVENT KOREAN WORDS by analogy from English roots — "자르임" (from "잘리다") is not a Korean word; use "잘림" or "잘리는 현상" instead. If a candidate Korean word looks unfamiliar, check it exists in a standard dictionary; if not, rephrase. Avoid translationese like "그것은 ~입니다 / ~라는 또 다른 질문입니다" — phrase as a Korean writer would. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Korean tech readers expect these terms in English. ACRONYMS: PRESERVE English acronyms (UI / UX / AI / ML / API / URL / CSS / HTML / JS / TS / SEO / AEO / GEO / CMS / CRM / ERP / SaaS / B2B / B2C / GDPR / KPI / ROI / OKR / TCO / RFP / RAG / LLM / NLP / WCAG / JSON-LD / E-E-A-T etc.) VERBATIM in Korean prose. NEVER phonetically transliterate to Hangul (no 유아이 / 에이아이 / 에이피아이 / 에스이오 / 지디피알). NEVER swap an English acronym for its expanded Korean meaning ("AI" stays as "AI", NOT "인공지능"; "SEO" stays as "SEO", NOT "검색엔진최적화"). A first-mention inline gloss is acceptable when natural — "AI (인공지능)" once, then "AI" thereafter — but the acronym itself is never replaced by the meaning. STANDARD TRANSLITERATIONS: "redirect" → 리다이렉트 (NOT 리디렉트), "workflow" → 워크플로우 (NOT 워크플로). FIRST PERSON: when the source uses "we / our" referring to Iropke (the publisher), render as 저희 / 이롭게 — NOT 우리. 우리 reads either casual or inclusive-of-the-reader in formal editorial; 저희 keeps the polite editorial distance. SELF-REFERENCE: when the source uses "this site / our site / our stack / this website" referring to iropke.com itself (not a hypothetical reader site), render as "이롭게 공식 웹사이트" or "이롭게" — NOT bare "이 사이트" / "우리 사이트". Because lexical blocks are translated in isolation, the reader cannot tell which site "this site" refers to; name the publisher explicitly. SECOND PERSON (CRITICAL): when the source uses "your site / your brand / your company / your X" addressing a generic reader, NEVER render as 귀사 / 귀하의 / 당신의 (formal-business / archaic register, wrong tone for modern editorial). Use 3rd-person generalization ("특정 기업과 브랜드", "기업", "조직", "각 기업"), or drop the pronoun and rewrite the sentence in impersonal form. WHITESPACE: when your input fragment has a leading or trailing space (because it sits next to a bold span, link, or inline code in the parent paragraph), reproduce that exact leading/trailing space in your output — Korean does not need spaces between sentences but it DOES need spaces between adjacent inline elements in the rendered HTML, so do not strip boundary whitespace. KOREAN SYNTAX — translate the MEANING, never mirror English structure. (1) EXPLICIT SUBJECTS: a Korean sentence needs a clear subject/topic far more often than English. When the English elides the subject or carries it with "it / this / these / that / the reverse", name the actual noun in Korean — e.g. "the reverse is also true" → "반대의 경우도 마찬가지입니다" (NOT "반대 방향도 마찬가지입니다"). "read in isolation" (subject = a passage) → "독립적으로 노출되었을 때" / "그 자체로 읽혔을 때" (NOT "격리된 상태에서 읽습니다" — that reads as if the human reader is isolated, which is wrong). A bare "이 두 계층은 …" when the reader cannot tell what the two layers are reads as a dangling reference — name them. (2) DO NOT STACK MODIFIERS: English piles pre-modifiers in front of a noun ("top-ranking pages with deep heading structures and pronoun-heavy paragraphs"); mirroring that in Korean reads badly — break it into a short relative clause or split into two sentences. (3) ONE TOPIC PER SENTENCE: do not let the topic marker (X은/는) and the real subject of the predicate diverge — "이 두 계층은 … 이점이 누적됩니다" is broken Korean; recast so the sentence has one coherent subject. (4) DO NOT MIRROR "each X … each X" repetition — say "각 계층은 … 그 아래 계층에 의존합니다" once. (5) DO NOT MIRROR English "X, not Y" CONTRAST in both halves — say one side and leave the other implicit. "appears above the search results, not in place of them" → "검색 결과 위에 함께 표시됩니다" (drop the negated half, which reads as redundant in Korean). (6) DO NOT MIRROR English connector phrases ("two results follow", "the consequence is", "it follows that") literally — "두 가지 결과가 따른다" reads as a dangling sentence with no clear referent; rewrite from the meaning ("두 가지 관점의 대응이 필요합니다"). (7) CHOOSE THE WORD BY MEANING, not by dictionary lookup — never reach for a stiff or technical 한자어 when a plain word carries the sense: "discrete" → 독립된 / 별개의 (NOT 이산적), "floor / indexing floor" → 최소 요건 (NOT 바닥선), "rewards" (each layer rewards X) → ~에 영향을 준다 / 유리하게 작용한다 (NOT 보상한다 — including passive "is not rewarded" → "의미가 없다" / "효과가 없다", NOT "보상받지 못한다"), "honest" (honest update date) → 정확한 (NOT 솔직한), "passage" (AEO sense) → 발췌 단위(passage), the Korean term with English in parentheses on every occurrence (NOT 구절 / 구간 / 텍스트 조각), "dominant" → 명확한 / 시장을 독점하는 (NOT 지배적), "healthy" (site/SEO readiness sense) → 준비된 / 완료된 / 진행된 (NOT 건강성을 갖춘 — sites are not healthy in the medical sense), "surface / citation surface" (AEO citation surfaces) → 표면(surface) with English in parentheses on every occurrence, SAME pattern as 발췌 단위(passage) — Korean has no clean word for the AEO sense of "surface" (AI answer card / search result / citation box areas) so anchor it with the English term every time (NOT bare 인용 표면 without English anchor — literal calque; NOT 인용 채널 / 인용 출처 — these substitutions lose the precise AEO meaning), "conversion rate" → 전환율 (NEVER 전환 중심도, which is a literal non-word), "transactional intent pages" → 거래 의도(인텐션)이 있는 페이지 / 거래 관련 페이지 (NOT 거래 의도의 페이지 with awkward 의도의), "winning content pattern" → 효과적인 콘텐츠 패턴 / 잘 작동하는 콘텐츠 패턴 (NOT 승리하는 — sports/war connotation), "side-by-side comparison" (when an actual table is adjacent) → simply "비교" (the "side-by-side" is redundant in Korean when a table is right there). (8) NEVER compose an unfamiliar compound term morpheme-by-morpheme — "co-citation" is 동시 인용 (NOT 동료 + 인용), "byline" is 작성자 표기 (NOT 필명 + 서명); translate the whole concept or keep the English term. (9) If a sentence still reads awkwardly after a literal pass, REWRITE it from the meaning — restructure clause order and word order freely so the result reads as native Korean editorial prose, not as translated English.',
   ja: 'Use です・ます体 (polite written form). Tone: editorial, calm, professional. Avoid だ・である体, casual sentence endings, slang, exclamation marks, and marketing superlatives. Punctuation: 「、」 and 「。」 (full-width). PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Japanese tech readers expect these terms in English.',
   zh: 'Use 简体中文 with neutral, formal written register (书面语). Avoid colloquialisms, marketing superlatives, and exclamation marks. Punctuation: full-width「，」「。」「：」. PRESERVE established English SW idioms verbatim (e.g. "silent failure", "race condition", "flaky test", "deadlock", "busy loop") — Chinese tech readers expect these terms in English in editorial prose.',
   de: 'Use the formal Sie-Form when addressing the reader. Tone: editorial and professional, similar to c\'t or heise.de. Avoid Du-Form, marketing exclamations, and over-translation of established English tech terms.',
@@ -206,7 +206,18 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
     { source: 'preview', target: '프리뷰 / 미리보기' },
     { source: 'migration', target: '마이그레이션', note: 'DB / schema context' },
     { source: 'feature', target: '기능' },
-    { source: 'workflow', target: '워크플로' },
+    {
+      source: 'workflow',
+      target: '워크플로우',
+      note:
+        'CRITICAL — must be 워크플로우 (with 우 at end), NOT 워크플로. Industry-standard transliteration in Korean tech writing.',
+    },
+    {
+      source: 'redirect / redirects / redirecting',
+      target: '리다이렉트',
+      note:
+        'CRITICAL — must be 리다이렉트, NOT 리디렉트. Korean industry standard transliteration (matches Naver Webmaster docs, search engine community usage). 리디렉트 is a common but non-standard variant.',
+    },
     { source: 'API', target: 'API', note: 'keep verbatim' },
     { source: 'SDK', target: 'SDK', note: 'keep verbatim' },
     { source: 'this week', target: '이번 주' },
@@ -387,6 +398,99 @@ export const GLOSSARY: Partial<Record<Locale, GlossaryEntry[]>> = {
         'cluster), NOT the past tense of "speak". "The companion spoke on [X] covers …" → ' +
         '"[X] 를 다루는 관련 글에서는 … 다룹니다". NEVER 동료가 말했습니다 / 동료는 다음과 같이 말했습니다 ' +
         '(reading "spoke" as a verb and "companion" as a colleague — a full mistranslation).',
+    },
+
+    // ── v3 (2026-05-25) — AEO cluster ko review feedback ───────────────
+    {
+      source: 'your site / your brand / your company / your X (generic reader address)',
+      target: '특정 기업과 브랜드 / 기업 / 조직 / 각 기업 (3인칭 일반화) — or drop the pronoun',
+      note:
+        'CRITICAL — when the English source uses "your X" addressing a generic reader, NEVER render as ' +
+        '귀사 / 귀하의 / 당신의. 귀사 is formal-business / archaic register that reads as 1990s corporate ' +
+        'boilerplate, wrong for modern editorial. 당신의 is a stiff calque of "your". Prefer 3rd-person ' +
+        'generalization: "your brand appears in citations" → "특정 기업과 브랜드가 인용에 등장하는지". ' +
+        'Or rewrite the sentence in impersonal form, dropping the pronoun entirely.',
+    },
+    {
+      source: 'this site / our site / our stack / this website (self-reference to iropke.com)',
+      target: '이롭게 공식 웹사이트 / 이롭게',
+      note:
+        'CRITICAL — when the source refers to iropke.com itself (not a hypothetical reader site), ' +
+        'render as "이롭게 공식 웹사이트" or "이롭게", NOT bare "이 사이트" / "우리 사이트". Lexical blocks ' +
+        'are translated in isolation, so the reader of the translated paragraph cannot tell which site ' +
+        '"this site" refers to. Naming the publisher (이롭게) makes the reference unambiguous.',
+    },
+    {
+      source: 'dominant / dominantly / dominate',
+      target: '명확한 / 시장을 독점하는 / 높은 시장 점유율을 보이는 / 두드러진 (context-dependent)',
+      note:
+        'NEVER 지배적 — 지배적 is formal-business / 한자어 that reads as 1990s editorial. Pick the natural ' +
+        'plain-Korean rendering by context: "the dominant intent is direct click" → "직접 클릭 의도가 명확합니다"; ' +
+        '"Google and Perplexity dominate citation share" → "Google과 Perplexity가 시장을 독점하고 있습니다" or ' +
+        '"높은 시장 점유율을 보이고 있습니다"; "the dominant pattern" → "두드러진 패턴".',
+    },
+    {
+      source: 'surface / citation surface / surfaces (AEO citation surfaces context)',
+      target: '표면(surface) — 매 등장마다 영문 병기 (괄호 앞 공백 없음, 조사는 `)` 뒤)',
+      note:
+        'CRITICAL — SAME PATTERN AS "passage". Korean has no single word that captures the AEO sense of ' +
+        '"surface" (the visible places where citations appear — AI answer cards, search-result widgets, ' +
+        'citation boxes in AI Overviews / Perplexity / ChatGPT). Render as 표면(surface): the Korean term ' +
+        '표면 followed immediately by the English word "surface" in parentheses, NO space before the "(". ' +
+        'Korean particles attach after the closing paren: "citations appear on two surfaces" → ' +
+        '"두 곳의 표면(surface)에서 인용이 노출됩니다". This parenthetical anchors a marginal Korean word ' +
+        'to its established English AEO term — required on EVERY occurrence (not just first mention). ' +
+        'EXCEPTION = bare 표면 is acceptable for close repetition WITHIN the same sentence after one ' +
+        'parenthetical anchor (e.g. "표면(surface)이며, 그 표면들이…"). NEVER render as 인용 채널 / 인용 출처 / ' +
+        '인용이 노출되는 영역 — these substitutions LOSE the precise AEO meaning. NEVER use bare 표면 alone ' +
+        'either — it reads as a physical surface without the English anchor.',
+    },
+    {
+      source: 'healthy / health (site readiness / classic SEO health context)',
+      target: '준비된 / 완료된 / 진행된 / 갖춘',
+      note:
+        'NEVER 건강성을 갖춘 / 건강한 — sites are not "healthy" in the medical sense in Korean. ' +
+        '"a site with classic SEO health" → "classic SEO 작업이 진행된 사이트" / "classic SEO 가 준비된 사이트". ' +
+        'Pick the verb that matches: 준비된 (prepared), 완료된 (completed), 진행된 (worked on), 갖춘 (equipped with).',
+    },
+    {
+      source: 'conversion rate / conversion-centric / conversion-focused',
+      target: '전환율 (정량) / 전환 중심의 (정성, 형용사)',
+      note:
+        'NEVER 전환 중심도 — literal non-word that does not exist in Korean. Conversion rate is 전환율 ' +
+        '(established term). "weakens conversion" → "전환율을 약화시킬 수 있습니다" (NOT "전환 중심도를 약화").',
+    },
+    {
+      source: 'transactional intent / transactional pages',
+      target: '거래 의도(인텐션)이 있는 페이지 / 거래 관련 페이지',
+      note:
+        'NEVER 거래 의도의 페이지 — the 의도의 (genitive) reads awkward and breaks meaning. Use ' +
+        '거래 의도(인텐션)이 있는 페이지 (parenthetical preserves the English term) or 거래 관련 페이지 ' +
+        '(natural and unambiguous).',
+    },
+    {
+      source: 'winning / winning pattern (winning content pattern context)',
+      target: '효과적인 / 잘 작동하는 / (단순 동사구 재작성)',
+      note:
+        'NEVER 승리하는 — sports/war connotation, unnatural for content patterns. ' +
+        '"winning content pattern per engine" → "각 엔진별 효과적인 콘텐츠 패턴" / "엔진별 콘텐츠 패턴".',
+    },
+    {
+      source: 'in isolation / read in isolation (subject = a passage)',
+      target: '독립적으로 노출되었을 때 / 그 자체로 읽혔을 때 (subject = 단락)',
+      note:
+        'NEVER "격리된 상태에서 읽습니다" — 격리 (quarantine / isolation) implies a human is isolated, which ' +
+        'misreads the subject. The subject is the passage / paragraph, not the reader. Render with the ' +
+        'passage as explicit subject: "if a passage is read in isolation" → "단락이 독립적으로 노출되었을 때" / ' +
+        '"단락 자체로 읽혔을 때".',
+    },
+    {
+      source: 'side-by-side / side-by-side comparison (with an adjacent table)',
+      target: '비교 (단순화) — drop "나란히" when a table is already adjacent',
+      note:
+        'When the English uses "side-by-side" alongside an actual comparison table, the "side-by-side" ' +
+        'is redundant in Korean — the table\'s adjacency already conveys it. Simplify to 비교: ' +
+        '"winning content patterns per engine — side-by-side" → "각 엔진별 콘텐츠 패턴 비교".',
     },
   ],
   ja: [
@@ -790,6 +894,88 @@ export const EXAMPLES: Partial<Record<Locale, FewShotExample[]>> = {
     },
     // "honest" (honest update date) — 정확한, NOT 솔직한
     { en: 'an honest update date', target: '정확한 업데이트 날짜' },
+
+    // ── v3 (2026-05-25) — AEO cluster ko review feedback examples ──────
+    // "your brand" — 3rd-person generalization, NOT 귀사 / 당신의
+    {
+      en: 'Citations per AI answer tracks how often your brand appears when engines cite sources.',
+      target:
+        'AI 답변당 인용 횟수는 엔진이 출처를 인용할 때 특정 기업과 브랜드가 얼마나 자주 인용되는지 추적합니다.',
+    },
+    // self-reference to iropke.com — 이롭게 공식 웹사이트, NOT 이 사이트
+    {
+      en: 'This site uses a labeled TL;DR pattern across every Insights article.',
+      target: '이롭게 공식 웹사이트는 모든 Insights 기사에서 레이블이 붙은 TL;DR 패턴을 사용합니다.',
+    },
+    // "healthy" (site readiness) — 진행된, NOT 건강성을 갖춘
+    {
+      en: 'The first AEO audit takes about one hour on a site that already has classic SEO health.',
+      target: '첫 번째 AEO 점검은 이미 classic SEO 작업이 진행된 사이트에서 약 1시간 정도 소요됩니다.',
+    },
+    // "dominant" — 명확합니다, NOT 지배적
+    {
+      en: 'When the query is a brand name combined with a product or feature, direct click intent is dominant.',
+      target: '쿼리가 브랜드명과 제품 또는 기능의 조합일 때는 직접 클릭 의도가 명확합니다.',
+    },
+    // "dominant" market share — 시장 독점 / 높은 점유율
+    {
+      en: 'Google AI Overviews and Perplexity together dominate informational AI citation share in 2026.',
+      target:
+        'Google AI Overviews와 Perplexity는 2026년 정보성 AI 인용 점유율에서 시장을 독점하고 있습니다.',
+    },
+    // "surface" — 표면(surface) parallel notation, SAME as 발췌 단위(passage)
+    {
+      en: 'Tuning content for both readers and both engines means the same investment earns citations on two surfaces, not one.',
+      target:
+        '글을 독자와 양쪽 엔진 모두를 위해 조정하면 한 번의 작업으로 두 곳의 표면(surface)에서 인용을 얻습니다.',
+    },
+    // "citation surface" + close repetition — bare 표면 acceptable after the parenthetical anchor in the same sentence
+    {
+      en: 'Without losing the reading experience, you can convert the lede into a trustworthy citation surface that lifts directly into AI answers.',
+      target:
+        '리드를 읽는 경험을 훼손하지 않으면서도 신뢰할 수 있는 인용 표면(surface)으로 전환할 수 있으며, 이 표면이 AI 답변에 그대로 인용됩니다.',
+    },
+    // "conversion" — 전환율, NOT 전환 중심도
+    {
+      en: 'Applying AEO patterns to these pages has no measurable effect and may weaken conversion.',
+      target: '이러한 페이지에 AEO 패턴을 적용해도 측정 가능한 효과가 없으며, 오히려 전환율을 약화시킬 수 있습니다.',
+    },
+    // "transactional intent" — 거래 의도(인텐션)이 있는 페이지 / 거래 관련 페이지
+    {
+      en: 'Apply AEO selectively — not to transactional intent pages where direct click intent is clear.',
+      target:
+        '거래 의도(인텐션)이 있는 페이지처럼 직접 클릭 의도가 명확한 곳에는 AEO 를 선별적으로 적용합니다.',
+    },
+    // "rewarded" (passive) — 의미가 없습니다, NOT 보상받지 못합니다
+    {
+      en: 'The cost of slowing the publishing cadence to apply AEO rules is rarely rewarded in these cases.',
+      target: '이러한 경우에는 AEO 규칙을 적용하기 위해 발행 주기를 늦추는 것은 의미가 없습니다.',
+    },
+    // English "X, not Y" contrast — say one side
+    {
+      en: "Google's AI Overviews appears above the standard search results, not in place of them.",
+      target: 'Google의 AI Overviews는 표준 검색 결과 위에 나타나는 것으로, 그 대신 나타나는 것이 아닙니다.',
+    },
+    // "winning" content patterns — drop the sports word; "side-by-side" redundant with adjacent table
+    {
+      en: 'Winning content patterns per engine — side-by-side',
+      target: '각 엔진별 콘텐츠 패턴 비교',
+    },
+    // "in isolation" — subject = passage, NOT human reader
+    {
+      en: 'When a paragraph is extracted and read in isolation, it should still make sense.',
+      target: '단락이 추출되어 독립적으로 노출되었을 때에도 의미가 통해야 합니다.',
+    },
+    // workflow — 워크플로우 (NOT 워크플로) + redirect — 리다이렉트 (NOT 리디렉트)
+    {
+      en: 'They route clicks through redirects that lose the original source, breaking the attribution workflow.',
+      target: '원래 출처를 잃어버리는 리다이렉트를 통해 클릭을 라우팅하여, 출처 추적 워크플로우가 깨집니다.',
+    },
+    // Connector phrase rewrite — "two results follow" was a calque dead-end
+    {
+      en: 'Two results follow.',
+      target: '두 가지 관점의 대응이 필요합니다.',
+    },
   ],
   ja: [
     // "ship" sense (a): public release

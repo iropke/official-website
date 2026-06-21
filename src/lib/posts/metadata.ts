@@ -101,7 +101,8 @@ export async function buildPostDetailMetadata(
     return { alternates }
   }
 
-  const title = post.meta?.metaTitle?.trim() || post.title?.trim() || undefined
+  const baseTitle = post.title?.trim() || undefined
+  const metaTitle = post.meta?.metaTitle?.trim() || undefined
   const description =
     post.meta?.metaDescription?.trim() || post.excerpt?.trim() || undefined
   const ogImageUrl = mediaUrl(post.meta?.ogImage) ?? mediaUrl(post.thumbnail)
@@ -110,14 +111,28 @@ export async function buildPostDetailMetadata(
   // 여기서 다시 명시한다. getSiteSettings 는 React cache() 라 layout 호출과 dedupe.
   const settings = await getSiteSettings(locale)
 
+  // 완성형 <title> 단일 계산:
+  //   - metaTitle 이 title 과 다르면 = 콘텐츠 파이프라인이 명시한 완성형 SEO 타이틀로,
+  //     locale 별 브랜드 접미사("| Iropke" / "| 이롭게")가 이미 포함돼 있다 → 그대로 사용.
+  //   - 그 외(metaTitle 미설정 또는 auto-sync 로 title 과 동일)면 → "title | siteName" 합성.
+  // 문서 title 은 `{ absolute }` 로 반환해 루트 레이아웃의 `%s | Iropke` 템플릿이
+  // 한 번 더 적용돼 브랜드가 중복되는 것을 막는다(예: "... | 이롭게 | Iropke").
+  // og:title 은 템플릿 영향을 받지 않으므로 동일 문자열을 그대로 전달해 일치시킨다.
+  const fullTitle =
+    metaTitle && metaTitle !== baseTitle
+      ? metaTitle
+      : baseTitle
+        ? `${baseTitle} | ${settings.siteName}`
+        : undefined
+
   return {
-    ...(title ? { title } : {}),
+    ...(fullTitle ? { title: { absolute: fullTitle } } : {}),
     ...(description ? { description } : {}),
     alternates,
     openGraph: {
       type: 'article',
       siteName: settings.siteName,
-      ...(title ? { title } : {}),
+      ...(fullTitle ? { title: fullTitle } : {}),
       ...(description ? { description } : {}),
       ...(ogImageUrl ? { images: [ogImageUrl] } : {}),
     },

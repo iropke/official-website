@@ -146,11 +146,13 @@ export interface Config {
     navigation: Navigation;
     'site-settings': SiteSetting;
     homepage: Homepage;
+    'post-category-pages': PostCategoryPage;
   };
   globalsSelect: {
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
+    'post-category-pages': PostCategoryPagesSelect<false> | PostCategoryPagesSelect<true>;
   };
   locale:
     | 'en'
@@ -507,6 +509,29 @@ export interface Page {
             blockName?: string | null;
             blockType: 'ctaBanner';
           }
+        | {
+            /**
+             * 예: "Related Articles". 비어 있으면 제목 미렌더.
+             */
+            heading?: string | null;
+            /**
+             * 어떤 기준으로 Post 를 묶어 노출할지 선택.
+             */
+            filterField: 'cluster' | 'tag' | 'category';
+            /**
+             * cluster / category 는 slug 문자열 (예: web-development). tag 는 태그 slug.
+             */
+            filterValue: string;
+            sort?: ('-publishedDate' | 'publishedDate') | null;
+            limit?: number | null;
+            /**
+             * 비어 있으면 글이 0건일 때 섹션 자체가 숨겨집니다.
+             */
+            emptyText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'postList';
+          }
       )[]
     | null;
   publishedLocales?:
@@ -844,6 +869,18 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        postList?:
+          | T
+          | {
+              heading?: T;
+              filterField?: T;
+              filterValue?: T;
+              sort?: T;
+              limit?: T;
+              emptyText?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   publishedLocales?: T;
   meta?:
@@ -1078,6 +1115,38 @@ export interface Homepage {
   createdAt?: string | null;
 }
 /**
+ * 각 게시판(Insights / Stories / Portfolio / Solutions / Services / Origin) 목록 페이지의 메타 설명을 카테고리별로 설정합니다. 카테고리당 한 줄씩 추가하세요.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-category-pages".
+ */
+export interface PostCategoryPage {
+  id: number;
+  /**
+   * 카테고리당 한 줄. 설명을 비우면 사이트 기본 설명으로 폴백합니다.
+   */
+  categories?:
+    | {
+        category: 'insight' | 'story' | 'portfolio' | 'solution' | 'service' | 'origin';
+        /**
+         * 검색결과/소셜 카드에 노출되는 설명. 비우면 사이트 기본 설명 사용.
+         */
+        metaDescription?: string | null;
+        /**
+         * 비우면 기본 라벨(Insights / Stories …)을 사용. 입력 시 " | Iropke" 가 자동으로 덧붙습니다.
+         */
+        metaTitle?: string | null;
+        /**
+         * 비우면 사이트 기본 OG 이미지를 사용.
+         */
+        ogImage?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "navigation_select".
  */
@@ -1185,6 +1254,24 @@ export interface HomepageSelect<T extends boolean = true> {
   ctaBannerCtaUrl?: T;
   ctaBannerGradient?: T;
   ctaBannerBackgroundImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-category-pages_select".
+ */
+export interface PostCategoryPagesSelect<T extends boolean = true> {
+  categories?:
+    | T
+    | {
+        category?: T;
+        metaDescription?: T;
+        metaTitle?: T;
+        ogImage?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -15,6 +15,7 @@ import { Inquiries } from './collections/Inquiries'
 import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
 import { Homepage } from './globals/Homepage'
+import { PostCategoryPages } from './globals/PostCategoryPages'
 import {
   LOCALES,
   LOCALE_LABELS_ADMIN,
@@ -93,7 +94,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Tags, Posts, Pages, Inquiries],
-  globals: [Navigation, SiteSettings, Homepage],
+  globals: [Navigation, SiteSettings, Homepage, PostCategoryPages],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Post, Media } from '@/payload-types'
 import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
-import { buildAlternates } from '@/i18n/alternates'
+import { buildPostListMetadata } from '@/lib/posts/metadata'
 
 import PostList, { type PostCardData } from '@/components/posts/PostList/PostList'
 
@@ -57,9 +57,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale: rawLocale } = await params
   const locale = normalizeLocale(rawLocale)
-  return {
-    alternates: buildAlternates(locale, CATEGORY_PATH),
-  }
+  return buildPostListMetadata(locale, CATEGORY)
 }
 
 export default async function OriginPage({ params, searchParams }: PageProps) {

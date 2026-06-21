@@ -5,7 +5,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Media, Post, Tag } from '@/payload-types'
 import { isLocale, LOCALE_INTL_TAG, type Locale } from '@/i18n/locales'
-import { buildAlternates } from '@/i18n/alternates'
+import { buildPostDetailMetadata } from '@/lib/posts/metadata'
 
 import PostDetail, {
   type PostDetailData,
@@ -82,9 +82,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params
   const locale = normalizeLocale(rawLocale)
-  return {
-    alternates: buildAlternates(locale, `${CATEGORY_PATH}/${slug}`),
-  }
+  return buildPostDetailMetadata(locale, CATEGORY, slug)
 }
 
 export default async function ServiceDetailPage({ params, searchParams }: PageProps) {

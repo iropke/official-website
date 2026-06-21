@@ -10,6 +10,7 @@ import {
   getCategoryBasePath,
   getCategoryPostPath,
 } from './urls'
+import { getPostCategoryMeta } from './categoryMeta'
 
 /**
  * Posts 라우트 메타데이터 단일 진입점.
@@ -48,15 +49,40 @@ const CATEGORY_LIST_TITLES: Record<PostCategory, string> = {
 }
 
 /**
- * 목록 페이지 메타데이터. 카테고리 고정 라벨 + path 별 hreflang alternates.
+ * 목록 페이지 메타데이터.
+ *
+ * 제목: `post-category-pages` 글로벌의 카테고리별 `metaTitle`(있으면) → 없으면
+ * 기본 라벨. 설명: 글로벌의 `metaDescription`(있으면) → 없으면 부모 레이아웃의
+ * 사이트 기본 설명으로 폴백(키 미지정). OG: 카테고리 ogImage → 사이트 기본 OG.
+ *
+ * 문서 title 은 `{ absolute }` 로 완성형을 직접 구성(루트 `%s | Iropke` 템플릿
+ * 이중 적용 방지) — 상세 페이지와 동일 규약. og:title 도 동일 문자열로 맞춘다.
  */
-export function buildPostListMetadata(
+export async function buildPostListMetadata(
   locale: Locale,
   category: PostCategory,
-): Metadata {
+): Promise<Metadata> {
+  const [catMeta, settings] = await Promise.all([
+    getPostCategoryMeta(locale).then((m) => m[category]),
+    getSiteSettings(locale),
+  ])
+
+  const label = catMeta?.metaTitle || CATEGORY_LIST_TITLES[category]
+  const fullTitle = `${label} | ${settings.siteName}`
+  const description = catMeta?.metaDescription || undefined
+  const ogImageUrl = catMeta?.ogImageUrl ?? settings.ogImageUrl
+
   return {
-    title: CATEGORY_LIST_TITLES[category],
+    title: { absolute: fullTitle },
     alternates: buildAlternates(locale, getCategoryBasePath(category)),
+    ...(description ? { description } : {}),
+    openGraph: {
+      type: 'website',
+      siteName: settings.siteName,
+      title: fullTitle,
+      ...(description ? { description } : {}),
+      ...(ogImageUrl ? { images: [ogImageUrl] } : {}),
+    },
   }
 }
 

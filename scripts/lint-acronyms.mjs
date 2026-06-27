@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * lint-acronyms.mjs — verify CLAUDE.md §2-A ⊆ website/scripts/lib/acronyms.mjs
+ * lint-acronyms.mjs — verify content-pipeline.md §2-A ⊆ website/scripts/lib/acronyms.mjs
  *
- * Catches drift between the human-readable acronym table in CLAUDE.md §2-A
+ * Catches drift between the human-readable acronym table in content-pipeline.md §2-A
  * "약어 (acronym) 대문자 규칙" and the code-readable ACRONYMS Map. Run after
  * any edit to either file; a green run is a precondition for merging.
  *
@@ -22,14 +22,16 @@ import { fileURLToPath } from 'node:url'
 import { ACRONYMS } from './lib/acronyms.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const CLAUDE_MD = resolve(__dirname, '..', '..', 'content-generation', 'CLAUDE.md')
+// §2-A "약어 (acronym) 대문자 규칙" lives in guides/content-pipeline.md after the
+// 2026-06-21 CLAUDE.md domain split (the spine no longer carries the table).
+const DOC_MD = resolve(__dirname, '..', '..', 'content-generation', 'guides', 'content-pipeline.md')
 
-if (!existsSync(CLAUDE_MD)) {
-  console.error(`[ERR] CLAUDE.md 를 찾을 수 없음: ${CLAUDE_MD}`)
+if (!existsSync(DOC_MD)) {
+  console.error(`[ERR] content-pipeline.md 를 찾을 수 없음: ${DOC_MD}`)
   process.exit(2)
 }
 
-const md = readFileSync(CLAUDE_MD, 'utf8')
+const md = readFileSync(DOC_MD, 'utf8')
 
 // Locate the §2-A "약어 (acronym) 대문자 규칙" section: from its heading
 // until the next heading at the same depth or '---' separator.
@@ -38,7 +40,7 @@ const SECTION_END = /^(?:###?\s|---\s*$)/m
 
 const startMatch = md.match(SECTION_START)
 if (!startMatch) {
-  console.error('[ERR] CLAUDE.md 에서 "### 약어 (acronym) 대문자 규칙" 헤더를 찾을 수 없음.')
+  console.error('[ERR] content-pipeline.md 에서 "### 약어 (acronym) 대문자 규칙" 헤더를 찾을 수 없음.')
   console.error('      파일 구조가 변경되었는지 확인하고, 변경되었다면 본 lint 의 정규식도 갱신.')
   process.exit(2)
 }

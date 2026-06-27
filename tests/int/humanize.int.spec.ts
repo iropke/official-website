@@ -129,6 +129,27 @@ describe('humanize() — headless-cms + modern-frontend cluster acronyms (2026-0
   })
 })
 
+describe('humanize() — direct-to-consumer-commerce cluster acronyms (2026-06-27)', () => {
+  it('humanize("dtc") === "DTC"', () => {
+    expect(humanize('dtc')).toBe('DTC')
+  })
+  it('humanize("d2c") === "D2C"', () => {
+    expect(humanize('d2c')).toBe('D2C')
+  })
+  it('humanize("dtc-commerce") === "DTC Commerce"', () => {
+    expect(humanize('dtc-commerce')).toBe('DTC Commerce')
+  })
+})
+
+describe('humanize() — §2-A drift backfill (2026-06-27)', () => {
+  it('humanize("oauth") === "OAuth" (mixed casing preserved)', () => {
+    expect(humanize('oauth')).toBe('OAuth')
+  })
+  it('humanize("u-city") === "U-City" (compound, hyphen preserved)', () => {
+    expect(humanize('u-city')).toBe('U-City')
+  })
+})
+
 describe('humanize() — edge cases', () => {
   it('empty string → ""', () => {
     expect(humanize('')).toBe('')

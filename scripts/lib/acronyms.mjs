@@ -88,6 +88,8 @@ export const ACRONYMS = new Map([
   ['okr', 'OKR'],
   ['b2b', 'B2B'],
   ['b2c', 'B2C'],
+  ['dtc', 'DTC'],
+  ['d2c', 'D2C'],
   ['cms', 'CMS'],
   ['crm', 'CRM'],
   ['erp', 'ERP'],
@@ -149,6 +151,7 @@ export const ACRONYMS = new Map([
   ['neom', 'NEOM'],
   ['javascript', 'JavaScript'],
   ['wordpress', 'WordPress'],
+  ['oauth', 'OAuth'],
   // Next.js: humanize() tokenizes the slug form 'nextjs' (no dot); lint-acronyms.mjs
   // lowercases the CLAUDE.md §2-A display token 'Next.js' to the key 'next.js'.
   // Both keys map to the same display form so humanize + lint agree.
@@ -159,4 +162,5 @@ export const ACRONYMS = new Map([
   // Matched against full slug FIRST in humanize().
   ['json-ld', 'JSON-LD'],
   ['e-e-a-t', 'E-E-A-T'],
+  ['u-city', 'U-City'],
 ])

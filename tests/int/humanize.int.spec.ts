@@ -141,6 +141,18 @@ describe('humanize() — direct-to-consumer-commerce cluster acronyms (2026-06-2
   })
 })
 
+describe('humanize() — martech-and-customer-data cluster acronyms (2026-06-28)', () => {
+  it('humanize("cdp") === "CDP"', () => {
+    expect(humanize('cdp')).toBe('CDP')
+  })
+  it('humanize("dxp") === "DXP"', () => {
+    expect(humanize('dxp')).toBe('DXP')
+  })
+  it('humanize("agentic-cdp") === "Agentic CDP"', () => {
+    expect(humanize('agentic-cdp')).toBe('Agentic CDP')
+  })
+})
+
 describe('humanize() — §2-A drift backfill (2026-06-27)', () => {
   it('humanize("oauth") === "OAuth" (mixed casing preserved)', () => {
     expect(humanize('oauth')).toBe('OAuth')

@@ -91,7 +91,9 @@ export const ACRONYMS = new Map([
   ['dtc', 'DTC'],
   ['d2c', 'D2C'],
   ['cms', 'CMS'],
+  ['cdp', 'CDP'],
   ['crm', 'CRM'],
+  ['dxp', 'DXP'],
   ['erp', 'ERP'],
   ['tco', 'TCO'],
 

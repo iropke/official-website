@@ -153,6 +153,30 @@ describe('humanize() — martech-and-customer-data cluster acronyms (2026-06-28)
   })
 })
 
+describe('humanize() — sustainable-web-and-esg-disclosure cluster acronyms (2026-06-28)', () => {
+  it('humanize("esg") === "ESG"', () => {
+    expect(humanize('esg')).toBe('ESG')
+  })
+  it('humanize("sci") === "SCI"', () => {
+    expect(humanize('sci')).toBe('SCI')
+  })
+  it('humanize("csrd") === "CSRD"', () => {
+    expect(humanize('csrd')).toBe('CSRD')
+  })
+  it('humanize("esrs") === "ESRS"', () => {
+    expect(humanize('esrs')).toBe('ESRS')
+  })
+  it('humanize("dpp") === "DPP"', () => {
+    expect(humanize('dpp')).toBe('DPP')
+  })
+  it('humanize("tcfd") === "TCFD"', () => {
+    expect(humanize('tcfd')).toBe('TCFD')
+  })
+  it('humanize("esg-disclosure") === "ESG Disclosure"', () => {
+    expect(humanize('esg-disclosure')).toBe('ESG Disclosure')
+  })
+})
+
 describe('humanize() — §2-A drift backfill (2026-06-27)', () => {
   it('humanize("oauth") === "OAuth" (mixed casing preserved)', () => {
     expect(humanize('oauth')).toBe('OAuth')

@@ -115,6 +115,17 @@ export const ACRONYMS = new Map([
   ['kisa', 'KISA'],
   ['faq', 'FAQ'],
 
+  // --- 지속가능성 / ESG (sustainability / ESG)
+  ['esg', 'ESG'],
+  ['sci', 'SCI'],
+  ['csrd', 'CSRD'],
+  ['esrs', 'ESRS'],
+  ['dpp', 'DPP'],
+  ['espr', 'ESPR'],
+  ['secr', 'SECR'],
+  ['csddd', 'CSDDD'],
+  ['tcfd', 'TCFD'],
+
   // --- 포맷 / 파일 (formats / files)
   ['pwa', 'PWA'],
   ['amp', 'AMP'],

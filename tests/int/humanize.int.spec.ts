@@ -43,6 +43,14 @@ describe('humanize() — CLAUDE.md §2-A mandatory cases', () => {
   it('humanize("content-quality") === "Content Quality" (no acronyms)', () => {
     expect(humanize('content-quality')).toBe('Content Quality')
   })
+
+  it('humanize("svg") === "SVG"', () => {
+    expect(humanize('svg')).toBe('SVG')
+  })
+
+  it('humanize("svgo") === "SVGO"', () => {
+    expect(humanize('svgo')).toBe('SVGO')
+  })
 })
 
 describe('humanize() — mixed-case acronyms preserved exactly', () => {

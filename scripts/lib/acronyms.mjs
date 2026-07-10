@@ -42,6 +42,7 @@ export const ACRONYMS = new Map([
   ['xml', 'XML'],
   ['yaml', 'YAML'],
   ['svg', 'SVG'],
+  ['svgo', 'SVGO'],
   ['pdf', 'PDF'],
   ['url', 'URL'],
   ['uri', 'URI'],

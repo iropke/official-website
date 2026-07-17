@@ -194,6 +194,15 @@ describe('humanize() — §2-A drift backfill (2026-06-27)', () => {
   })
 })
 
+describe('humanize() — §2-A drift backfill (2026-07-17, designops cluster)', () => {
+  it('humanize("designops") === "DesignOps" (internal capital preserved, not "Designops")', () => {
+    expect(humanize('designops')).toBe('DesignOps')
+  })
+  it('humanize("design-systems") === "Design Systems" (plain words unaffected)', () => {
+    expect(humanize('design-systems')).toBe('Design Systems')
+  })
+})
+
 describe('humanize() — edge cases', () => {
   it('empty string → ""', () => {
     expect(humanize('')).toBe('')

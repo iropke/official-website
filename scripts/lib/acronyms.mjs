@@ -166,6 +166,7 @@ export const ACRONYMS = new Map([
   ['javascript', 'JavaScript'],
   ['wordpress', 'WordPress'],
   ['oauth', 'OAuth'],
+  ['designops', 'DesignOps'],
   // Next.js: humanize() tokenizes the slug form 'nextjs' (no dot); lint-acronyms.mjs
   // lowercases the CLAUDE.md §2-A display token 'Next.js' to the key 'next.js'.
   // Both keys map to the same display form so humanize + lint agree.

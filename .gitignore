@@ -57,3 +57,16 @@ node_modules/
 
 # Claude Code 로컬 작업용 메모 (각 워크트리/머신마다 다르게 운영, 커밋 대상 아님)
 /CLAUDE.md
+
+# 콘텐츠 파이프라인 per-cluster 일회용 스크립트 (publish-*-cluster, check-*-tags/state,
+# fix-*-tag-names, inspect-*, audit-*-once, strip-* 등) — 로컬 전용, 커밋 금지
+# (2026-06-21 사용자 요청: website 커밋 혼선 + stale 누적 회피). 이미 tracked 된 스크립트
+# (build.mjs / lib/ / lint-acronyms.mjs / check-aeo-* 등 2026-06-21 이전)는 그대로 유지.
+#   특정 일회용 스크립트를 의도적으로 커밋하려면: git add -f scripts/<name>.mjs
+/scripts/*.mjs
+# 예외 — 범용 재사용 SSOT 루틴은 추적 (2026-06-27 사용자 결정: "핵심 루틴만 버전관리").
+#   per-cluster 일회용 churn 은 위 규칙대로 계속 미추적.
+!/scripts/check-all-clusters-state.mjs
+!/scripts/check-multi-cluster-state.mjs
+!/scripts/flip-with-date.mjs
+!/scripts/audit-posts-publish-state.mjs

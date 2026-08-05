@@ -43,6 +43,14 @@ describe('humanize() — CLAUDE.md §2-A mandatory cases', () => {
   it('humanize("content-quality") === "Content Quality" (no acronyms)', () => {
     expect(humanize('content-quality')).toBe('Content Quality')
   })
+
+  it('humanize("svg") === "SVG"', () => {
+    expect(humanize('svg')).toBe('SVG')
+  })
+
+  it('humanize("svgo") === "SVGO"', () => {
+    expect(humanize('svgo')).toBe('SVGO')
+  })
 })
 
 describe('humanize() — mixed-case acronyms preserved exactly', () => {
@@ -126,6 +134,72 @@ describe('humanize() — headless-cms + modern-frontend cluster acronyms (2026-0
   })
   it('build-vs-buy compound keeps TCO when tokenized', () => {
     expect(humanize('tco-analysis')).toBe('TCO Analysis')
+  })
+})
+
+describe('humanize() — direct-to-consumer-commerce cluster acronyms (2026-06-27)', () => {
+  it('humanize("dtc") === "DTC"', () => {
+    expect(humanize('dtc')).toBe('DTC')
+  })
+  it('humanize("d2c") === "D2C"', () => {
+    expect(humanize('d2c')).toBe('D2C')
+  })
+  it('humanize("dtc-commerce") === "DTC Commerce"', () => {
+    expect(humanize('dtc-commerce')).toBe('DTC Commerce')
+  })
+})
+
+describe('humanize() — martech-and-customer-data cluster acronyms (2026-06-28)', () => {
+  it('humanize("cdp") === "CDP"', () => {
+    expect(humanize('cdp')).toBe('CDP')
+  })
+  it('humanize("dxp") === "DXP"', () => {
+    expect(humanize('dxp')).toBe('DXP')
+  })
+  it('humanize("agentic-cdp") === "Agentic CDP"', () => {
+    expect(humanize('agentic-cdp')).toBe('Agentic CDP')
+  })
+})
+
+describe('humanize() — sustainable-web-and-esg-disclosure cluster acronyms (2026-06-28)', () => {
+  it('humanize("esg") === "ESG"', () => {
+    expect(humanize('esg')).toBe('ESG')
+  })
+  it('humanize("sci") === "SCI"', () => {
+    expect(humanize('sci')).toBe('SCI')
+  })
+  it('humanize("csrd") === "CSRD"', () => {
+    expect(humanize('csrd')).toBe('CSRD')
+  })
+  it('humanize("esrs") === "ESRS"', () => {
+    expect(humanize('esrs')).toBe('ESRS')
+  })
+  it('humanize("dpp") === "DPP"', () => {
+    expect(humanize('dpp')).toBe('DPP')
+  })
+  it('humanize("tcfd") === "TCFD"', () => {
+    expect(humanize('tcfd')).toBe('TCFD')
+  })
+  it('humanize("esg-disclosure") === "ESG Disclosure"', () => {
+    expect(humanize('esg-disclosure')).toBe('ESG Disclosure')
+  })
+})
+
+describe('humanize() — §2-A drift backfill (2026-06-27)', () => {
+  it('humanize("oauth") === "OAuth" (mixed casing preserved)', () => {
+    expect(humanize('oauth')).toBe('OAuth')
+  })
+  it('humanize("u-city") === "U-City" (compound, hyphen preserved)', () => {
+    expect(humanize('u-city')).toBe('U-City')
+  })
+})
+
+describe('humanize() — §2-A drift backfill (2026-07-17, designops cluster)', () => {
+  it('humanize("designops") === "DesignOps" (internal capital preserved, not "Designops")', () => {
+    expect(humanize('designops')).toBe('DesignOps')
+  })
+  it('humanize("design-systems") === "Design Systems" (plain words unaffected)', () => {
+    expect(humanize('design-systems')).toBe('Design Systems')
   })
 })
 

@@ -1,0 +1,37 @@
+#!/bin/sh
+# website pre-commit gate — CONDITIONAL.
+# Runs the acronym-map drift lint + humanize unit tests ONLY when the staged
+# change actually touches acronym tooling, so the ~20s vitest cold-start is paid
+# only on acronym commits — unrelated commits pass through instantly.
+#
+# Checks (SSOT): scripts/lint-acronyms.mjs (§2-A ⊆ ACRONYMS) +
+#                tests/int/humanize.int.spec.ts (humanize() casing).
+# Activation (one-time per clone, core.hooksPath is NOT tracked):
+#   git config core.hooksPath .githooks
+# Emergency bypass: git commit --no-verify
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 0
+STAGED="$(git diff --cached --name-only --diff-filter=ACM)"
+
+# Trigger only if an acronym-related file is staged; else exit fast.
+if ! printf '%s\n' "$STAGED" | grep -qE '^scripts/lib/acronyms\.mjs$|^scripts/lib/humanize\.mjs$|^scripts/lint-acronyms\.mjs$|^tests/int/humanize\.int\.spec\.ts$'; then
+  exit 0
+fi
+
+echo "[pre-commit] acronym tooling changed -> running lint-acronyms + humanize tests…"
+
+# 1) acronym map <-> content-pipeline.md §2-A drift (fast, ~1s)
+if command -v node >/dev/null 2>&1; then
+  node scripts/lint-acronyms.mjs || { echo "[pre-commit] BLOCKED: lint-acronyms drift. Fix acronyms.mjs / §2-A."; exit 1; }
+else
+  echo "[pre-commit] node not found - skipping lint-acronyms (run it manually)"
+fi
+
+# 2) humanize unit tests (slower; only runs because acronym tooling changed)
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm vitest run tests/int/humanize.int.spec.ts || { echo "[pre-commit] BLOCKED: humanize tests failed."; exit 1; }
+else
+  echo "[pre-commit] pnpm not found - skipping humanize tests (run them manually)"
+fi
+
+echo "[pre-commit] OK - acronym lint + humanize tests passed"

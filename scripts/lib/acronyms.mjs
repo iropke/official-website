@@ -42,6 +42,7 @@ export const ACRONYMS = new Map([
   ['xml', 'XML'],
   ['yaml', 'YAML'],
   ['svg', 'SVG'],
+  ['svgo', 'SVGO'],
   ['pdf', 'PDF'],
   ['url', 'URL'],
   ['uri', 'URI'],
@@ -88,8 +89,12 @@ export const ACRONYMS = new Map([
   ['okr', 'OKR'],
   ['b2b', 'B2B'],
   ['b2c', 'B2C'],
+  ['dtc', 'DTC'],
+  ['d2c', 'D2C'],
   ['cms', 'CMS'],
+  ['cdp', 'CDP'],
   ['crm', 'CRM'],
+  ['dxp', 'DXP'],
   ['erp', 'ERP'],
   ['tco', 'TCO'],
 
@@ -110,6 +115,17 @@ export const ACRONYMS = new Map([
   ['pci', 'PCI'],
   ['kisa', 'KISA'],
   ['faq', 'FAQ'],
+
+  // --- 지속가능성 / ESG (sustainability / ESG)
+  ['esg', 'ESG'],
+  ['sci', 'SCI'],
+  ['csrd', 'CSRD'],
+  ['esrs', 'ESRS'],
+  ['dpp', 'DPP'],
+  ['espr', 'ESPR'],
+  ['secr', 'SECR'],
+  ['csddd', 'CSDDD'],
+  ['tcfd', 'TCFD'],
 
   // --- 포맷 / 파일 (formats / files)
   ['pwa', 'PWA'],
@@ -149,6 +165,8 @@ export const ACRONYMS = new Map([
   ['neom', 'NEOM'],
   ['javascript', 'JavaScript'],
   ['wordpress', 'WordPress'],
+  ['oauth', 'OAuth'],
+  ['designops', 'DesignOps'],
   // Next.js: humanize() tokenizes the slug form 'nextjs' (no dot); lint-acronyms.mjs
   // lowercases the CLAUDE.md §2-A display token 'Next.js' to the key 'next.js'.
   // Both keys map to the same display form so humanize + lint agree.
@@ -159,4 +177,5 @@ export const ACRONYMS = new Map([
   // Matched against full slug FIRST in humanize().
   ['json-ld', 'JSON-LD'],
   ['e-e-a-t', 'E-E-A-T'],
+  ['u-city', 'U-City'],
 ])

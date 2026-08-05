@@ -82,6 +82,14 @@ export const Inquiries: CollectionConfig = {
       label: '희망 런칭일 (YYYY-MM-DD)',
     },
     {
+      name: 'budget',
+      type: 'text',
+      label: '예산 (Budget)',
+      admin: {
+        description: '프로젝트 예산 (구 사이트 이관 데이터 보존용)',
+      },
+    },
+    {
       name: 'rfpFile',
       type: 'upload' as const,
       label: 'RFP 파일',

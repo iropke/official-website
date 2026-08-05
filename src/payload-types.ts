@@ -585,6 +585,10 @@ export interface Inquiry {
   websiteUrl?: string | null;
   launchDate?: string | null;
   /**
+   * 프로젝트 예산 (구 사이트 이관 데이터 보존용)
+   */
+  budget?: string | null;
+  /**
    * PPT/Word/PDF/ZIP, 최대 20MB
    */
   rfpFile?: (number | null) | Media;
@@ -908,6 +912,7 @@ export interface InquiriesSelect<T extends boolean = true> {
   projectOverview?: T;
   websiteUrl?: T;
   launchDate?: T;
+  budget?: T;
   rfpFile?: T;
   status?: T;
   adminNote?: T;

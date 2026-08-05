@@ -16,6 +16,7 @@ import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
 import { Homepage } from './globals/Homepage'
 import { PostCategoryPages } from './globals/PostCategoryPages'
+import { resendEmailAdapter } from './lib/email/payloadResendAdapter'
 import {
   LOCALES,
   LOCALE_LABELS_ADMIN,
@@ -76,10 +77,46 @@ const allowedOrigins = Array.from(
   ),
 )
 
+/**
+ * 이메일 어댑터는 RESEND_API_KEY 가 있을 때만 부착합니다. 미설정 환경(로컬 dev
+ * 등)에서는 Payload 기본 consoleEmailAdapter 로 폴백(발송 없이 로그) — config
+ * 로드 자체가 깨지지 않도록 graceful 처리 (src/lib/email/resend.ts 와 동일 정책).
+ */
+const resendApiKey = process.env.RESEND_API_KEY?.trim()
+const emailAdapter = resendApiKey
+  ? resendEmailAdapter({
+      apiKey: resendApiKey,
+      defaultFromName: 'Iropke',
+      defaultFromAddress: process.env.EMAIL_FROM?.trim() || 'hello@iropke.com',
+    })
+  : undefined
+
 export default buildConfig({
   serverURL,
   csrf: allowedOrigins,
   cors: allowedOrigins,
+  ...(emailAdapter ? { email: emailAdapter } : {}),
+  /**
+   * 계정 잠금 메시지(error:userLocked) 커스터마이즈. Payload 는 config 의
+   * i18n.translations 를 base 번역과 deepMergeSimple 로 병합하므로, 해당 키만
+   * 부분 지정해도 다른 error 메시지는 그대로 보존됩니다.
+   * ko = 대표님 지정 문구, en = 동등 영문. admin UI 언어에 따라 표시됨.
+   */
+  i18n: {
+    translations: {
+      en: {
+        error: {
+          userLocked:
+            'This account is locked due to repeated failed password attempts. Please contact your administrator.',
+        },
+      },
+      ko: {
+        error: {
+          userLocked: '연속된 비밀번호 오류로 계정 잠김 상태입니다, 관리자에게 문의해주세요',
+        },
+      },
+    },
+  },
   admin: {
     user: Users.slug,
     importMap: {

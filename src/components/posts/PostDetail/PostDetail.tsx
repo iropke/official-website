@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { localizeContentHref } from '@/lib/posts/urls';
 import styles from './PostDetail.module.css';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -133,6 +134,32 @@ function renderTextNode(node: LexicalNode, key: number): React.ReactNode {
   return <React.Fragment key={key}>{element}</React.Fragment>;
 }
 
+/* 본문 내부 링크(`/insight/foo`)에 현재 locale 을 붙이기 위한 context.
+   renderInlineChildren 은 여러 블록 렌더러가 공유하는 순수 함수라 locale 을 인자로 넘기지 않고
+   PostDetail 이 Provider 로 감싼다. */
+const ContentLocaleContext = React.createContext<string>('en');
+
+function EditorialLink({
+  url,
+  newTab,
+  children,
+}: {
+  url: string;
+  newTab: boolean;
+  children: React.ReactNode;
+}) {
+  const locale = useContext(ContentLocaleContext);
+  return (
+    <a
+      href={localizeContentHref(url, locale)}
+      className={styles.editorialLink}
+      {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    >
+      {children}
+    </a>
+  );
+}
+
 function renderInlineChildren(children: LexicalNode[] | undefined): React.ReactNode {
   if (!children || !children.length) return null;
   return children.map((child, i) => {
@@ -141,17 +168,10 @@ function renderInlineChildren(children: LexicalNode[] | undefined): React.ReactN
     if (t === 'linebreak') return <br key={i} />;
     if (t === 'link') {
       const fields = (child as { fields?: { url?: string; newTab?: boolean } }).fields;
-      const url = fields?.url ?? '#';
-      const newTab = Boolean(fields?.newTab);
       return (
-        <a
-          key={i}
-          href={url}
-          className={styles.editorialLink}
-          {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        >
+        <EditorialLink key={i} url={fields?.url ?? '#'} newTab={Boolean(fields?.newTab)}>
           {renderInlineChildren(child.children)}
-        </a>
+        </EditorialLink>
       );
     }
     // autolink, mark 등 기타 inline 은 children 을 flatten
@@ -829,7 +849,9 @@ export default function PostDetail({
             </header>
 
             <div className={`${styles.editorial} ${hideAside ? styles.editorialNarrow : ''}`}>
-              <LexicalRenderer content={post.content} />
+              <ContentLocaleContext.Provider value={locale}>
+                <LexicalRenderer content={post.content} />
+              </ContentLocaleContext.Provider>
 
               {post.references.length > 0 && (
                 <section

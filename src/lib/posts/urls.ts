@@ -24,6 +24,9 @@
  *   - collections/Posts.ts (admin preview URL)
  */
 
+// 상대 경로: collections/Posts.ts 가 이 모듈을 상대 경로로 import 하므로 alias 의존을 늘리지 않음
+import { isLocale } from '../../i18n/locales'
+
 export type PostCategory =
   | 'insight'
   | 'story'
@@ -84,6 +87,52 @@ export function getPostUrl(
   slug: string,
 ): string {
   return `/${locale}${getCategoryPostPath(category, slug)}`
+}
+
+/**
+ * 본문(Lexical) 안의 사이트 내부 링크를 현재 locale 경로로 보정.
+ *
+ * 본문 링크는 콘텐츠 파이프라인에서 locale 없이 `/insight/foo` 로 작성되고,
+ * 초기 원고 일부는 단수 통일(2026-05-11) 이전 경로 `/insights/foo`·`/stories/foo` 를 쓴다.
+ * 라우트는 `/{locale}/{category}/{slug}` 뿐이라 그대로 출력하면 404 가 된다.
+ *
+ * 규칙:
+ *   - `/` 로 시작하는 사이트 내부 경로만 대상 (외부 URL · `//host` · `#hash` · `mailto:` 는 그대로)
+ *   - 첫 세그먼트가 이미 locale 이면 그대로
+ *   - 복수형 레거시 세그먼트(insights / stories)는 단수로 교정
+ *   - 첫 세그먼트가 알려진 프론트엔드 라우트일 때만 locale 을 붙임
+ *     (`/api`, `/admin`, `/assets/...` 같은 비-페이지 경로는 건드리지 않음)
+ *
+ * 예: `localizeContentHref('/insights/foo', 'ko')` → `'/ko/insight/foo'`
+ */
+const LEGACY_PLURAL_SEGMENTS: Record<string, string> = {
+  insights: 'insight',
+  stories: 'story',
+}
+
+const LOCALIZABLE_ROOT_SEGMENTS = new Set<string>([
+  ...Object.values(CATEGORY_PATHS).map((p) => p.slice(1)),
+  'project-inquiry',
+  'privacy-policy',
+  'search',
+])
+
+export function localizeContentHref(href: string, locale: string): string {
+  if (!href.startsWith('/') || href.startsWith('//')) return href
+
+  const match = /^([^?#]*)(.*)$/.exec(href)
+  const path = match?.[1] ?? href
+  const suffix = match?.[2] ?? ''
+  const segments = path.split('/')
+  const first = segments[1] ?? ''
+
+  if (isLocale(first)) return href
+
+  const root = LEGACY_PLURAL_SEGMENTS[first] ?? first
+  if (!LOCALIZABLE_ROOT_SEGMENTS.has(root)) return href
+
+  segments[1] = root
+  return `/${locale}${segments.join('/')}${suffix}`
 }
 
 /**

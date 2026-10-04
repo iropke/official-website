@@ -71,7 +71,7 @@ export const PostCategoryPages: GlobalConfig = {
           localized: true,
           admin: {
             description:
-              '비우면 기본 라벨(Insights / Stories …)을 사용. 입력 시 " | Iropke" 가 자동으로 덧붙습니다.',
+              '비우면 기본 라벨(Insights / Stories …)을 사용. 끝말은 사이트 설정의 "제목 끝말"(언어별: ko = 이롭게, 그 외 = IROPKE)이 자동으로 붙으니 넣지 마세요.',
           },
         },
         {

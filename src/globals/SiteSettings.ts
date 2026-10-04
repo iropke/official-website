@@ -30,6 +30,16 @@ export const SiteSettings: GlobalConfig = {
               required: true,
             },
             {
+              name: 'titleSuffix',
+              type: 'text',
+              label: '제목 끝말 (브랜드 접미사)',
+              localized: true,
+              admin: {
+                description:
+                  '모든 페이지 <title> · og:title 끝에 " | {값}" 으로 자동으로 붙습니다. 언어별로 입력하세요 (ko = 이롭게, 그 외 = IROPKE). 비우면 사이트명을 씁니다. 글의 SEO 메타 제목에는 끝말을 넣지 마세요.',
+              },
+            },
+            {
               name: 'siteDescription',
               type: 'textarea',
               label: '사이트 기본 설명 (메타)',

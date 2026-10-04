@@ -10,6 +10,8 @@ export type SocialPlatform = NonNullable<
 
 export interface NormalizedSiteSettings {
   siteName: string
+  /** Brand suffix for `<title>` (" | {titleSuffix}"), localized. Falls back to siteName. */
+  titleSuffix: string
   siteDescription?: string
   logoUrl?: string
   logoDarkUrl?: string
@@ -28,6 +30,7 @@ export interface NormalizedSiteSettings {
  */
 const DEFAULTS: NormalizedSiteSettings = {
   siteName: 'Iropke',
+  titleSuffix: 'IROPKE',
   footerCopyright: '© Iropke All Rights Reserved.',
   logoAlt: 'Iropke logo',
   socialLinks: [],
@@ -65,6 +68,8 @@ export const getSiteSettings = cache(
 
       return {
         siteName: s.siteName?.trim() || DEFAULTS.siteName,
+        titleSuffix:
+          s.titleSuffix?.trim() || s.siteName?.trim() || DEFAULTS.titleSuffix,
         siteDescription: s.siteDescription?.trim() || undefined,
         logoUrl: mediaUrl(s.logo),
         logoDarkUrl: mediaUrl(s.logoDark),

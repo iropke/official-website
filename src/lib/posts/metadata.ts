@@ -26,9 +26,14 @@ import { getPostCategoryMeta } from './categoryMeta'
  *           / `meta.ogImage`(폴백 `thumbnail`)
  *   - 목록: 카테고리 고정 라벨 (영문 단일 파이프라인 — 추후 i18n 확장 여지)
  *
- * 반환한 `title` 문자열은 루트 레이아웃의 `title.template`(`%s | Iropke`)에
- * 주입되어 "Post Title | Iropke" 로 렌더된다.
+ * 반환한 `title` 은 `{ absolute }` 완성형 — 끝말은 site-settings 의 locale 별
+ * `titleSuffix`(ko = 이롭게, 그 외 = IROPKE)를 붙인다.
  */
+
+/** 과거 콘텐츠에 박혀 있던 브랜드 끝말 제거 — 끝말은 전역설정(titleSuffix)이 붙인다. */
+function stripBrandSuffix(title: string): string {
+  return title.replace(/\s*\|\s*(Iropke|IROPKE|이롭게)\s*$/u, '').trim()
+}
 
 function mediaUrl(value: (number | null) | Media | undefined): string | undefined {
   if (!value || typeof value !== 'object') return undefined
@@ -36,7 +41,7 @@ function mediaUrl(value: (number | null) | Media | undefined): string | undefine
 }
 
 /**
- * 카테고리 목록 페이지 `<title>` 라벨. 루트 템플릿이 ` | Iropke` 를 덧붙인다.
+ * 카테고리 목록 페이지 `<title>` 라벨. 끝말은 site-settings `titleSuffix` 가 붙는다.
  * 영문 단일 파이프라인 정책에 따라 영어 라벨 고정 (섹션 표시명과 동일 계열).
  */
 const CATEGORY_LIST_TITLES: Record<PostCategory, string> = {
@@ -55,7 +60,7 @@ const CATEGORY_LIST_TITLES: Record<PostCategory, string> = {
  * 기본 라벨. 설명: 글로벌의 `metaDescription`(있으면) → 없으면 부모 레이아웃의
  * 사이트 기본 설명으로 폴백(키 미지정). OG: 카테고리 ogImage → 사이트 기본 OG.
  *
- * 문서 title 은 `{ absolute }` 로 완성형을 직접 구성(루트 `%s | Iropke` 템플릿
+ * 문서 title 은 `{ absolute }` 로 완성형을 직접 구성(레이아웃 `%s | {titleSuffix}` 템플릿
  * 이중 적용 방지) — 상세 페이지와 동일 규약. og:title 도 동일 문자열로 맞춘다.
  */
 export async function buildPostListMetadata(
@@ -67,8 +72,8 @@ export async function buildPostListMetadata(
     getSiteSettings(locale),
   ])
 
-  const label = catMeta?.metaTitle || CATEGORY_LIST_TITLES[category]
-  const fullTitle = `${label} | ${settings.siteName}`
+  const label = stripBrandSuffix(catMeta?.metaTitle || '') || CATEGORY_LIST_TITLES[category]
+  const fullTitle = `${label} | ${settings.titleSuffix}`
   const description = catMeta?.metaDescription || undefined
   const ogImageUrl = catMeta?.ogImageUrl ?? settings.ogImageUrl
 
@@ -78,7 +83,7 @@ export async function buildPostListMetadata(
     ...(description ? { description } : {}),
     openGraph: {
       type: 'website',
-      siteName: settings.siteName,
+      siteName: settings.titleSuffix,
       title: fullTitle,
       ...(description ? { description } : {}),
       ...(ogImageUrl ? { images: [ogImageUrl] } : {}),
@@ -137,19 +142,14 @@ export async function buildPostDetailMetadata(
   // 여기서 다시 명시한다. getSiteSettings 는 React cache() 라 layout 호출과 dedupe.
   const settings = await getSiteSettings(locale)
 
-  // 완성형 <title> 단일 계산:
-  //   - metaTitle 이 title 과 다르면 = 콘텐츠 파이프라인이 명시한 완성형 SEO 타이틀로,
-  //     locale 별 브랜드 접미사("| Iropke" / "| 이롭게")가 이미 포함돼 있다 → 그대로 사용.
-  //   - 그 외(metaTitle 미설정 또는 auto-sync 로 title 과 동일)면 → "title | siteName" 합성.
-  // 문서 title 은 `{ absolute }` 로 반환해 루트 레이아웃의 `%s | Iropke` 템플릿이
-  // 한 번 더 적용돼 브랜드가 중복되는 것을 막는다(예: "... | 이롭게 | Iropke").
+  // 완성형 <title> 단일 계산 (2026-10-04 — 브랜드 끝말은 전역설정이 단일 소스):
+  //   "{metaTitle 또는 title} | {site-settings.titleSuffix(locale)}"
+  //   - 콘텐츠의 metaTitle 에는 끝말을 넣지 않는다. 과거 데이터에 남은
+  //     "| Iropke" / "| IROPKE" / "| 이롭게" 는 stripBrandSuffix 로 제거해 중복을 막는다.
+  // 문서 title 은 `{ absolute }` 로 반환해 레이아웃 템플릿이 한 번 더 적용되지 않게 한다.
   // og:title 은 템플릿 영향을 받지 않으므로 동일 문자열을 그대로 전달해 일치시킨다.
-  const fullTitle =
-    metaTitle && metaTitle !== baseTitle
-      ? metaTitle
-      : baseTitle
-        ? `${baseTitle} | ${settings.siteName}`
-        : undefined
+  const head = stripBrandSuffix(metaTitle || '') || baseTitle
+  const fullTitle = head ? `${head} | ${settings.titleSuffix}` : undefined
 
   return {
     ...(fullTitle ? { title: { absolute: fullTitle } } : {}),
@@ -157,7 +157,7 @@ export async function buildPostDetailMetadata(
     alternates,
     openGraph: {
       type: 'article',
-      siteName: settings.siteName,
+      siteName: settings.titleSuffix,
       ...(fullTitle ? { title: fullTitle } : {}),
       ...(description ? { description } : {}),
       ...(ogImageUrl ? { images: [ogImageUrl] } : {}),

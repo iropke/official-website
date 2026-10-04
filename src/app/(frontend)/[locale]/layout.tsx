@@ -115,12 +115,18 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
 
   return {
     metadataBase: new URL(SITE_BASE_URL),
+    // Locale-specific brand suffix from the `site-settings` global (`titleSuffix`,
+    // localized: ko = 이롭게, others = IROPKE). Overrides the root layout template.
+    title: {
+      template: `%s | ${settings.titleSuffix}`,
+      default: settings.titleSuffix,
+    },
     alternates: buildAlternates(rawLocale, ''),
     ...(settings.siteDescription
       ? { description: settings.siteDescription }
       : {}),
     openGraph: {
-      siteName: settings.siteName,
+      siteName: settings.titleSuffix,
       ...(settings.ogImageUrl ? { images: [settings.ogImageUrl] } : {}),
     },
   }

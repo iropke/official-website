@@ -1021,6 +1021,10 @@ export interface Navigation {
 export interface SiteSetting {
   id: number;
   siteName: string;
+  /**
+   * 모든 페이지 <title> · og:title 끝에 " | {값}" 으로 자동으로 붙습니다. 언어별로 입력하세요 (ko = 이롭게, 그 외 = IROPKE). 비우면 사이트명을 씁니다. 글의 SEO 메타 제목에는 끝말을 넣지 마세요.
+   */
+  titleSuffix?: string | null;
   siteDescription?: string | null;
   logo?: (number | null) | Media;
   logoDark?: (number | null) | Media;
@@ -1138,7 +1142,7 @@ export interface PostCategoryPage {
          */
         metaDescription?: string | null;
         /**
-         * 비우면 기본 라벨(Insights / Stories …)을 사용. 입력 시 " | Iropke" 가 자동으로 덧붙습니다.
+         * 비우면 기본 라벨(Insights / Stories …)을 사용. 끝말은 사이트 설정의 "제목 끝말"(언어별: ko = 이롭게, 그 외 = IROPKE)이 자동으로 붙으니 넣지 마세요.
          */
         metaTitle?: string | null;
         /**
@@ -1187,6 +1191,7 @@ export interface NavigationSelect<T extends boolean = true> {
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
+  titleSuffix?: T;
   siteDescription?: T;
   logo?: T;
   logoDark?: T;

@@ -51,6 +51,10 @@ describe('humanize() — CLAUDE.md §2-A mandatory cases', () => {
   it('humanize("svgo") === "SVGO"', () => {
     expect(humanize('svgo')).toBe('SVGO')
   })
+
+  it('humanize("aria") === "ARIA"', () => {
+    expect(humanize('aria')).toBe('ARIA')
+  })
 })
 
 describe('humanize() — mixed-case acronyms preserved exactly', () => {

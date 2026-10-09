@@ -47,6 +47,7 @@ export const ACRONYMS = new Map([
   ['url', 'URL'],
   ['uri', 'URI'],
   ['dom', 'DOM'],
+  ['aria', 'ARIA'],
   ['cdn', 'CDN'],
   ['dns', 'DNS'],
   ['ssl', 'SSL'],

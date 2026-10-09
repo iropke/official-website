@@ -55,6 +55,32 @@ describe('humanize() — CLAUDE.md §2-A mandatory cases', () => {
   it('humanize("aria") === "ARIA"', () => {
     expect(humanize('aria')).toBe('ARIA')
   })
+
+  it('security acronyms', () => {
+    expect(humanize('csp')).toBe('CSP')
+    expect(humanize('xss')).toBe('XSS')
+    expect(humanize('waf')).toBe('WAF')
+    expect(humanize('sbom')).toBe('SBOM')
+    expect(humanize('ddos')).toBe('DDoS')
+    expect(humanize('devsecops')).toBe('DevSecOps')
+    expect(humanize('ci-cd')).toBe('CI/CD')
+    expect(humanize('ci-cd-security')).toBe('CI/CD Security')
+    expect(humanize('soc2-iso27001')).toBe('SOC 2 ISO 27001')
+    expect(humanize('ciso')).toBe('CISO')
+  })
+
+  it('EU AI Act / sector regulation acronyms', () => {
+    expect(humanize('gpai-obligations')).toBe('GPAI Obligations')
+    expect(humanize('mdr')).toBe('MDR')
+    expect(humanize('ivdr')).toBe('IVDR')
+    expect(humanize('dora')).toBe('DORA')
+    expect(humanize('eba')).toBe('EBA')
+    expect(humanize('ncas')).toBe('NCAs')
+    expect(humanize('caio')).toBe('CAIO')
+    expect(humanize('dpo')).toBe('DPO')
+    expect(humanize('samd')).toBe('SaMD')
+    expect(humanize('cro')).toBe('CRO')
+  })
 })
 
 describe('humanize() — mixed-case acronyms preserved exactly', () => {

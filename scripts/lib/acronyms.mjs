@@ -117,6 +117,30 @@ export const ACRONYMS = new Map([
   ['kisa', 'KISA'],
   ['faq', 'FAQ'],
 
+  // --- 보안 (security)
+  ['csp', 'CSP'],
+  ['xss', 'XSS'],
+  ['waf', 'WAF'],
+  ['sbom', 'SBOM'],
+  ['ciso', 'CISO'],
+  // SOC 2 / ISO 27001: slug tokens 'soc2' / 'iso27001'; lint keys 'soc 2' / 'iso 27001'
+  // (lint lowercases the §2-A display form). Both map to the spaced display form.
+  ['soc2', 'SOC 2'],
+  ['soc 2', 'SOC 2'],
+  ['iso27001', 'ISO 27001'],
+  ['iso 27001', 'ISO 27001'],
+
+  // --- EU AI Act / 금융·의료 규제 (EU AI Act / sector regulation)
+  ['gpai', 'GPAI'],
+  ['mdr', 'MDR'],
+  ['ivdr', 'IVDR'],
+  ['dora', 'DORA'],
+  ['eba', 'EBA'],
+  ['nca', 'NCA'],
+  ['caio', 'CAIO'],
+  ['dpo', 'DPO'],
+  ['cro', 'CRO'],
+
   // --- 지속가능성 / ESG (sustainability / ESG)
   ['esg', 'ESG'],
   ['sci', 'SCI'],
@@ -168,6 +192,10 @@ export const ACRONYMS = new Map([
   ['wordpress', 'WordPress'],
   ['oauth', 'OAuth'],
   ['designops', 'DesignOps'],
+  ['devsecops', 'DevSecOps'],
+  ['ddos', 'DDoS'],
+  ['samd', 'SaMD'],
+  ['ncas', 'NCAs'],
   // Next.js: humanize() tokenizes the slug form 'nextjs' (no dot); lint-acronyms.mjs
   // lowercases the CLAUDE.md §2-A display token 'Next.js' to the key 'next.js'.
   // Both keys map to the same display form so humanize + lint agree.
@@ -179,4 +207,9 @@ export const ACRONYMS = new Map([
   ['json-ld', 'JSON-LD'],
   ['e-e-a-t', 'E-E-A-T'],
   ['u-city', 'U-City'],
+  // CI/CD: slug 'ci-cd' (full-slug match) and lint key 'ci/cd'. 'ci-cd-security' is
+  // registered too so token-wise humanize() cannot regress the DB name to 'CI CD Security'.
+  ['ci-cd', 'CI/CD'],
+  ['ci/cd', 'CI/CD'],
+  ['ci-cd-security', 'CI/CD Security'],
 ])

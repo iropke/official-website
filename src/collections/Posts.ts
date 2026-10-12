@@ -40,6 +40,8 @@ const autoFillOgImage: CollectionBeforeChangeHook = ({ data }) => {
  * 판별 로직 (스키마 변경 없이 originalDoc 비교):
  *   "자동 모드" = metaTitle 이 비어있음 OR 이전 metaTitle === 이전 title
  *   "수동 모드" = 그 외 (사용자가 title 과 다른 값을 직접 입력한 상태)
+ *   자동 모드에서도 이번 저장의 meta 값이 이전 meta 값과 다르면 직접 수정으로 보고 보존
+ *   (같으면 손대지 않은 것이므로 title/excerpt 변경을 따라감).
  *
  *   create 시에는 originalDoc 이 없으므로:
  *     - metaTitle 비어있으면 → title 복사
@@ -73,7 +75,9 @@ const autoFillSeoMeta: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
     prev !== undefined &&
     prev.meta?.metaTitle !== undefined &&
     prev.meta.metaTitle === prev.title
-  if ((metaTitleIsEmpty || metaTitleWasInAutoMode) && newTitle) {
+  // 자동 모드였더라도 이번 저장에서 metaTitle 을 직접 다른 값으로 넣었으면 보존
+  const metaTitleEditedNow = !metaTitleIsEmpty && newMetaTitle !== prev?.meta?.metaTitle
+  if ((metaTitleIsEmpty || (metaTitleWasInAutoMode && !metaTitleEditedNow)) && newTitle) {
     data.meta = { ...(data.meta ?? {}), metaTitle: newTitle }
   }
 
@@ -83,7 +87,11 @@ const autoFillSeoMeta: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
     prev !== undefined &&
     prev.meta?.metaDescription !== undefined &&
     prev.meta.metaDescription === prev.excerpt
-  if ((metaDescIsEmpty || metaDescWasInAutoMode) && newExcerpt) {
+  // 자동 모드였더라도 이번 저장에서 metaDescription 을 직접 다른 값으로 넣었으면 보존
+  // (2026-10-13: 요약과 같던 글에 seo 값을 넣어도 요약으로 되돌아가던 문제)
+  const metaDescEditedNow =
+    !metaDescIsEmpty && newMetaDescription !== prev?.meta?.metaDescription
+  if ((metaDescIsEmpty || (metaDescWasInAutoMode && !metaDescEditedNow)) && newExcerpt) {
     data.meta = { ...(data.meta ?? {}), metaDescription: newExcerpt }
   }
 
